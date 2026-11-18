@@ -21,6 +21,10 @@
   GET  /api/gold-desk/top5                the Top-5 paper books: the five, the three account types, each book
   GET  /api/gold-desk/top5/positions      ?book=top5_2L|top5_10L|each10L_1..5&status=OPEN|CLOSED|ALL
   POST /api/gold-desk/top5/run            copy the desk into the books once, now
+
+  GET  /api/gold-desk/sf-books            the Strategy Factory tab's top 25, a Rs 2 lakh account each, in five sets
+  GET  /api/gold-desk/sf-books/positions  ?account=sf2L_01..25 | ?band=1-5..21-25 (neither: all 25) &status=
+  POST /api/gold-desk/sf-books/run        copy the tab into the 25 accounts once, now
 """
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
@@ -161,3 +165,32 @@ async def top5_run(_current_user: dict = Depends(get_current_user)):
     from app.services import gold_top5_books
     from app.services.desk_switches import is_on
     return await gold_top5_books.sync(entries=await is_on("gold_desk"))
+
+
+# ── the Strategy Factory tab's top 25, a Rs 2 lakh paper account each, in five sets (2026-11-18) ─────
+# Imported inside each route as the Top-5 books are: a fault in these accounts can only break these three routes.
+
+
+@router.get("/sf-books")
+async def sf_books(_current_user: dict = Depends(get_current_user)):
+    from app.services import gold_sf_books
+    return await gold_sf_books.overview()
+
+
+@router.get("/sf-books/positions")
+async def sf_books_positions(account: str = Query(""), band: str = Query(""),
+                             status: str = Query("OPEN", pattern="^(OPEN|CLOSED|ALL)$"),
+                             limit: int = Query(200, ge=1, le=1000), _current_user: dict = Depends(get_current_user)):
+    from app.services import gold_sf_books
+    ids = gold_sf_books.accounts_in(band=band or None, account=account or None)
+    if ids is None:
+        raise HTTPException(status_code=404, detail=f"No Strategy Factory account or set '{account or band}'")
+    return {"account": account or None, "band": band or None, "status": status,
+            "positions": await gold_sf_books.positions(ids, status, limit)}
+
+
+@router.post("/sf-books/run")
+async def sf_books_run(_current_user: dict = Depends(get_current_user)):
+    from app.services import gold_sf_books
+    from app.services.desk_switches import is_on
+    return await gold_sf_books.sync(entries=await is_on("gold_desk"))

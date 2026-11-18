@@ -26,7 +26,9 @@ import GoldH1Panel from "./GoldH1Panel";
 import GoldCostsPanel from "./GoldCostsPanel";
 import GoldLabPanel from "./GoldLabPanel";
 import GoldTop5Panel from "./GoldTop5Panel";
+import GoldSfBooksPanel from "./GoldSfBooksPanel";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
+import { DAY_COL_TITLES, dayCell, istDaysSince, pctCell, perDayTraded, toneOf, totalReturnPct } from "../../lib/dayReturns";
 import {
   GoldBasis,
   GoldPosition,
@@ -46,6 +48,9 @@ import {
 
 const REFRESH_MS = 20000;
 const VENUE_ORDER: GoldVenueKey[] = ["delta", "mcx"];
+/** A strategy record with its trading days (2026-11-18): the IST days it closed a trade on, when the venue's book
+ *  began, and its own capital. A server not yet updated sends none of them. */
+type GoldStrategyDays = GoldStrategy & { days_traded?: number; started_at?: string | null; capital?: number };
 
 /** Money in the book's OWN currency — the two tabs are never added together. */
 function money(v: number | null | undefined, ccy: string, signed = true): string {
@@ -93,6 +98,8 @@ export default function GoldDeskPage() {
   const [fac, setFac] = useState(false);
   // The Top-5 paper books tab (2026-11-12): three accounts on the Delta board's top five, copying H1's trades.
   const [t5, setT5] = useState(false);
+  // The Strategy Factory top-25 tab (2026-11-18): a ₹2 lakh account for each of that board's Rank 1-25, in five sets.
+  const [sf, setSf] = useState(false);
   const [labSum, setLabSum] = useState<GoldLabSummary | null>(null);
   const [venues, setVenues] = useState<GoldSummary[]>([]);
   const [strats, setStrats] = useState<GoldStrategy[]>([]);
@@ -199,7 +206,7 @@ export default function GoldDeskPage() {
             ) : (
               <StatusPill label="MCX closed" tone="muted" />
             )}
-            {lab || t5 ? null : (
+            {lab || t5 || sf ? null : (
               <button
                 className="btn"
                 disabled={!!busy || !sum?.can_enable}
@@ -228,11 +235,12 @@ export default function GoldDeskPage() {
         {ordered.map((v) => (
           <button
             key={v.venue}
-            className={!lab && !fac && !t5 && tab === v.venue ? "ptab on" : "ptab"}
+            className={!lab && !fac && !t5 && !sf && tab === v.venue ? "ptab on" : "ptab"}
             onClick={() => {
               setLab(false);
               setFac(false);
               setT5(false);
+              setSf(false);
               setTab(v.venue);
             }}
           >
@@ -249,7 +257,7 @@ export default function GoldDeskPage() {
           </button>
         ))}
         {!ordered.length && <div className="ptab muted">loading books…</div>}
-        <button className={lab && !fac && !t5 ? "ptab on" : "ptab"} onClick={() => { setFac(false); setT5(false); setLab(true); }}>
+        <button className={lab && !fac && !t5 && !sf ? "ptab on" : "ptab"} onClick={() => { setFac(false); setT5(false); setSf(false); setLab(true); }}>
           <span>Gold Lab · 7 tested strategies</span>
           <span className={`tv ${tone(labSum?.net_pnl)}`}>
             {!labSum
@@ -261,11 +269,15 @@ export default function GoldDeskPage() {
                   : "off"}
           </span>
         </button>
-        <button className={fac && !t5 ? "ptab on" : "ptab"} onClick={() => { setLab(false); setT5(false); setFac(true); }}>
+        <button className={fac && !t5 && !sf ? "ptab on" : "ptab"} onClick={() => { setLab(false); setT5(false); setSf(false); setFac(true); }}>
           <span>Strategy Factory · 546</span>
           <span className="tv">records beside H1 · Delta XAUTUSD</span>
         </button>
-        <button className={t5 ? "ptab on" : "ptab"} onClick={() => { setLab(false); setFac(false); setT5(true); }}>
+        <button className={sf ? "ptab on" : "ptab"} onClick={() => { setLab(false); setFac(false); setT5(false); setSf(true); }}>
+          <span>Factory Top 1-25 · 25 paper accounts</span>
+          <span className="tv">₹2 lakh each · 5 sets: Top 1-5 … 20-25</span>
+        </button>
+        <button className={t5 && !sf ? "ptab on" : "ptab"} onClick={() => { setLab(false); setFac(false); setSf(false); setT5(true); }}>
           <span>Top 5 · 17 paper accounts</span>
           <span className="tv">₹2 lakh &amp; ₹10 lakh each · shared ₹2L / ₹10L</span>
         </button>
@@ -275,12 +287,17 @@ export default function GoldDeskPage() {
         </a>
       </div>
 
-      {t5 ? (
+      {sf ? (
+        <GlassPanel title="Strategy Factory Top 1-25 — a ₹2 lakh paper account each"
+                    note="the 546 board's Rank 1-25 on 18 Nov, in five sets, copied at their own size">
+          <GoldSfBooksPanel />
+        </GlassPanel>
+      ) : t5 ? (
         <GlassPanel title="Top 5 — three paper accounts" note="the board's five best-ranked strategies, copied at their own size">
           <GoldTop5Panel />
         </GlassPanel>
       ) : fac ? (
-        <FactoryDeskView desk="gold" />
+        <FactoryDeskView desk="gold" dayColumns />
       ) : lab ? (
         <GlassPanel title="Gold Lab — seven tested strategies" note="Tier B: profitable in every test period, not proven better than holding gold">
           <GoldLabPanel />
@@ -541,11 +558,24 @@ export default function GoldDeskPage() {
                 <th>Costs</th>
                 <th>Realised</th>
                 <th>Open</th>
+                <th title={DAY_COL_TITLES.traded}>Days traded</th>
+                <th title={DAY_COL_TITLES.total}>Total days</th>
+                <th title={`${DAY_COL_TITLES.ret} (${sum?.mode === "record" ? "its sleeve of the book" : "the book"})`}>
+                  Total return
+                </th>
+                <th title={DAY_COL_TITLES.avg}>Avg / day</th>
                 <th className="l">Record</th>
               </tr>
             </thead>
             <tbody>
-              {sortByRank(strats, ranks, rankId).map((s) => (
+              {sortByRank(strats, ranks, rankId).map((s) => {
+                // Trading days (2026-11-18). A server not yet updated sends no days_traded / started_at / capital:
+                // H1's start is its pre-registration and a record-mode strategy's capital its sleeve of the book.
+                const x = s as GoldStrategyDays;
+                const cap = x.capital ?? (sum ? (sum.mode === "record" ? sum.capital / Math.max(sum.strategy_count, 1) : sum.capital) : null);
+                const ret = s.trades || s.open_positions ? totalReturnPct(s.realized_pnl, s.unrealized_pnl, cap) : null;
+                const days = x.days_traded ?? null;
+                return (
                 <tr key={`${s.symbol}-${s.template}-${s.timeframe}`}>
                   {ranks && <RankTd board={ranks} id={rankId(s)} />}
                   <td className="l strong">
@@ -561,15 +591,22 @@ export default function GoldDeskPage() {
                   <td className="muted">{plain(s.total_costs, ccy)}</td>
                   <td className={`strong ${tone(s.realized_pnl)}`}>{money(s.realized_pnl, ccy)}</td>
                   <td className={tone(s.unrealized_pnl)}>{s.open_positions ? money(s.unrealized_pnl, ccy) : "—"}</td>
+                  <td>{dayCell(days)}</td>
+                  <td>{dayCell(istDaysSince(x.started_at ?? (sum?.mode === "record" ? sum?.h1?.stored_at : null)))}</td>
+                  <td className={`strong ${toneOf(ret)}`}>{pctCell(ret)}</td>
+                  <td className={toneOf(perDayTraded(ret, days))}>{pctCell(perDayTraded(ret, days))}</td>
                   <td className="l">
-                    <span className="verdict record">{s.verdict}</span>
-                    {s.verdict_reasons?.[0] && <span className="why"> {s.verdict_reasons[0]}</span>}
+                    <div className="rec">
+                      <span className="verdict record">{s.verdict}</span>
+                      {s.verdict_reasons?.[0] && <span className="why"> {s.verdict_reasons[0]}</span>}
+                    </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {!strats.length && (
                 <tr>
-                  <td className="l empty" colSpan={11}>
+                  <td className="l empty" colSpan={16}>
                     No strategy is enabled on this venue, and none has a record here.
                   </td>
                 </tr>
@@ -816,6 +853,8 @@ export default function GoldDeskPage() {
                    border-radius: 100px; background: var(--canvas-soft); color: var(--text-muted); }
         .verdict.record { color: var(--text-muted); border: 1px solid var(--panel-border); }
         .why { margin-left: 8px; font-size: 11.5px; color: var(--text-muted); white-space: normal; }
+        /* the record's sentence keeps a readable width; the table scrolls sideways rather than squeeze it */
+        .rec { min-width: 320px; white-space: normal; }
       `}</style>
     </div>
   );

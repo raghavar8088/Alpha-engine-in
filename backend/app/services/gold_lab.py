@@ -454,10 +454,39 @@ def _iso(x):
     return x.isoformat() if isinstance(x, datetime) else x
 
 
+def _ny_day(v) -> str | None:
+    """The New York date of a stored time (naive = UTC, as Mongo returns them)."""
+    if v is None:
+        return None
+    if isinstance(v, str):
+        return v[:10]
+    t = v if v.tzinfo else v.replace(tzinfo=timezone.utc)
+    return t.astimezone(NY).date().isoformat()
+
+
+async def _trading_days(started) -> tuple[dict[str, int], int | None]:
+    """Trading days (2026-11-18): per strategy, the New York sessions it traded in (a rebalancing fill; a manual
+    close-all counts on its New York date), and the NYSE sessions since the lab began - it trades only at a New York
+    open. Read-only: a failure leaves the page without these figures, never without the lab."""
+    by: dict[str, set] = {}
+    try:
+        async for f in fills_coll.find({}, {"sid": 1, "session": 1, "at": 1}):
+            d = f.get("session") or _ny_day(f.get("at"))
+            if f.get("sid") and d:
+                by.setdefault(f["sid"], set()).add(str(d)[:10])
+        start = _ny_day(started)
+        sessions = len(nyse_days(date.fromisoformat(start), ny_now().date())) if start else None
+    except Exception:  # noqa: BLE001
+        logger.warning("gold lab trading days unavailable", exc_info=True)
+        return {}, None
+    return {k: len(v) for k, v in by.items()}, sessions
+
+
 async def summary() -> dict:
     st = await get_state()
     pre = await state_coll.find_one({"_id": PREREG_ID})
     dec = await state_coll.find_one({"_id": "lab:decision"}) or {}
+    days_by, sessions = await _trading_days(pre.get("stored_at") if pre else None)
     spec_cv = 0.001
     rows, total = [], {"realized": 0.0, "fees": 0.0, "funding": 0.0, "unrealized": 0.0}
     holds = {h["sid"]: h async for h in holdings_coll.find({})}
@@ -480,6 +509,7 @@ async def summary() -> dict:
             "realized": round(float(h.get("realized") or 0), 4), "fees": round(float(h.get("fees") or 0), 4),
             "funding": round(float(h.get("funding") or 0), 4), "unrealized": round(u, 4), "net": round(net, 4),
             "net_pct_of_sleeve": round(net / sleeve() * 100, 3), "fills": fills_n.get(s["id"], 0),
+            "days_traded": days_by.get(s["id"], 0),
         })
     net_total = total["realized"] - total["fees"] - total["funding"] + total["unrealized"]
     return {
@@ -491,6 +521,7 @@ async def summary() -> dict:
         "decision": {k: _iso(v) for k, v in dec.items() if k != "_id"} if dec else None,
         "preregistered": bool(pre), "fingerprint": pre.get("fingerprint") if pre else None,
         "stored_at": _iso(pre.get("stored_at")) if pre else None,
+        "sessions_since_start": sessions,
         "last_run_at": _iso(st.get("last_run_at")), "last_note": st.get("last_note"),
         "calendar_through": "2028-12-31",
         "tier_note": ("Tier B: profitable after costs in 2004-14, 2015-19 and an untouched 2020-26 holdout; "

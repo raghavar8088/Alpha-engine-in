@@ -33,6 +33,8 @@ export interface FactoryDeskSummary {
   entry_gate: string | null;
   last_cycle_at: string | null;
   last_notes: string[];
+  /** The tab's first position: every one of its strategies started then (2026-11-18; absent on an older server). */
+  started_at?: string | null;
 }
 
 export interface FactoryDeskRow {
@@ -51,6 +53,8 @@ export interface FactoryDeskRow {
   open_positions: number;
   unrealized_pnl: number;
   roi_pct: number;
+  /** The IST days it closed a trade on (2026-11-18; absent on an older server). */
+  days_traded?: number;
 }
 
 export interface FactoryLeg {

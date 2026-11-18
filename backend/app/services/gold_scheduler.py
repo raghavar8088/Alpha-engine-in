@@ -114,6 +114,13 @@ async def gold_delta_loop() -> None:
         _TASKS.add(asyncio.create_task(gold_top5_books.loop()))
     except Exception:  # noqa: BLE001
         logger.exception("[gold top5] books not started - the desk runs on without them")
+    # The Strategy Factory top-25 accounts (gold_sf_books, 2026-11-18) copy the Factory tab's gold trades: started here
+    # for the same reason, and guarded the same way.
+    try:
+        from app.services import gold_sf_books
+        _TASKS.add(asyncio.create_task(gold_sf_books.loop()))
+    except Exception:  # noqa: BLE001
+        logger.exception("[gold sf] accounts not started - the desk runs on without them")
     while True:
         try:
             on, has_open, may_enter = await venue_activity("delta")

@@ -894,18 +894,29 @@ async def strategies(v: Venue, limit: int = 400) -> list[dict]:
     rows: dict[tuple, dict] = {}
     for s in specs_for(v):
         for sym in v.symbols:
-            rows[(s.template, s.timeframe, sym)] = {"closed": [], "unreal": 0.0, "open": 0}
+            rows[(s.template, s.timeframe, sym)] = {"closed": [], "unreal": 0.0, "open": 0, "days": set()}
+    first_open = None                      # when this venue's book began: its first position (2026-11-18)
     async for p in gold_positions_collection.find(
             {"venue": v.key, "void": {"$ne": True}},
             {"strategy_template": 1, "timeframe": 1, "symbol": 1, "status": 1, "realized_pnl": 1,
-             "costs": 1, "net_bp": 1, "unrealized_pnl": 1, "closed_at": 1}).sort("closed_at", 1):
+             "costs": 1, "net_bp": 1, "unrealized_pnl": 1, "closed_at": 1, "closed_on": 1,
+             "opened_at": 1}).sort("closed_at", 1):
         k = (p.get("strategy_template"), p.get("timeframe"), p.get("symbol"))
-        r = rows.setdefault(k, {"closed": [], "unreal": 0.0, "open": 0})
+        r = rows.setdefault(k, {"closed": [], "unreal": 0.0, "open": 0, "days": set()})
+        opened = p.get("opened_at")
+        if isinstance(opened, datetime) and (first_open is None or _aware(opened) < first_open):
+            first_open = _aware(opened)
         if p.get("status") == "OPEN":
             r["open"] += 1
             r["unreal"] += float(p.get("unrealized_pnl") or 0.0)
         else:
             r["closed"].append(p)
+            # the IST day it closed: a strategy's "days traded" are the days it closed a trade on
+            closed = p.get("closed_at")
+            day = p.get("closed_on") or (_aware(closed).astimezone(IST).date().isoformat()
+                                         if isinstance(closed, datetime) else None)
+            if day:
+                r["days"].add(str(day)[:10])
     by = {(s.template, s.timeframe): s for s in COMMODITY_CATALOG}
     enabled = {(s.template, s.timeframe) for s in specs_for(v)}
     out = []
@@ -933,6 +944,10 @@ async def strategies(v: Venue, limit: int = 400) -> list[dict]:
             "total_costs": round(sum(float(p.get("costs") or 0) for p in agg["closed"]), 2),
             "realized_pnl": stats.get("net_pnl", 0.0), "unrealized_pnl": round(agg["unreal"], 2),
             "open_positions": agg["open"], "verdict": "RECORD", "verdict_reasons": [reason],
+            # trading days (2026-11-18): the IST days it closed a trade on, and when the venue's book began
+            "days_traded": len(agg["days"]),
+            "started_at": first_open.isoformat() if first_open else None,
+            "capital": round(v.capital / max(len(enabled), 1), 2) if v.mode == "record" else v.capital,
         })
     out.sort(key=lambda r: (not r["enabled"], -(r["realized_pnl"] + r["unrealized_pnl"]), -r["trades"]))
     return out[:limit]

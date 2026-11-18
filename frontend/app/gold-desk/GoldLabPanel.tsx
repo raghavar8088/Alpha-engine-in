@@ -10,6 +10,11 @@ import {
   type GoldLabFill,
   type GoldLabSummary,
 } from "../../lib/api";
+import { dayCell, pctCell, perDayTraded, toneOf } from "../../lib/dayReturns";
+
+/** Trading days (2026-11-18): per strategy the New York sessions it had a fill in, and the NYSE sessions since the lab
+ *  began. A server not yet updated sends neither. */
+type LabDays = { days_traded?: number };
 
 const usd = (v: number | null | undefined, signed = true) => {
   if (v === null || v === undefined || Number.isNaN(v)) return "—";
@@ -67,6 +72,7 @@ export default function GoldLabPanel() {
   if (err && !s) return <div className="lab-err">Gold Lab unavailable: {err}</div>;
   if (!s) return null;
   const d = s.decision;
+  const sessions = (s as GoldLabSummary & { sessions_since_start?: number | null }).sessions_since_start;
 
   return (
     <div className="lab">
@@ -143,7 +149,10 @@ export default function GoldLabPanel() {
               <th>Contracts</th>
               <th>Notional</th>
               <th>Net</th>
-              <th>% of sleeve</th>
+              <th title="New York sessions it traded in (a rebalancing fill)">Days traded</th>
+              <th title="NYSE sessions since the lab began, today counted - it trades only at a New York open">Total days</th>
+              <th title={`Net P&L, open position included, as a share of its ${usd(s.sleeve, false)} sleeve`}>Total return</th>
+              <th title="Average return per day traded: total return ÷ days traded">Avg / day</th>
               <th title="Sharpe in the untouched 2020-26 holdout">Holdout SR</th>
               <th title="Sharpe 2004-26 under Delta's funding">Delta SR 04-26</th>
               <th title="Beta to gold">β</th>
@@ -151,7 +160,10 @@ export default function GoldLabPanel() {
             </tr>
           </thead>
           <tbody>
-            {s.strategies.map((x) => (
+            {s.strategies.map((x) => {
+              const days = (x as typeof x & LabDays).days_traded;
+              const avg = perDayTraded(x.net_pct_of_sleeve, days);
+              return (
               <tr key={x.id}>
                 <td className="l">
                   <div className="nm">
@@ -164,13 +176,17 @@ export default function GoldLabPanel() {
                 <td className={x.contracts > 0 ? "gain" : x.contracts < 0 ? "loss" : ""}>{x.contracts}</td>
                 <td className="muted">{usd(x.notional, false)}</td>
                 <td className={`strong ${tone(x.net)}`}>{usd(x.net)}</td>
-                <td className={tone(x.net_pct_of_sleeve)}>{num(x.net_pct_of_sleeve, 2)}%</td>
+                <td className="muted">{dayCell(days)}</td>
+                <td className="muted">{dayCell(sessions)}</td>
+                <td className={tone(x.net_pct_of_sleeve)}>{pctCell(x.net_pct_of_sleeve)}</td>
+                <td className={toneOf(avg)}>{pctCell(avg)}</td>
                 <td>{x.evidence.holdout_sharpe.toFixed(2)}</td>
                 <td>{x.evidence.delta_full_sharpe.toFixed(2)}</td>
                 <td className="muted">{x.evidence.beta.toFixed(2)}</td>
                 <td className="muted">{x.fills}</td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

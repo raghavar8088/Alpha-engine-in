@@ -8,16 +8,28 @@
 // ₹10 lakh account (own2L_n / own10L_n) - a second section below the 12 Nov accounts, which keep their five.
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../../lib/api";
+import { DAY_COL_TITLES, dayCell, istDaysSince, pctCell, perDayTraded, toneOf } from "../../lib/dayReturns";
 
 type Pick = { n: number; key: string; template: string; timeframe: string; name: string; score: number; trades: number;
   bp: number; net_usd: number; t: number };
-type StratRow = { key: string; name: string; trades: number; wins: number; net: number; open: number; unrealized: number };
+type StratRow = { key: string; name: string; trades: number; wins: number; net: number; open: number; unrealized: number;
+  days_traded?: number };
 type Money = { capital: number; equity: number; realized_pnl: number; unrealized_pnl: number; deployed: number;
   available_cash: number; fees: number; gross_pnl: number; open_positions: number; closed_positions: number; wins: number;
   win_rate: number | null; roi_pct: number };
 type Book = Money & { id: string; group: "2L" | "10L" | "each10L" | "own2L" | "own10L"; label: string; roster: string[];
   max_open: number; position_cap: number | null; compound: boolean; skipped: Record<string, number>; voided: number;
-  started_at: string | null; strategies: StratRow[] };
+  started_at: string | null; strategies: StratRow[];
+  /** The IST days a copy closed on (18 Nov 2026; absent on a server not yet updated). */
+  days_traded?: number };
+
+/** The four trading-day cells of one account (18 Nov 2026): days traded, days since it started, its total return
+ *  (realised + open on its own capital) and that return per day traded. Rendered inline by each table. */
+function dayFigures(b: Book | undefined) {
+  const ret = b ? b.roi_pct : null;
+  const days = b?.days_traded ?? null;
+  return { days, total: istDaysSince(b?.started_at), ret, avg: perDayTraded(ret, days) };
+}
 type Total = Money & { accounts: number };
 export type Overview = { mode: string; enabled: boolean; tick_seconds: number; picked_at: string; board: string; instrument: string;
   picks: Pick[]; groups: { group: string; label: string; about: string }[]; books: Book[]; each_total: Total;
@@ -155,7 +167,7 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
   return (
     <div className="t5">
       <div className="t5-warn">
-        <b>Paper only, and not proven.</b> Each set of five is the top of this desk&apos;s Rank on the day it was picked
+        <b>Paper only, and not proven.</b>{" "}Each set of five is the top of this desk&apos;s Rank on the day it was picked
         and stays fixed. They had 8 to 20 closed trades each and none a t-stat of 2: a short good record, not an edge.
       </div>
 
@@ -183,6 +195,12 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
                   <th>Its own ₹2 lakh</th>
                   <th>Its own ₹10 lakh</th>
                   <th>Open now</th>
+                  <th title={`${DAY_COL_TITLES.traded}, in its own ₹2 lakh account`}>Days traded</th>
+                  <th title="Days since its accounts started, today counted (Delta's XAUTUSD trades every day)">Total days</th>
+                  <th title="Its own ₹2 lakh account's total return: realised + open P&L on ₹2 lakh (the ₹10 lakh twin copies the same trades; its return is in its cell)">
+                    Total return
+                  </th>
+                  <th title={DAY_COL_TITLES.avg}>Avg / day</th>
                 </tr>
               </thead>
               <tbody>
@@ -190,6 +208,7 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
                   const a = byId[`own2L_${p.n}`];
                   const b = byId[`own10L_${p.n}`];
                   const openNow = (a?.open_positions ?? 0) + (b?.open_positions ?? 0);
+                  const dd = dayFigures(a);
                   return (
                     <tr key={p.key}>
                       <td>{p.n}</td>
@@ -210,6 +229,10 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
                         </td>
                       ))}
                       <td>{openNow || "—"}</td>
+                      <td>{dayCell(dd.days)}</td>
+                      <td>{dayCell(dd.total)}</td>
+                      <td className={toneOf(dd.ret)}>{pctCell(dd.ret)}</td>
+                      <td className={toneOf(dd.avg)}>{pctCell(dd.avg)}</td>
                     </tr>
                   );
                 })}
@@ -240,6 +263,10 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
               <th>₹10 lakh book</th>
               <th>Its own ₹10 lakh account</th>
               <th>Open now</th>
+              <th title={`${DAY_COL_TITLES.traded}, in its own ₹10 lakh account`}>Days traded</th>
+              <th title="Days since its accounts started, today counted (Delta's XAUTUSD trades every day)">Total days</th>
+              <th title="Its own ₹10 lakh account's total return: realised + open P&L on ₹10 lakh">Total return</th>
+              <th title={DAY_COL_TITLES.avg}>Avg / day</th>
             </tr>
           </thead>
           <tbody>
@@ -248,6 +275,7 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
               const b = byId.top5_10L?.strategies.find((x) => x.key === p.key);
               const own = byId[`each10L_${p.n}`];
               const openNow = (a?.open ?? 0) + (b?.open ?? 0) + (own?.open_positions ?? 0);
+              const dd = dayFigures(own);
               return (
                 <tr key={p.key}>
                   <td>{p.n}</td>
@@ -262,6 +290,10 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
                     {own ? <>{inr(own.equity)}<div className="t5-dim">{pct(own.roi_pct)} · {own.closed_positions} trades</div></> : "—"}
                   </td>
                   <td>{openNow || "—"}</td>
+                  <td>{dayCell(dd.days)}</td>
+                  <td>{dayCell(dd.total)}</td>
+                  <td className={toneOf(dd.ret)}>{pctCell(dd.ret)}</td>
+                  <td className={toneOf(dd.avg)}>{pctCell(dd.avg)}</td>
                 </tr>
               );
             })}

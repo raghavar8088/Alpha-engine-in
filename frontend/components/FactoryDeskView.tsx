@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import GlassPanel from "./GlassPanel";
 import ErrorBanner from "./ErrorBanner";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "./StrategyRank";
+import { DAY_COL_TITLES, dayCell, istDaysSince, pctCell, perDayTraded, toneOf, totalReturnPct } from "../lib/dayReturns";
 import {
   FactoryDeskKey,
   FactoryDeskRow,
@@ -25,7 +26,9 @@ const tone = (v: number | null | undefined) => ((v ?? 0) >= 0 ? "gain" : "loss")
 const num = (v: number | null | undefined, dp = 2) =>
   v === null || v === undefined ? "—" : v.toLocaleString("en-IN", { maximumFractionDigits: dp });
 
-export default function FactoryDeskView({ desk }: { desk: FactoryDeskKey }) {
+// `dayColumns` (2026-11-18, the Gold Desk): days traded, days since the tab began, total return and return per day
+// traded on the strategies board. A 24/7 market's days are calendar days, so only the gold tab turns them on.
+export default function FactoryDeskView({ desk, dayColumns = false }: { desk: FactoryDeskKey; dayColumns?: boolean }) {
   const [summary, setSummary] = useState<FactoryDeskSummary | null>(null);
   const [rows, setRows] = useState<FactoryDeskRow[]>([]);
   const [family, setFamily] = useState<string | null>(null);
@@ -77,6 +80,11 @@ export default function FactoryDeskView({ desk }: { desk: FactoryDeskKey }) {
   const coverage = summary?.coverage ?? {};
   const skipped = summary?.skipped ?? {};
   const unit = usd ? `$${num(summary?.per_strategy_capital, 0)} sleeve` : `₹${num(summary?.per_strategy_capital, 0)} account`;
+  // every strategy on a tab started with the tab: one count of days for the whole board
+  const totalDays = istDaysSince(summary?.started_at);
+  const startedOn = summary?.started_at
+    ? new Date(summary.started_at).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric" })
+    : null;
 
   return (
     <>
@@ -160,10 +168,22 @@ export default function FactoryDeskView({ desk }: { desk: FactoryDeskKey }) {
                   <th>Charges</th>
                   <th>Net P&amp;L</th>
                   <th>Open</th>
+                  {dayColumns && (
+                    <>
+                      <th title={DAY_COL_TITLES.traded}>Days traded</th>
+                      <th title={`Days since this tab began trading (${startedOn ?? "—"}), today counted`}>Total days</th>
+                      <th title={`${DAY_COL_TITLES.ret} (its ${unit})`}>Total return</th>
+                      <th title={DAY_COL_TITLES.avg}>Avg / day</th>
+                    </>
+                  )}
                 </tr>
               </thead>
               <tbody>
-                {sortByRank(shown, ranks, (r) => r.strategy_id).map((r) => (
+                {sortByRank(shown, ranks, (r) => r.strategy_id).map((r) => {
+                  const ret = r.trades || r.open_positions
+                    ? totalReturnPct(r.net_pnl, r.unrealized_pnl, summary?.per_strategy_capital) : null;
+                  const avg = perDayTraded(ret, r.days_traded);
+                  return (
                   <tr key={r.strategy_id}>
                     {ranks && <RankTd board={ranks} id={r.strategy_id} />}
                     <td style={{ textAlign: "left" }}>
@@ -177,8 +197,17 @@ export default function FactoryDeskView({ desk }: { desk: FactoryDeskKey }) {
                     <td className="loss">{r.fees ? money(-r.fees, 2) : "—"}</td>
                     <td className={tone(r.net_pnl)}>{r.trades ? signed(r.net_pnl) : "—"}</td>
                     <td>{r.open_positions ? `${r.open_positions} · ${signed(r.unrealized_pnl)}` : "—"}</td>
+                    {dayColumns && (
+                      <>
+                        <td>{dayCell(r.days_traded)}</td>
+                        <td>{dayCell(totalDays)}</td>
+                        <td className={toneOf(ret)}>{pctCell(ret)}</td>
+                        <td className={toneOf(avg)}>{pctCell(avg)}</td>
+                      </>
+                    )}
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

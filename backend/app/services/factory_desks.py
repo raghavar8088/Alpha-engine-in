@@ -1106,8 +1106,12 @@ async def summary(key: str) -> dict:
                     "deployed": {"$sum": {"$ifNull": ["$capital_deployed", 0]}},
                     "fees": {"$sum": {"$ifNull": ["$fees", 0]}},
                     "gross": {"$sum": {"$ifNull": ["$gross_pnl", 0]}},
-                    "wins": {"$sum": {"$cond": [{"$gt": [_RPNL, 0]}, 1, 0]}}}}])}
+                    "wins": {"$sum": {"$cond": [{"$gt": [_RPNL, 0]}, 1, 0]}},
+                    "first": {"$min": "$opened_at"}}}])}
     o, c = agg.get("OPEN") or {}, agg.get("CLOSED") or {}
+    # When the tab began: its first position (every one of the 546 started then). The Gold Desk's board counts its
+    # strategies' trading days from it (2026-11-18).
+    first = min((_utc(x) for x in (o.get("first"), c.get("first")) if x is not None), default=None)
     open_n, deployed, unrealized = int(o.get("n", 0)), float(o.get("deployed", 0.0)), float(o.get("unrealized", 0.0))
     closed_n, realized, wins = int(c.get("n", 0)), float(c.get("realized", 0.0)), int(c.get("wins", 0))
     fees, gross = float(c.get("fees", 0.0)), float(c.get("gross", 0.0))
@@ -1130,6 +1134,7 @@ async def summary(key: str) -> dict:
         "skipped": sk.get("by_reason") or {}, "entry_gate": gate.get("why"),
         "last_cycle_at": naive_utc(cyc["at"]).replace(tzinfo=timezone.utc).isoformat() if cyc.get("at") else None,
         "last_notes": cyc.get("notes") or [],
+        "started_at": first.isoformat() if first else None,
     }
 
 
@@ -1147,7 +1152,9 @@ async def leaderboard(key: str, family: str | None = None, timeframe: str | None
                     "open": {"$sum": {"$cond": [_IS_OPEN, 1, 0]}},
                     "unreal": {"$sum": {"$cond": [_IS_OPEN, {"$ifNull": ["$unrealized_pnl", 0]}, 0]}},
                     "gw": {"$sum": {"$cond": [won, _RPNL, 0]}},
-                    "gl": {"$sum": {"$cond": [lost, {"$multiply": [_RPNL, -1]}, 0]}}}}])}
+                    "gl": {"$sum": {"$cond": [lost, {"$multiply": [_RPNL, -1]}, 0]}},
+                    # the IST days it closed a trade on (`closed_on`): its "days traded" (2026-11-18)
+                    "days": {"$addToSet": {"$cond": [_IS_CLOSED, "$closed_on", None]}}}}])}
     rows = []
     for s in FACTORY_CATALOG:
         if family and s.family != family:
@@ -1164,6 +1171,7 @@ async def leaderboard(key: str, family: str | None = None, timeframe: str | None
             "profit_factor": round(r["gw"] / r["gl"], 3) if r.get("gl") else None,
             "open_positions": r.get("open", 0), "unrealized_pnl": round(r.get("unreal", 0.0), 2),
             "roi_pct": round(r.get("net", 0.0) / tab.capital * 100, 4) if tab.capital else 0.0,
+            "days_traded": len({d for d in r.get("days") or () if d}),
         })
     rows.sort(key=lambda r: (-r["net_pnl"], -r["trades"], r["strategy_id"]))
     return rows

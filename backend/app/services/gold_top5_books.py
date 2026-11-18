@@ -537,11 +537,21 @@ def _iso(v) -> str | None:
     return d.replace(tzinfo=timezone.utc).isoformat() if d else None
 
 
+def _ist_day(v) -> str | None:
+    """The IST date of a stored time (naive = UTC, as Mongo returns them)."""
+    d = _dt(v)
+    return d.replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=5, minutes=30))).date().isoformat() \
+        if d else None
+
+
 async def summary(book: Book) -> dict:
     realized = unrealized = deployed = fees = gross = 0.0
     open_n = closed_n = wins = voided = 0
     per = {k: {"key": k, "name": PICK[k].name, "trades": 0, "wins": 0, "net": 0.0, "open": 0, "unrealized": 0.0}
            for k in book.roster}
+    # trading days (2026-11-18): the IST days a copy closed on, for the book and for each pick in it
+    days: set[str] = set()
+    days_by: dict[str, set[str]] = {k: set() for k in book.roster}
     async for r in POSITIONS.find({"book": book.id}):
         x = per.get(r.get("key"))
         status = r.get("status")
@@ -562,10 +572,15 @@ async def summary(book: Book) -> dict:
             wins += 1 if v > 0 else 0
             fees += r.get("fees") or 0.0
             gross += r.get("gross_pnl") or 0.0
+            d = r.get("closed_on") or _ist_day(r.get("closed_at"))
+            if d:
+                days.add(str(d)[:10])
             if x:
                 x["trades"] += 1
                 x["wins"] += 1 if v > 0 else 0
                 x["net"] += v
+                if d:
+                    days_by[x["key"]].add(str(d)[:10])
     skipped: dict[str, int] = {}
     async for s in STATE.find({"kind": "skip", "book": book.id}, {"reason": 1}):
         skipped[s.get("reason") or "?"] = skipped.get(s.get("reason") or "?", 0) + 1
@@ -583,7 +598,9 @@ async def summary(book: Book) -> dict:
         "roi_pct": round((equity - book.capital) / book.capital * 100, 4) if book.capital else 0.0,
         "skipped": skipped, "voided": voided,
         "started_at": _iso(start.get("started_at")) if start else None,
-        "strategies": [{**x, "net": round(x["net"], 2), "unrealized": round(x["unrealized"], 2)} for x in per.values()],
+        "days_traded": len(days),
+        "strategies": [{**x, "net": round(x["net"], 2), "unrealized": round(x["unrealized"], 2),
+                        "days_traded": len(days_by[x["key"]])} for x in per.values()],
     }
 
 
