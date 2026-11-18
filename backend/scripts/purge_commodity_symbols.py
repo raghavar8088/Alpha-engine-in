@@ -1,12 +1,14 @@
 """Remove every commodity but the desk's own contracts from the Commodity Trading module's records.
 
-The owner's decision (18 Nov 2026): Commodity Trading keeps only Natural Gas Mini (NATGASMINI) and Crude
-Oil Mini (CRUDEOILM); the other eight underlyings' records are deleted from this module. The desk stops
-TRADING them in commodity_engine.DESK_UNDERLYINGS; this script removes their HISTORY.
+The owner's decision (18 Nov 2026): Commodity Trading keeps natural gas and crude oil only, in both sizes -
+NATGASMINI, CRUDEOILM, NATURALGAS and CRUDEOIL (first the two minis were named; the full-size two were kept
+as well when asked). The other six underlyings' records (GOLD, GOLDM, SILVER, SILVERM, COPPER, ZINC) are
+deleted from this module. The desk stops TRADING them in commodity_engine.DESK_UNDERLYINGS; this script
+removes their HISTORY. The keep list is --keep (default: the desk's own DESK_UNDERLYINGS).
 
 WHAT IT TOUCHES - and nothing else
   main database (Atlas)
-    commodity_positions, commodity_trades            rows of the eight                        DELETED
+    commodity_positions, commodity_trades            rows of the six                          DELETED
     top10_book_positions {desk: "commodity"}          Top 10 Paper Trade books' copies           DELETED
     rank_band_positions                               Top 5 / 5-10 / 10-15 / 15-20 books' copies DELETED
     commodity_scores                                  recomputed from what remains (rescore_all) REBUILT
@@ -16,9 +18,9 @@ WHAT IT TOUCHES - and nothing else
       rank_band_scores: `skipped`                     counted across all commodities, not
                                                       attributable to one - restart at zero       RESET
   the box's local MongoDB (intraday_signal_ledger._db(), FACTORY_MONGO_URL)
-    ai_positions, ai_gate_decisions {module: "commodity"}   rows of the eight                    DELETED
+    ai_positions, ai_gate_decisions {module: "commodity"}   rows of the six                      DELETED
 
-A row is "of the eight" when its symbol's underlying (the letters before a contract's date, so
+A row is "of the six" when its symbol's underlying (the letters before a contract's date, so
 NATGASMINI26NOVFUT is NATGASMINI) is one of commodity_bars.LIQUID_UNDERLYINGS that is not kept. A row with
 no symbol, or an underlying outside that list, is KEPT and reported - nothing is deleted by inference.
 
@@ -62,7 +64,7 @@ from bson import json_util
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))          # backend/
 
-KEEP_DEFAULT = ("NATGASMINI", "CRUDEOILM")
+KEEP_DEFAULT = ("NATGASMINI", "CRUDEOILM", "NATURALGAS", "CRUDEOIL")     # = commodity_engine.DESK_UNDERLYINGS
 BATCH = 500
 IST = timezone(timedelta(hours=5, minutes=30))
 _BASE = re.compile(r"^([A-Z]+?)(?=\d|$)")
@@ -319,7 +321,7 @@ async def apply_purge(db, fdb, keep: set[str], known: set[str], *, confirm: str,
         deleted[label] = n
     rebuilt = await rebuild(db, stamp)
     left = await plan_purge(db, fdb, keep, known)
-    return {"backup": str(path), "deleted": deleted, "rebuilt": rebuilt, "left_of_the_eight": left["total"]}
+    return {"backup": str(path), "deleted": deleted, "rebuilt": rebuilt, "left_to_delete": left["total"]}
 
 
 async def restore(path: Path, db, fdb) -> dict:

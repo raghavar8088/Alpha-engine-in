@@ -62,13 +62,15 @@ logger = logging.getLogger("commodity_engine")
 
 STATE_ID = "commodity"
 
-# THE DESK'S CONTRACTS (2026-11-18, the owner's decision): Natural Gas Mini and Crude Oil Mini only. The
-# other eight (GOLD, GOLDM, SILVER, SILVERM, CRUDEOIL, NATURALGAS, COPPER, ZINC) are no longer traded here,
-# and their records are removed from this desk by backend/scripts/purge_commodity_symbols.py (backed up
-# first). The bar STORE still fetches all ten (commodity_bars.LIQUID_UNDERLYINGS): the Gold desk, the
+# THE DESK'S CONTRACTS (2026-11-18, the owner's decision): natural gas and crude oil only, in both sizes -
+# Natural Gas Mini, Crude Oil Mini, Natural Gas and Crude Oil. The owner first named the two minis, then kept
+# the full-size two as well. The other six (GOLD, GOLDM, SILVER, SILVERM, COPPER, ZINC) are no longer traded
+# here, and their records are removed from this desk by backend/scripts/purge_commodity_symbols.py (backed
+# up first). The bar STORE still fetches all ten (commodity_bars.LIQUID_UNDERLYINGS): the Gold desk, the
 # Pre-Live desk and the Strategy Factory read it, so it is not this desk's list to shorten.
 DESK_UNDERLYINGS: tuple[str, ...] = tuple(
-    u.strip().upper() for u in os.getenv("COMMODITY_DESK_UNDERLYINGS", "NATGASMINI,CRUDEOILM").split(",")
+    u.strip().upper() for u in os.getenv("COMMODITY_DESK_UNDERLYINGS",
+                                         "NATGASMINI,CRUDEOILM,NATURALGAS,CRUDEOIL").split(",")
     if u.strip())
 
 # ── capital ──────────────────────────────────────────────────────────────────────

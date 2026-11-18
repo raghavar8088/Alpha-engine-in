@@ -51,7 +51,7 @@ def check(name, cond, detail=""):
         fails.append(name)
 
 
-KEEP = {"NATGASMINI", "CRUDEOILM"}
+KEEP = {"NATGASMINI", "CRUDEOILM", "NATURALGAS", "CRUDEOIL"}     # natural gas + crude oil, both sizes
 KNOWN = {"GOLD", "GOLDM", "SILVER", "SILVERM", "CRUDEOIL", "NATURALGAS", "COPPER", "ZINC", "CRUDEOILM", "NATGASMINI"}
 T0 = datetime(2026, 11, 10, 4, 0, tzinfo=timezone.utc)
 S1, S2 = COMMODITY_CATALOG[0].strategy_id, COMMODITY_CATALOG[1].strategy_id
@@ -72,8 +72,8 @@ async def seed():
     await P.insert_many([
         pos("n1", "NATGASMINI", S1, 0, 1000.0), pos("c1", "CRUDEOILM", S2, 10, -400.0),
         pos("g1", "GOLD", S1, 20, 5000.0), pos("g2", "GOLDM", S2, 30, -2000.0),
-        pos("z1", "ZINC", S1, 40, 700.0), pos("ng", "NATURALGAS", S1, 50, -300.0),   # NOT the mini: deleted
-        pos("co", "CRUDEOIL", S2, 60, 900.0),                                          # NOT the mini: deleted
+        pos("z1", "ZINC", S1, 40, 700.0), pos("ng", "NATURALGAS", S1, 50, -300.0),   # full-size: KEPT
+        pos("co", "CRUDEOIL", S2, 60, 900.0),                                          # full-size: KEPT
         pos("o_n", "NATGASMINI", S2, 70, 0, status="OPEN"), pos("o_g", "SILVER", S1, 80, 0, status="OPEN"),
         {"position_id": "nul", "symbol": None, "strategy_id": S1, "status": "CLOSED", "realized_pnl": 1.0,
          "opened_at": T0, "closed_at": T0 + timedelta(minutes=5)},
@@ -126,10 +126,13 @@ async def main():
     # ── dry run ───────────────────────────────────────────────────────────────────────────
     plan = await purge.plan_purge(DB, FDB, KEEP, KNOWN)
     s = plan["stores"]
-    check("dry run: the eight, never the minis",
-          s["commodity_positions"]["delete"] == 6 and s["commodity_positions"]["kept"] == {"NATGASMINI": 2, "CRUDEOILM": 1})
-    check("...the FULL-SIZE natural gas and crude oil are among the eight (only the minis are kept)",
-          s["commodity_positions"]["by_symbol"].get("NATURALGAS") == 1 and s["commodity_positions"]["by_symbol"].get("CRUDEOIL") == 1)
+    check("dry run: the six (gold, silver, copper, zinc), never natural gas or crude oil",
+          s["commodity_positions"]["delete"] == 4
+          and s["commodity_positions"]["by_symbol"] == {"GOLD": 1, "GOLDM": 1, "ZINC": 1, "SILVER": 1},
+          str(s["commodity_positions"]["by_symbol"]))
+    check("...the full-size natural gas and crude oil are KEPT beside the minis",
+          s["commodity_positions"]["kept"] == {"NATGASMINI": 2, "CRUDEOILM": 1, "NATURALGAS": 1, "CRUDEOIL": 1},
+          str(s["commodity_positions"]["kept"]))
     check("...a row with no symbol or an unknown one is kept and reported, never deleted",
           s["commodity_positions"]["kept_unknown"] == {"None": 1, "LEAD": 1})
     check("...a contract-named mini is kept; another module's rows are not even looked at",
@@ -137,7 +140,7 @@ async def main():
           and s["top10_book_positions"]["delete"] == 1)
     check("...nothing written by a dry run", await DB["commodity_positions"].count_documents({}) == before["commodity_positions"])
     phrase = purge.confirm_phrase(plan)
-    check("the confirmation carries the exact count", phrase == f"DELETE {plan['total']} ROWS" and plan["total"] == 12, phrase)
+    check("the confirmation carries the exact count", phrase == f"DELETE {plan['total']} ROWS" and plan["total"] == 10, phrase)
 
     with tempfile.TemporaryDirectory() as tmp:
         try:
@@ -152,24 +155,25 @@ async def main():
         bk = Path(out["backup"])
         check("apply: a verified backup file first", bk.exists() and bk.stat().st_size > 0)
         syms = sorted([d.get("symbol") async for d in DB["commodity_positions"].find({})], key=str)
-        check("only the minis (and the unrecognised rows) remain on the desk",
-              syms == sorted(["NATGASMINI", "NATGASMINI", "CRUDEOILM", None, "LEAD"], key=str), str(syms))
-        check("trades, paper-book copies and AI rows of the eight are gone; others untouched",
+        check("only natural gas and crude oil (and the unrecognised rows) remain on the desk",
+              syms == sorted(["NATGASMINI", "NATGASMINI", "CRUDEOILM", "NATURALGAS", "CRUDEOIL", None, "LEAD"], key=str), str(syms))
+        check("trades, paper-book copies and AI rows of the six are gone; others untouched",
               [d["symbol"] async for d in DB["commodity_trades"].find({})] == ["NATGASMINI"]
               and await DB["top10_book_positions"].count_documents({"desk": "zero-hero"}) == 1
               and await DB["top10_book_positions"].count_documents({"desk": "commodity"}) == 1
               and await DB["rank_band_positions"].count_documents({}) == 1
               and await FDB["ai_positions"].count_documents({}) == 2
               and await FDB["ai_gate_decisions"].count_documents({}) == 1)
-        check("nothing of the eight is left anywhere", out["left_of_the_eight"] == 0)
+        check("nothing of the six is left anywhere", out["left_to_delete"] == 0)
         sc = {d["strategy_id"]: d async for d in DB["commodity_scores"].find({})}
-        check("scores recomputed from what remains (S1: the NATGASMINI +1,000 only)",
-              sc[S1]["trades"] == 1 and abs(sc[S1]["net_pnl"] - 1000.0) < 0.01, str({k: sc[S1].get(k) for k in ("trades", "net_pnl")}))
+        check("scores recomputed from what remains (S1: NATGASMINI +1,000 and NATURALGAS -300)",
+              sc[S1]["trades"] == 2 and abs(sc[S1]["net_pnl"] - 700.0) < 0.01, str({k: sc[S1].get(k) for k in ("trades", "net_pnl")}))
         from app.services import commodity_engine as ce
         eq = [d async for d in DB["commodity_equity"].find({}).sort("ts", 1)]
-        # Remaining closes: the two kept unrecognised rows (+1, +2) at 0:05, NATGASMINI +1,000 at 0:30, CRUDEOILM -400 at 0:40.
-        check("desk equity replayed at the same times: capital + remaining realised (+3 at 0:25, +603 from 0:45)",
-              [round(d["equity"] - ce.INITIAL_CAPITAL, 2) for d in eq] == [3.0, 603.0, 603.0, 603.0]
+        # Remaining closes: the two kept unrecognised rows (+1, +2) at 0:05, NATGASMINI +1,000 at 0:30, CRUDEOILM -400
+        # at 0:40, NATURALGAS -300 at 1:20, CRUDEOIL +900 at 1:30.
+        check("desk equity replayed at the same times: capital + remaining realised (+3, +603, +603, +1,203)",
+              [round(d["equity"] - ce.INITIAL_CAPITAL, 2) for d in eq] == [3.0, 603.0, 603.0, 1203.0]
               and all("rebuilt" in d for d in eq), str([round(d["equity"] - ce.INITIAL_CAPITAL, 2) for d in eq]))
         from app.services import top10_books as t10
         teq = await DB["top10_book_equity"].find_one({"desk": "commodity"})
@@ -189,9 +193,11 @@ async def main():
         check("...including the box-local AI rows", await FDB["ai_positions"].count_documents({}) == 3
               and await FDB["ai_gate_decisions"].count_documents({}) == 2, str(r))
 
-    # ── the desk trades only the two minis ─────────────────────────────────────────────────
+    # ── the desk trades natural gas and crude oil only, both sizes ────────────────────────────
     from app.services import commodity_engine as ce
-    check("the desk's contracts are the two minis", ce.DESK_UNDERLYINGS == ("NATGASMINI", "CRUDEOILM"))
+    check("the desk's contracts: natural gas and crude oil, both sizes",
+          ce.DESK_UNDERLYINGS == ("NATGASMINI", "CRUDEOILM", "NATURALGAS", "CRUDEOIL"))
+    check("the script keeps exactly what the desk trades, by default", set(purge.KEEP_DEFAULT) == set(ce.DESK_UNDERLYINGS))
     asked: list = []
 
     async def fake_universe():
@@ -202,8 +208,8 @@ async def main():
         return {}
     ce.front_month_universe, ce.mcx_market.quotes = fake_universe, fake_quotes
     await ce.scan_cycle()
-    check("a scan quotes only NATGASMINI and CRUDEOILM out of all ten contracts",
-          sorted(asked) == ["CRUDEOILM26NOVFUT", "NATGASMINI26NOVFUT"], str(asked))
+    check("a scan quotes only the four natural gas and crude oil contracts out of all ten",
+          sorted(asked) == ["CRUDEOIL26NOVFUT", "CRUDEOILM26NOVFUT", "NATGASMINI26NOVFUT", "NATURALGAS26NOVFUT"], str(asked))
 
     print(f"\n{'ALL PASS' if not fails else str(len(fails)) + ' FAILED: ' + ', '.join(fails)}")
     return 1 if fails else 0

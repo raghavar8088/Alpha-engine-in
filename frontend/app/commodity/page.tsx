@@ -66,9 +66,20 @@ const STATUS_TONE: Record<string, "gain" | "loss" | "muted" | "accent"> = {
   READY_TO_EVALUATE: "accent", REJECTED_ON_HISTORY: "loss", REJECTED_FORWARD: "loss", REJECTED_IN_INCUBATION: "loss",
 };
 
+const CONTRACT_NAMES: Record<string, string> = {
+  NATURALGAS: "Natural Gas", NATGASMINI: "Natural Gas Mini", CRUDEOIL: "Crude Oil", CRUDEOILM: "Crude Oil Mini",
+  GOLD: "Gold", GOLDM: "Gold Mini", SILVER: "Silver", SILVERM: "Silver Mini", COPPER: "Copper", ZINC: "Zinc",
+};
+
 export default function CommodityPage() {
   const [tab, setTab] = useState<Tab>("record");
   const [summary, setSummary] = useState<CommoditySummary | null>(null);
+  // The contracts the desk trades, named - only once the server reports them (18 Nov 2026), so the page
+  // never claims a change the backend has not made yet.
+  const deskList = (summary as { desk_underlyings?: string[] } | null)?.desk_underlyings;
+  const deskNames = deskList && deskList.length > 0 && deskList.length < 10
+    ? deskList.map((u) => CONTRACT_NAMES[u] ?? u).join(", ")
+    : null;
   const [records, setRecords] = useState<CmdRecords | null>(null);
   const [positions, setPositions] = useState<CommodityPosition[]>([]);
   const [trades, setTrades] = useState<CommodityTrade[]>([]);
@@ -134,9 +145,9 @@ export default function CommodityPage() {
           <>
             A <strong>research record</strong>, not a strategy picker. {summary?.strategy_count ?? 353} pattern
             strategies{" "}
-            {(summary as { desk_underlyings?: string[] } | null)?.desk_underlyings?.length === 2 ? (
+            {deskNames ? (
               <>
-                on two MCX contracts only, <strong>Natural Gas Mini and Crude Oil Mini</strong>{" "}
+                on natural gas and crude oil only — <strong>{deskNames}</strong>{" "}
                 {"(your decision of 18 Nov 2026)"}
               </>
             ) : (
