@@ -139,6 +139,9 @@ services:
       - mongodb
     restart: unless-stopped
     mem_limit: 300m
+    # 18 Nov 2026: lower CPU priority than the backend (default 1024), which runs the real-money desks and the Angel
+    # stream; when the box is short of CPU the backend wins. Applied live with docker update; this keeps it on recreate.
+    cpu_shares: 256
 
   # Premium Strategies paper desk: one Rs 10 lakh paper account per strategy. Its own container because the backend sits
   # at its memory cap; every cycle is a short process that hands its memory back. It reads the bar store read-only, writes
@@ -159,6 +162,9 @@ services:
       - premium_data:/data/premium
     restart: unless-stopped
     mem_limit: 400m
+    # 18 Nov 2026: lower CPU priority than the backend (default 1024), which runs the real-money desks and the Angel
+    # stream; when the box is short of CPU the backend wins. Applied live with docker update; this keeps it on recreate.
+    cpu_shares: 256
 
   frontend:
     build:
