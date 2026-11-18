@@ -12,6 +12,7 @@ than a blend of all three.
   GET  /api/live-intraday/trades       closed-trade blotter, with the cost of each
   GET  /api/live-intraday/daily        per-day realised P&L, fees and ROI
   POST /api/live-intraday/run          manually trigger one scan+manage cycle (all books)
+  GET  /api/live-intraday/twin         the Live Trading paper twin beside the real desk (18 Nov 2026)
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -70,6 +71,18 @@ async def summary_endpoint(
     snap["broker_connected"] = state.get("broker_connected", False)
     snap["angel_configured"] = state.get("angel_configured", False)
     return snap
+
+
+@router.get("/twin")
+async def twin_endpoint(
+    limit: int = Query(300, ge=1, le=1000),
+    current_user: dict = Depends(get_current_user),
+):
+    """The Live Trading paper twin (book "ltpaper"): its account, and each of its trades beside what the
+    REAL desk did with the same tournament signal - taken, refused by Angel, disarmed or never tried.
+    Read only; see app.services.live_trading_twin."""
+    from app.services import live_trading_twin
+    return await live_trading_twin.compare(limit)
 
 
 @router.get("/leaderboard")

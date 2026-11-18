@@ -59,7 +59,9 @@ DESKS: dict[str, dict] = {
                   "ag_donchian_1h": "A Grade Donchian 1h Rs10,00,000",
                   "ag_pdh_pdl_15m": "A Grade Prior-Day High/Low 15m Rs10,00,000",
                   "ag_supertrend_45m": "A Grade Supertrend 45m Rs10,00,000",
-                  "ag_supertrend_1h": "A Grade Supertrend 1h Rs10,00,000"},
+                  "ag_supertrend_1h": "A Grade Supertrend 1h Rs10,00,000",
+                  # Live Trading paper twin (2026-11-18): the real desk's rules on paper
+                  "ltpaper": "Live Trading paper twin Rs33,882"},
         "collections": ["live_intraday_positions", "live_intraday_trades", "live_intraday_scores", "live_intraday_equity"],
     },
 }

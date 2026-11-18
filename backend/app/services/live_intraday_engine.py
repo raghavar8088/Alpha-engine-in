@@ -132,6 +132,21 @@ A_GRADE: tuple[tuple[str, str, str, int, float, int, float], ...] = (
 A_GRADE_CAPITAL = float(os.getenv("LIVE_INTRADAY_CAPITAL_AGRADE", "1000000"))
 A_GRADE_BOOKS: tuple[str, ...] = tuple(b for b, *_ in A_GRADE)
 BOOK_CAPITAL.update({b: A_GRADE_CAPITAL for b in A_GRADE_BOOKS})
+# LIVE TRADING · PAPER TWIN (2026-11-18). The owner asked for the REAL-money Live Trading desk replicated in
+# paper: the same paper money as the real Angel One account, the same strategies, the same setup. So this
+# book is configured FROM the real desk (live_trading_engine), not from the books' defaults:
+#   - money: the Angel balance read at 09:06 IST on 18 Nov 2026 (Rs 33,882.16), fixed from then on, like
+#     every paper account - its own P&L moves it, a deposit into Angel does not;
+#   - strategies: whichever the real desk has switched on, read every pass, and a strategy's trades only
+#     from the moment its switch went on (live_intraday_mirror._twin_offer);
+#   - size: the real desk's COPY_NOTIONAL (Rs 30,000) per position at its MIS leverage (5x, Rs 6,000 of
+#     margin), at most its MAX_OPEN_POSITIONS (5) at once, one per stock, 3% daily breaker - the real desk's.
+# It copies the tournament's own fills, so it shows what the real desk's rules earn with perfect fills and
+# no broker refusals; GET /api/live-intraday/twin puts each paper trade beside what the real desk did.
+TWIN_BOOK = "ltpaper"
+TWIN_CAPITAL_READ_AT = "2026-11-18T09:06:23+05:30"     # when the Angel balance below was read
+TWIN_START = datetime(2026, 11, 18, 3, 45)              # 09:15 IST, 18 Nov 2026 (naive UTC): its first session
+BOOK_CAPITAL[TWIN_BOOK] = float(os.getenv("LIVE_INTRADAY_CAPITAL_LTPAPER", "33882.16"))
 BOOKS = list(BOOK_CAPITAL)
 
 # TOP-10 BOOKS. The owner asked (2026-10-26) for Rs 2 lakh and Rs 10 lakh paper accounts on
@@ -161,6 +176,9 @@ TOP10_ROSTER: tuple[str, ...] = tuple(p[0] for p in TOP10_PICKS)
 # Which books trade only a roster; a book not listed copies all 54.
 BOOK_ROSTER: dict[str, tuple[str, ...]] = {"top2L": TOP10_ROSTER, "top10L": TOP10_ROSTER}
 BOOK_ROSTER.update({b: (sid,) for b, sid, *_ in A_GRADE})      # one strategy per A Grade book
+# The twin's roster is the real desk's, resolved when asked (book_roster); listed here only so the
+# legacy scan, which reads this dict, never treats it as a book of all 54.
+BOOK_ROSTER[TWIN_BOOK] = ()
 # Books whose positions are sized on their own realised equity (profit reinvested): the A Grade ones.
 COMPOUND_BOOKS: frozenset[str] = frozenset(A_GRADE_BOOKS)
 
@@ -175,7 +193,28 @@ def book_leverage(book: str) -> float:
 
 
 def book_roster(book: str) -> tuple[str, ...] | None:
+    if book == TWIN_BOOK:
+        return twin_desk().COPY_SOURCES           # every strategy the real desk can trade
     return BOOK_ROSTER.get(book)
+
+
+def twin_desk():
+    """The real-money desk the paper twin replicates. Imported late: it imports this module."""
+    from app.services import live_trading_engine
+    return live_trading_engine
+
+
+def book_extra_rules(book: str) -> dict:
+    """plan_book rules a book takes beyond book_rules' defaults: the twin's are the real desk's own."""
+    if book != TWIN_BOOK:
+        return {}
+    lt = twin_desk()
+    return {"max_open": lt.MAX_OPEN_POSITIONS, "position_value_cap": lt.COPY_NOTIONAL}
+
+
+def book_fixed_start(book: str):
+    """A book whose copying starts at a set moment rather than when a pass first sees it."""
+    return TWIN_START if book == TWIN_BOOK else None
 
 
 def book_compounds(book: str) -> bool:
@@ -677,15 +716,25 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
         base = capital + realized if book_compounds(book) else capital
         alloc = mirror.position_cap(base)
         value_cap = mirror.position_cap(base, lev)
+        extra = book_extra_rules(book)
+        if extra.get("position_value_cap"):
+            # The twin: the real desk's own size per position, whatever capital / slots would allow.
+            value_cap = min(value_cap, float(extra["position_value_cap"]))
+            alloc = value_cap / max(lev, 1.0)
         started = await mirror.started_at(book)
         roster = book_roster(book)
-        copy = {"source": "tournament", "max_open_positions": mirror.MAX_OPEN,
+        copy = {"source": "tournament", "max_open_positions": int(extra.get("max_open") or mirror.MAX_OPEN),
                 "position_cap": round(value_cap, 2),
                 "tournament_strategies": len(roster) if roster else len(v2.CATALOG),
                 "skipped": await mirror.skipped_totals(book),
                 "copying_since": (started if started.tzinfo else started.replace(
                     tzinfo=timezone.utc)).isoformat() if started else None}
-        if roster:
+        if roster and book == TWIN_BOOK:
+            copy["roster"] = list(roster)
+            copy["twin"] = {"of": "live-trading", "capital_read_at": TWIN_CAPITAL_READ_AT,
+                            "copy_notional": float(extra.get("position_value_cap") or 0.0),
+                            "max_open_positions": int(extra.get("max_open") or 0)}
+        elif roster:
             copy["roster"] = list(roster)
             copy["roster_picked_at"] = A_GRADE_PICKED_AT if book in A_GRADE_BOOKS else TOP10_PICKED_AT
         copy["compounding"] = book_compounds(book)

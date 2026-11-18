@@ -1036,7 +1036,8 @@ export async function fetchIntradayTrades(limit = 100): Promise<IntradayTrade[]>
 
 // ---- Live Intraday desk (curated ₹80k shortlist inside Intraday Stocks) ----
 // "top2L" / "top10L" (2026-10-26) trade only the Tournament's top 10 by Rank, frozen at the pick.
-export type LiveIntradayBook = "80k" | "30k" | "10k" | "2L" | "10L" | "top2L" | "top10L";
+// "ltpaper" (2026-11-18): the Live Trading paper twin - the real-money desk's rules on paper money.
+export type LiveIntradayBook = "80k" | "30k" | "10k" | "2L" | "10L" | "top2L" | "top10L" | "ltpaper";
 
 export interface DailyRoi {
   date: string;
@@ -1049,6 +1050,85 @@ export interface DailyRoi {
   roi_pct: number;
 }
 
+// ---- Live Trading paper twin (2026-11-18) ----------------------------------------------------------
+// One Live Intraday book ("ltpaper") configured from the REAL-money desk: its switched-on strategies, Rs
+// 30,000 a position at 5x MIS, five at once, one per stock, 3% breaker, and the real Angel balance of
+// 18 Nov 2026 as its money. GET /api/live-intraday/twin puts each of its trades beside what the real desk
+// did with the same tournament signal.
+export type TwinOutcome = "taken" | "refused" | "disarmed" | "not_seen" | "skipped";
+
+export interface TwinLeg {
+  qty: number | null;
+  entry: number | null;
+  exit: number | null;
+  status: string | null;
+  net: number;
+  fees?: number | null;
+  notional?: number | null;
+  margin?: number | null;
+  exit_reason?: string | null;
+  closed_at?: string | null;
+}
+
+export interface TwinRow {
+  parent_id: string | null;
+  opened_at: string | null;
+  symbol: string | null;
+  side: "BUY" | "SELL" | null;
+  strategy_id: string | null;
+  strategy_name: string | null;
+  real_outcome: TwinOutcome;
+  real_outcome_text: string;
+  paper: TwinLeg | null;
+  real: TwinLeg | null;
+}
+
+export interface TwinTally {
+  trades: number;
+  closed: number;
+  open: number;
+  wins: number;
+  net: number;
+  realized: number;
+}
+
+export interface LiveTradingTwin {
+  book: string;
+  summary: LiveIntradaySummary;
+  copying_since: string | null;
+  capital_read_at: string;
+  real_desk: {
+    copy_notional: number;
+    max_open_positions: number;
+    mis_leverage: number;
+    breaker_pct: number;
+    strategies: { strategy_id: string; name: string; enabled: boolean; since: string | null }[];
+  };
+  totals: {
+    paper: TwinTally;
+    real: TwinTally;
+    both: number;
+    paper_only: number;
+    paper_only_by_reason: Partial<Record<TwinOutcome, number>>;
+    real_only: number;
+    both_paper_net: number;
+    both_real_net: number;
+  };
+  rows: TwinRow[];
+}
+
+/** The paper twin beside the real desk. null when the server does not have it yet (an older backend
+ *  answers 404), so the page says so instead of showing another account's numbers. */
+export async function fetchLiveTradingTwin(): Promise<LiveTradingTwin | null> {
+  try {
+    return await apiFetch("/api/live-intraday/twin");
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    if (msg === "Not Found" || msg.includes("404")) return null;
+    throw e;
+  }
+}
+
 export interface LiveIntradaySummary {
   // "tournament" (since 2026-10-13): the book copies the tournament's trades as ONE account
   // of up to max_open_positions, each capped at position_cap. "legacy": the old 8-strategy scan.
@@ -1056,6 +1136,8 @@ export interface LiveIntradaySummary {
   // A roster book (the Top-10 books): the strategies it is limited to, and when they were picked.
   roster?: string[];
   roster_picked_at?: string;
+  // The Live Trading paper twin (book "ltpaper"): configured from the real-money desk.
+  twin?: { of: "live-trading"; capital_read_at: string; copy_notional: number; max_open_positions: number };
   max_open_positions?: number;
   position_cap?: number;
   tournament_strategies?: number;

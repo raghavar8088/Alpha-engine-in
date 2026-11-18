@@ -6,6 +6,7 @@ import GlassPanel from "../../components/GlassPanel";
 import DeskHistory from "../../components/DeskHistory";
 import LineChart from "../../components/charts/LineChart";
 import ErrorBanner from "../../components/ErrorBanner";
+import PaperTwin from "./PaperTwin";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
@@ -68,6 +69,9 @@ export default function LiveTradingPage() {
   const [equity, setEquity] = useState<LiveTradingEquityPoint[]>([]);
   const [daily, setDaily] = useState<LiveTradingDay[]>([]);
   const [arming, setArming] = useState<LiveTradingArming | null>(null);
+  // Real desk or its paper twin (18 Nov 2026). Always opens on the real desk: a real-money page must
+  // show its own state first, never a paper account left selected from the last visit.
+  const [view, setView] = useState<"real" | "twin">("real");
 
   const load = useCallback(async () => {
     try {
@@ -220,6 +224,21 @@ export default function LiveTradingPage() {
         subtitle={`REAL-MONEY desk: when ARMED, copies the Intraday Stocks tournament's positions in the strategies switched on below (now: ${onNames(summary as (LiveTradingSummary & CopyDesk) | null)}) into real Angel One orders within seconds — up to ${(summary as (LiveTradingSummary & CopyDesk) | null)?.max_open_positions ?? 5} positions at a time across them, one per stock, about ${inr((summary as (LiveTradingSummary & CopyDesk) | null)?.copy_notional ?? summary?.position_notional)} each on ${(summary as (LiveTradingSummary & CopyDesk) | null)?.mis_leverage ?? 5}x intraday (MIS) leverage, closed at the same stop or target, when the tournament closes it, or at the session square-off. Every order is INTRADAY (MIS). The forward-test gate is overridden for these strategies by your decisions of 10 Nov 2026 (Selected ORB 15-min) and 16 Nov 2026 (the four added that day).`}
       />
 
+      <div className="view-tabs" role="tablist" aria-label="Real desk or paper twin">
+        <button role="tab" aria-selected={view === "real"} className={`vtab ${view === "real" ? "on" : ""}`}
+                onClick={() => setView("real")}>
+          Real-money desk
+        </button>
+        <button role="tab" aria-selected={view === "twin"} className={`vtab ${view === "twin" ? "on" : ""}`}
+                onClick={() => setView("twin")}>
+          Paper twin · same rules, paper money
+        </button>
+      </div>
+
+      {view === "twin" ? (
+        <PaperTwin realArmed={summary ? armed : null} />
+      ) : (
+      <>
       {error && <ErrorBanner message={error} />}
       {notice && <div className="notice" onClick={() => setNotice(null)}>{notice}</div>}
 
@@ -238,14 +257,18 @@ export default function LiveTradingPage() {
       )}
 
       {/* The big green/red LIVE TRADING switch */}
-      <div className={`arm-banner ${armed ? "on" : "off"}`}>
+      <div className={`arm-banner ${!summary ? "unknown" : armed ? "on" : "off"}`}>
         <div className="arm-left">
           <div className="arm-title">
-            LIVE TRADING {armed ? "ENABLED" : "OFF"}
+            LIVE TRADING {!summary ? "STATUS UNKNOWN" : armed ? "ENABLED" : "OFF"}
             <span className="mode-tag">REAL MONEY · {inr(summary?.desk_ceiling)} ceiling</span>
           </div>
           <div className="arm-sub">
-            {armed
+            {!summary
+              ? error
+                ? "The desk could not be loaded, so its state is unknown — it may be ARMED and trading. Do not assume it is off: refresh, or check the Angel One app."
+                : "Loading the desk… until it answers its state is unknown — it may be armed."
+              : armed
               ? "Real orders are placed on your Angel One account as strategies fire during market hours."
               : armBlocked
                 ? "Disarmed, and cannot be armed yet — see why below."
@@ -253,12 +276,12 @@ export default function LiveTradingPage() {
             {summary?.disarmed_reason && !armed ? ` · last: ${summary.disarmed_reason}` : ""}
           </div>
         </div>
-        <button className={`switch ${armed ? "on" : "off"}`} onClick={toggleArm}
-                disabled={busy || armBlocked}
+        <button className={`switch ${!summary ? "unknown" : armed ? "on" : "off"}`} onClick={toggleArm}
+                disabled={busy || armBlocked || !summary}
                 title={armBlocked ? "Arming is refused until every enabled strategy passes its forward test" : undefined}
                 aria-label="Toggle live trading">
           <span className="knob" />
-          <span className="switch-label">{armed ? "ON" : "OFF"}</span>
+          <span className="switch-label">{!summary ? "…" : armed ? "ON" : "OFF"}</span>
         </button>
       </div>
 
@@ -310,12 +333,12 @@ export default function LiveTradingPage() {
 
       {/* Kill switch + panic + broker status */}
       <div className="controls">
-        <button className={`ctl ${killed ? "kill-on" : ""}`} onClick={toggleKill} disabled={busy}>
-          {killed ? "● KILL SWITCH ON — new orders halted" : "Kill switch off — trading allowed"}
+        <button className={`ctl ${killed ? "kill-on" : ""}`} onClick={toggleKill} disabled={busy || !summary}>
+          {!summary ? "Kill switch: unknown" : killed ? "● KILL SWITCH ON — new orders halted" : "Kill switch off — trading allowed"}
         </button>
         <button className="ctl panic" onClick={panic} disabled={busy}>Panic — CLOSE ALL</button>
-        <span className={`broker ${summary?.broker_connected ? "ok" : "bad"}`}>
-          {summary?.broker_connected ? "Angel One connected" : "Angel One not configured"}
+        <span className={`broker ${!summary ? "unknown" : summary.broker_connected ? "ok" : "bad"}`}>
+          {!summary ? "Angel One: unknown" : summary.broker_connected ? "Angel One connected" : "Angel One not configured"}
         </span>
         {summary?.breaker_tripped && <span className="breaker">Daily loss breaker tripped</span>}
         <span className="rejects">{summary ? `rejects ${summary.consecutive_rejects}/${summary.max_consecutive_rejects} → auto-disarm` : ""}</span>
@@ -323,7 +346,7 @@ export default function LiveTradingPage() {
 
       {/* Summary tiles */}
       <div className="tiles">
-        <Tile label="Mode" value="REAL" tone={armed ? "gain" : "loss"} sub={armed ? "armed · live Angel" : "disarmed"} />
+        <Tile label="Mode" value="REAL" tone={!summary ? undefined : armed ? "gain" : "loss"} sub={!summary ? "status unknown" : armed ? "armed · live Angel" : "disarmed"} />
         <Tile
           label="Angel balance"
           value={angel?.available ? inr(angel.available_cash) : "—"}
@@ -628,6 +651,8 @@ export default function LiveTradingPage() {
       </GlassPanel>
 
       <DeskHistory deskKey={"live-trading"} />
+      </>
+      )}
 
       <style jsx>{`
         .roi-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
@@ -712,6 +737,16 @@ export default function LiveTradingPage() {
         .mini-switch.off .mini-label { right: 8px; }
         .muted { color: var(--text-faint); }
         .pool-note { margin: 0 0 10px; font-size: 12px; line-height: 1.5; }
+        .arm-banner.unknown { background: var(--canvas-soft); border-color: var(--panel-border); }
+        .arm-banner.unknown .arm-title { color: var(--text-muted); }
+        .switch.unknown { background: var(--text-faint); justify-content: center; }
+        .switch.unknown .switch-label { left: 50%; right: auto; transform: translate(-50%, -50%); }
+        .switch.unknown .knob { display: none; }
+        .broker.unknown { color: var(--text-muted); background: var(--canvas-soft); }
+        .view-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+        .vtab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted);
+                padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+        .vtab.on { background: var(--brand-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--brand); }
         .gain { color: var(--gain); }
         .loss { color: var(--loss); }
       `}</style>

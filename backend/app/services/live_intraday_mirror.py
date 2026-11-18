@@ -145,7 +145,8 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
               entries: bool, max_open: int | None = None, net_fn=None,
               source_tag: str | None = None, closed_rows: list[dict] | None = None,
               compound: bool = False, leverage_fn=None, loss_limit: float | None = None,
-              day_realized: dict[str, float] | None = None) -> dict:
+              day_realized: dict[str, float] | None = None,
+              position_value_cap: float | None = None) -> dict:
     """Replay one book against the tournament, in time order. Pure - no I/O.
 
     open_rows:   the book's OPEN positions from ANY source (they hold cash, slots, symbols).
@@ -187,7 +188,11 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
     DAILY LOSS ON THE TRADES' CLOCK. `loss_limit` (rupees) refuses new entries ("breaker") once the
     realised P&L of that IST day, followed through the replay with its closes, has lost that much.
     `breaker_tripped` is the same breaker read once, when the pass starts; this one also catches a
-    close INSIDE the pass. `day_realized` seeds the days with what was realised before t0."""
+    close INSIDE the pass. `day_realized` seeds the days with what was realised before t0.
+
+    POSITION VALUE CAP (2026-11-18, the Live Trading paper twin). `position_value_cap` (rupees) is the
+    most one position may be WORTH whatever capital / slots x leverage allows - the real desk sizes
+    every position at a flat Rs 30,000, and the twin that replicates it must too. None changes nothing."""
     slots = MAX_OPEN if max_open is None else max_open
     tag = SOURCE_TAG if source_tag is None else source_tag
     lev_of = leverage_fn if leverage_fn is not None else (lambda _p: 1.0)
@@ -283,6 +288,8 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
         # The most this position may be WORTH (its slot of the buying power), and the most the free
         # margin can carry. At 1x both are the old figures exactly (x 1.0 changes no float).
         cap_now = (max(eq, 0.0) / max(slots, 1) if compound else cap) * lev
+        if position_value_cap:
+            cap_now = min(cap_now, float(position_value_cap))
         room = max(cash, 0.0) * lev
         qty = int(min(cap_now, room) // price) if price > 0 else 0
         if breaker_tripped or (loss_limit is not None
@@ -342,8 +349,12 @@ async def _book_start(book: str) -> datetime:
     doc = await live_intraday_state_collection.find_one({"_id": key})
     if doc and doc.get("started_at"):
         return naive_utc(doc["started_at"])
+    from app.services import live_intraday_engine as li   # late: that module imports this one
+    # The one exception: the Live Trading paper twin starts at its first session (09:15 IST, 18 Nov
+    # 2026), the day the owner asked for it, so it can be read beside the real desk from that day.
+    first = li.book_fixed_start(book) or _now()
     await live_intraday_state_collection.update_one(
-        {"_id": key}, {"$setOnInsert": {"started_at": _now(), "book": book}}, upsert=True)
+        {"_id": key}, {"$setOnInsert": {"started_at": first, "book": book}}, upsert=True)
     doc = await live_intraday_state_collection.find_one({"_id": key})
     return naive_utc(doc["started_at"])
 
@@ -515,15 +526,54 @@ async def _score(book: str, strategy_id: str, skips: dict[str, int]) -> None:
         {"strategy_id": strategy_id, "book": book}, update, upsert=True)
 
 
+async def _twin_offer(parents: list[dict], held: set[str]) -> list[dict]:
+    """What the Live Trading paper twin is offered: a tournament trade of a strategy whose switch on the
+    REAL desk is on, opened at or after the moment that switch went on - a strategy switched on at 13:00
+    must not be handed that morning's trades, which the real desk could never have taken. Read every pass,
+    so the twin follows the real desk's switches within one cycle. A parent a twin row already holds always
+    stays, so a position opened before a switch went off still closes. If the switches cannot be read,
+    nothing new is offered."""
+    from app.core.db import live_trading_flags_collection
+    from app.services import live_intraday_engine as li   # late: that module imports this one
+
+    keep_held = [p for p in parents if p["position_id"] in held]
+    try:
+        desk = li.twin_desk()
+        flags = {f.get("strategy_id"): f async for f in live_trading_flags_collection.find({})}
+        since: dict[str, datetime | None] = {}
+        for ls in desk.SELECTED:
+            f = flags.get(ls.strategy_id)
+            if not (bool(f.get("enabled", True)) if f else ls.default_enabled):
+                continue
+            since[ls.strategy_id] = naive_utc(f.get("updated_at")) if f and f.get("updated_at") else None
+    except Exception:  # noqa: BLE001 - never guess the real desk's switches
+        logger.warning("live_intraday_mirror: the real desk's switches could not be read - "
+                       "the paper twin takes no new entry this pass", exc_info=True)
+        return keep_held
+    out = list(keep_held)
+    for p in parents:
+        if p["position_id"] in held or p.get("strategy_id") not in since:
+            continue
+        on_at = since[p["strategy_id"]]
+        opened = naive_utc(p.get("opened_at"))
+        if on_at is not None and (opened is None or opened < on_at):
+            continue
+        out.append(p)
+    out.sort(key=lambda p: (naive_utc(p.get("opened_at")) or datetime.min, p["position_id"]))
+    return out
+
+
 def book_rules(book: str) -> dict:
     """The plan_book rules one book trades by - the live passes and the 5x history replay
     (backend/scripts/rebuild_leverage_books.py) both read them here, so they cannot drift."""
     from app.services import live_intraday_engine as li   # late: that module imports this one
 
     lev = li.book_leverage(book)
-    return {"compound": li.book_compounds(book),
-            "leverage_fn": (lambda p, _lim=lev: parent_leverage(p, _lim)),
-            "loss_limit": li.DAILY_LOSS_BREAKER_PCT * li.book_capital(book)}
+    rules = {"compound": li.book_compounds(book),
+             "leverage_fn": (lambda p, _lim=lev: parent_leverage(p, _lim)),
+             "loss_limit": li.DAILY_LOSS_BREAKER_PCT * li.book_capital(book)}
+    rules.update(li.book_extra_rules(book))       # the paper twin: the real desk's slots and size
+    return rules
 
 
 async def sync(*, entries: bool) -> dict:
@@ -560,6 +610,8 @@ async def _sync(*, entries: bool) -> dict:
             # not candidates at all, so they are neither copied nor counted as skipped.
             keep = set(roster)
             parents = [p for p in parents if p["strategy_id"] in keep]
+        if book == li.TWIN_BOOK:
+            parents = await _twin_offer(parents, set(pointed))
         op, cl = await li._totals_split(live_intraday_positions_collection, {"book": book})
         breaker = (await li.breaker_state(book))["breaker_tripped"] if entries else False
         decided = await _decided(book, parents) if entries else set()
