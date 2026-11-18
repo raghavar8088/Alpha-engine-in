@@ -21,6 +21,10 @@
 Long jobs (backfills, archive catch-up) run as their OWN tasks so a two-hour 5-minute
 backfill can never delay the 09:08 pre-open capture or the 15:40 flush. Every step is
 isolated; a failure is logged and retried on a later tick, never raised.
+
+Today's Playbook's own jobs - the gap forecast, the Scanner Board snapshots and the
+expected-move retrain - wait while its Main Control switch ("stock_selection") is OFF. The
+shared data jobs around them (global cues, bars, pre-open, archives) do not.
 """
 
 from __future__ import annotations
@@ -47,6 +51,16 @@ RECONCILE_FROM = "15:50"
 
 _tasks: dict[str, asyncio.Task] = {}
 _done: dict[str, str] = {}           # job -> ISO date it last completed
+SELECTION_MODULE = "stock_selection"  # Today's Playbook in Main Control
+
+
+async def _selection_on() -> bool:
+    """Today's Playbook switched ON in Main Control? Fails open: a switch it cannot read is ON."""
+    try:
+        from app.services import desk_switches
+        return await desk_switches.is_on(SELECTION_MODULE)
+    except Exception:  # noqa: BLE001
+        return True
 
 
 def _spawn(name: str, coro) -> bool:
@@ -167,11 +181,13 @@ async def intraday_data_loop() -> None:
                 logger.info("results calendar: %s", await results_calendar.refresh())
             if trading and "08:40" <= hhmm < "09:05" and _once("global_0840", today):
                 await global_cues.snapshot()
-                await selection_brief.record_gap_forecast(now.date())
+                if await _selection_on():
+                    await selection_brief.record_gap_forecast(now.date())
             if trading and "09:05" <= hhmm < "09:15" and _once("global_0905", today):
                 await global_cues.snapshot()
-                fc = await selection_brief.record_gap_forecast(now.date())
-                logger.info("expected NIFTY gap: %s", fc and {k: fc[k] for k in ("pred_bp", "call", "us_move_bp")})
+                if await _selection_on():
+                    fc = await selection_brief.record_gap_forecast(now.date())
+                    logger.info("expected NIFTY gap: %s", fc and {k: fc[k] for k in ("pred_bp", "call", "us_move_bp")})
             if trading and hhmm >= UNIVERSE_FROM:
                 await intraday_universe.today()                     # builds once a day
                 if hhmm <= "15:30" and _once("preload", today):
@@ -188,7 +204,7 @@ async def intraday_data_loop() -> None:
                     _done["preopen"] = today
                     logger.info("pre-open captured: %d stocks, A/D %s/%s", r["stocks"], r["advances"], r["declines"])
 
-            if trading and "08:55" <= hhmm < "12:00":
+            if trading and "08:55" <= hhmm < "12:00" and await _selection_on():
                 await _snapshots(now, today)
 
             # ── in the session ───────────────────────────────────────────────────
@@ -238,7 +254,8 @@ async def intraday_data_loop() -> None:
                     last_backfill = time.monotonic()
             if now.weekday() == 6 and _once("global_history", today):
                 logger.info("global history: %s", await global_cues.refresh_history())
-            if intraday_backfill.off_hours(now) and reconciled and _once("train_check", today):
+            if (intraday_backfill.off_hours(now) and reconciled and await _selection_on()
+                    and _once("train_check", today)):
                 _spawn("train", _train_if_stale())
         except Exception:  # noqa: BLE001
             logger.exception("intraday data loop tick failed — retrying")

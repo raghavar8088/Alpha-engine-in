@@ -90,4 +90,20 @@ setPausedApiPrefixes([]);
 await apiFetch('/api/frozen/summary');
 assert.equal(calls.length, 5, 'switched back on: memory dropped, reads go to the server');
 
+// 8. the longest prefix owns a path, as on the server: a live module nested inside a paused one
+//    (the real-money Delta desk's /api/premium-paper/live inside Premium Strategies') stays live
+reset();
+setPausedApiPrefixes(['/api/premium-paper'], ['/api/premium-paper/live']);
+await apiFetch('/api/premium-paper/live/desk/crypto');
+await apiFetch('/api/premium-paper/live/desk/crypto');
+assert.equal(calls.length, 2, 'the active nested module is read from the server every time');
+await apiFetch('/api/premium-paper/summary');
+await apiFetch('/api/premium-paper/summary');
+assert.equal(calls.length, 3, 'the paused outer module is still answered from memory');
+setPausedApiPrefixes(['/api/premium-paper/live'], ['/api/premium-paper']);
+await apiFetch('/api/premium-paper/live');
+await apiFetch('/api/premium-paper/live');
+assert.equal(calls.length, 4, 'a paused nested module is answered from memory under an active outer one');
+setPausedApiPrefixes([]);
+
 console.log('apiFetch sharing, hidden-tab pause, paused-module memory: all checks passed.');

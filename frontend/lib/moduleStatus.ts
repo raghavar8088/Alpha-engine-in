@@ -45,13 +45,18 @@ let cache: { at: number; data: ModuleStatusMap } | null = null;
 let inflight: Promise<ModuleStatusMap> | null = null;
 const listeners = new Set<(d: ModuleStatusMap) => void>();
 
+/** Modules that place real orders: switching one OFF asks for an explicit confirmation. The server
+ *  says so itself (`real_money`); this list covers a server from before it did. */
+export const REAL_MONEY_MODULES: ReadonlySet<string> = new Set(["live_trading", "delta_live"]);
+
 function publish(data: ModuleStatusMap) {
   cache = { at: Date.now(), data };
   const paused: string[] = [];
+  const active: string[] = [];
   for (const m of Object.values(data.modules)) {
-    if (m.state === "paused") paused.push(...(m.api_prefixes ?? []));
+    (m.state === "paused" ? paused : active).push(...(m.api_prefixes ?? []));
   }
-  setPausedApiPrefixes(paused);
+  setPausedApiPrefixes(paused, active);
   listeners.forEach((fn) => fn(data));
 }
 
@@ -68,7 +73,7 @@ export function fromSnapshot(snap: ModuleSwitches): ModuleStatusMap {
       state: (r.state as ModuleState) ?? (r.enabled ? "active" : "paused"),
       open_positions: r.open_positions ?? null,
       drains: drainServer ? !!r.drains : false,
-      real_money: r.module === "live_trading",
+      real_money: r.real_money ?? REAL_MONEY_MODULES.has(r.module),
       group: r.group,
       shared: r.shared,
       api_prefixes: r.api_prefixes ?? [],

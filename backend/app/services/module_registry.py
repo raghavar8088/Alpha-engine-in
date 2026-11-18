@@ -121,7 +121,17 @@ _MODULES: list[Module] = [
        ["/api/premium-paper"],
        note="52 research strategies, each paper trading its own Rs 10 lakh in its own container "
             "(premium-paper). Paper only. OFF stops its cycles; a missed session is replayed "
-            "when it is switched back on, as far as its bars still exist."),
+            "when it is switched back on, as far as its bars still exist. The real-money Delta "
+            "desks copy these books: with them OFF those desks open nothing new after 20 minutes "
+            "and close their open trades at the market after an hour."),
+    # Its API is the /live part of Premium Strategies' (the longer prefix wins), so each switch
+    # gates only its own: Premium Strategies OFF no longer refuses this desk's controls.
+    _m("delta_live", "Delta Exchange Live Trading (REAL MONEY)", "Trading", "/delta-live",
+       ["/api/premium-paper/live"],
+       note="Real orders on Delta Exchange India: the bitcoin and the gold desk. OFF stops new "
+            "entries on both, whatever each desk's own off/shadow/live mode says; trades already "
+            "open keep being managed to their close, with their stop and target orders on the "
+            "venue. Flatten still works while OFF; changing a desk's mode or size does not."),
     _m("index_intraday", "Indian Index Intraday Trading", "Trading", "/index-intraday",
        ["/api/index-intraday"],
        note="Cash-market index intraday, paper only. OFF stops new paper entries, its Angel "
@@ -189,6 +199,11 @@ _MODULES: list[Module] = [
        ["/api/pattern"]),
     _m("pattern_books", "Intraday Stocks - Paper Trade books", "Strategy Lab",
        "/intraday-stocks", ["/api/pattern-books"]),
+    _m("stock_selection", "Today's Playbook", "Strategy Lab", "/todays-playbook",
+       ["/api/selection"],
+       note="The stock-selection layer: Scanner Board, pre-market brief, expected-move model. "
+            "Places no orders. OFF stops its scheduled board snapshots, NIFTY gap forecasts and "
+            "model retraining, and refuses a retrain from the page; the board still reads."),
     _m("long_horizon", "Long-Horizon Desk", "Strategy Lab", "/long-horizon",
        ["/api/long-horizon"]),
 
@@ -240,6 +255,9 @@ _OFF_BEHAVIOUR: dict[str, tuple[tuple[str, ...], bool]] = {
     "banknifty_desk": (("bn_desk_positions",), True),
     "ath_trading": (("ath_positions",), True),
     "trending_stocks": (("ts_positions",), True),
+    # real money on Delta: premium_live.loop runs through gated() and _cycle_one checks
+    # entries_blocked() before its entry pass; the count covers both desks (bitcoin + gold)
+    "delta_live": (("app.services.premium_live:open_count",), True),
     # entries here are only ever YOUR orders, which the API refuses while OFF; orders and
     # positions already placed keep being worked until flat
     "paper_broker": (("pt_positions",), True),
@@ -271,6 +289,8 @@ _EXTRA_HREFS: dict[str, tuple[str, ...]] = {
     "stock_desk": ("/stock-prelive-selling",),
     "stock_books": ("/stock-prelive-selling",),
     "fno_positions": ("/positions",),
+    # the gold desk's own switches are also on Premium Strategies' "Real money" tab
+    "delta_live": ("/premium-strategies",),
 }
 
 REGISTRY: dict[str, Module] = {

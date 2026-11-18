@@ -53,6 +53,12 @@ MODES
 Going live also needs the words REAL MONEY in the request (the page sends them). The owner's PIN is asked for going
 live, flattening and changing the size only when PREMIUM_LIVE_REQUIRE_PIN=1; the owner chose no PIN on 15 Nov.
 Three venue errors in a row switch the desk off (a good answer from Delta starts the count again).
+
+MAIN CONTROL (17 Nov 2026). Both desks are one module there, "delta_live", with the ON/OFF switch in the header of the
+Delta Exchange Live Trading page. OFF stops new entries on both desks whatever their own mode, and leaves the mode as it
+is: a trade already open is still managed to its close, exactly as in mode off. Once neither desk holds a trade the loop
+stops running altogether until the switch is back ON, when each desk carries on in the mode it was left in. A signal
+from the OFF stretch is then taken only as any late-seen signal is: inside the desk's lag and drift limits.
 """
 
 from __future__ import annotations
@@ -242,6 +248,23 @@ def _sc(db):
 def _tc(db):
     """This desk's trade records."""
     return getattr(db, _d().trades_coll)
+
+
+OPEN_STATUSES = ("entering", "open", "closing")
+MODULE = "delta_live"          # its key in Main Control (module_registry)
+
+
+async def open_count() -> int:
+    """Trades still open on either desk: Main Control's probe for STOPPING (manage them) versus PAUSED (skip the loop).
+
+    Raises when the database cannot answer, which Main Control reads as "may still hold something" and keeps managing."""
+    db = _db()
+    if db is None:
+        return 0
+    n = 0
+    for desk in DESKS.values():
+        n += int(await getattr(db, desk.trades_coll).count_documents({"status": {"$in": list(OPEN_STATUSES)}}))
+    return n
 
 # -- small helpers -------------------------------------------------------------------------------------
 
@@ -1018,6 +1041,15 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
 _LOCKS: dict[str, asyncio.Lock] = {k: asyncio.Lock() for k in DESKS}
 
 
+def _entries_blocked() -> bool:
+    """True inside the manage-only pass Main Control runs while this module is OFF and a trade is still open."""
+    try:
+        from app.services import desk_switches
+        return bool(desk_switches.entries_blocked())
+    except Exception:  # noqa: BLE001 - never let the switch stop a pass that manages real trades
+        return False
+
+
 async def _cycle_one() -> dict:
     """One pass of the current desk."""
     db = _db()
@@ -1027,8 +1059,12 @@ async def _cycle_one() -> dict:
         st = await _state(db)
         await _set_state(db, last_cycle_at=_now())
         out: dict = {"mode": st["mode"], "managed": [], "entered": []}
-        open_rows = [t async for t in _tc(db).find({"status": {"$in": ["entering", "open", "closing"]}})]
-        if st["mode"] == "off" and not open_rows:
+        # Main Control OFF with a trade still open somewhere: this pass only manages, like mode off (see MAIN CONTROL)
+        blocked = _entries_blocked()
+        if blocked:
+            out["main_control"] = "off: managing open trades only"
+        open_rows = [t async for t in _tc(db).find({"status": {"$in": list(OPEN_STATUSES)}})]
+        if (st["mode"] == "off" or blocked) and not open_rows:
             return out
         try:
             products = await _products(db, st, {t["product"] for t in open_rows})
@@ -1066,7 +1102,7 @@ async def _cycle_one() -> dict:
             else:
                 await _manage_shadow(db, t, paper.get(t["_id"]), desk_age, products)
             out["managed"].append(t["_id"])
-        if st["mode"] == "off" or (st["mode"] == "live" and positions is None):
+        if st["mode"] == "off" or blocked or (st["mode"] == "live" and positions is None):
             return out
         decided = {t["_id"] async for t in _tc(db).find({"_id": {"$in": list(paper)}}, {"_id": 1})}
         books: dict[str, bool] = {}
@@ -1137,11 +1173,21 @@ async def cycle(desk: str | None = None) -> dict:
 
 
 async def loop() -> None:
-    """Every TICK_S seconds, around the clock, every desk in turn. Started by the premium routes' startup hook."""
+    """Every TICK_S seconds, around the clock, every desk in turn. Started by the premium routes' startup hook.
+
+    Through Main Control's gate: ON runs the pass as always; OFF with a trade open runs it manage-only; OFF and flat
+    skips it (an empty report). The gate fails open: a switch it cannot read counts as ON, and a gate that cannot even
+    be loaded leaves the loop running ungated rather than leaving open trades unmanaged."""
+    try:
+        from app.services import desk_switches
+        gate = desk_switches.gated
+    except Exception:  # noqa: BLE001
+        logger.exception("[premium live] Main Control unavailable: the desks run without its switch")
+        gate = None
     await asyncio.sleep(60)
     while True:
         try:
-            r = await cycle()
+            r = await (gate(MODULE, cycle) if gate is not None else cycle())
             for key, rep_ in r.items():
                 if rep_.get("entered") or rep_.get("error"):
                     logger.info("[premium live %s] %s", key, rep_)

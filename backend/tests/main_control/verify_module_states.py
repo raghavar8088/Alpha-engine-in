@@ -17,10 +17,12 @@ What must hold:
 
 import asyncio
 import os
+import re
 import sys
 from pathlib import Path
 
 os.environ["MONGO_URL"] = "mongodb://127.0.0.1:1/?serverSelectionTimeoutMS=200"   # never the real cluster
+os.environ["FACTORY_MONGO_URL"] = ""          # nor the box's: the Delta desk's open-trade probe then counts 0
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT.parent / "shared"))
 sys.path.insert(0, str(ROOT))
@@ -94,6 +96,30 @@ async def main():
     check("intraday_focus" in pages_for("/intraday-stocks/focus-five"), "sub-page finds Focus Five")
     check(pages_for("/live-trading") == ["live_trading"], "/live-trading is only Live Trading")
     check("live_paper" not in pages_for("/live-trading"), "/live does not claim /live-trading")
+    check(pages_for("/delta-live") == ["delta_live"], "/delta-live is the real-money Delta desk's switch")
+    check(set(pages_for("/premium-strategies")) == {"premium_strategies", "delta_live"},
+          "/premium-strategies shows its own switch and the Delta desk's (its gold desk lives there too)")
+    check(pages_for("/todays-playbook") == ["stock_selection"], "/todays-playbook is Today's Playbook")
+    check(REGISTRY["delta_live"].drains and bool(REGISTRY["delta_live"].positions)
+          and "delta_live" in sw.REAL_MONEY, "delta_live drains, has an open-trade probe, and is REAL MONEY")
+    check(resolve("/api/premium-paper/live/desk/crypto/mode") == "delta_live"
+          and resolve("/api/premium-paper/live") == "delta_live"
+          and resolve("/api/premium-paper/summary") == "premium_strategies",
+          "the live desk's API is its own; the rest of /api/premium-paper stays Premium Strategies'")
+    check(resolve("/api/selection/train") == "stock_selection", "/api/selection is Today's Playbook's")
+
+    # Every page in the sidebar shows a switch in its header, unless it is not a module at all.
+    # Same rule as the header (lib/moduleStatus.modulesForPath): shared System services are left out.
+    def header_modules(path):
+        return [k for k in pages_for(path) if not (REGISTRY[k].shared and REGISTRY[k].group == "System")]
+    not_modules = {"/crypto-application": "links out to the separate crypto app; nothing runs here",
+                   "/main-control": "the switchboard itself", "/settings/broker": "settings"}
+    sidebar = ROOT.parent / "frontend" / "components" / "Sidebar.tsx"
+    if sidebar.exists():
+        hrefs = re.findall(r'href:\s*"(/[^"]*)"', sidebar.read_text(encoding="utf-8"))
+        missing = [h for h in hrefs if h not in not_modules and not header_modules(h)]
+        check(len(hrefs) >= 40 and not missing,
+              f"every sidebar page has a header switch ({len(hrefs)} pages; without one: {missing})")
 
     # ── API rule ─────────────────────────────────────────────────────────────────
     check(is_exit("POST", "/api/fno-positions/positions/abc123/exit"), "position exit is an exit")
@@ -230,6 +256,18 @@ async def main():
     check((await call("POST", "/api/fno-positions/positions")) ["status"] == 423, "OFF module: new order refused (423)")
     check((await call("GET", "/api/fno-positions/positions"))["status"] == 200, "OFF module: plain read served")
     check((await call("POST", "/api/main-control/toggle"))["status"] == 200, "main-control never gated")
+
+    await sw.set_module("delta_live", False)
+    check((await call("POST", "/api/premium-paper/live/desk/crypto/flatten"))["status"] == 200,
+          "Delta desk OFF: flatten still served")
+    check((await call("POST", "/api/premium-paper/live/desk/crypto/mode"))["status"] == 423,
+          "Delta desk OFF: arming refused (423)")
+    check((await call("GET", "/api/premium-paper/live/desk/crypto"))["status"] == 200, "Delta desk OFF: status read served")
+    await sw.set_module("delta_live", True)
+    await sw.set_module("premium_strategies", False)
+    check((await call("POST", "/api/premium-paper/live/mode"))["status"] == 200,
+          "Premium Strategies OFF no longer refuses the real-money desk's own controls")
+    await sw.set_module("premium_strategies", True)
     ps = perf.summary()
     names = [e["endpoint"] for e in ps["endpoints"]]
     check("POST /api/fno-positions/positions/:id/exit" in names, f"perf normalises ids ({names[:4]})")

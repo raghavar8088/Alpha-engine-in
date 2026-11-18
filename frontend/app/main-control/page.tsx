@@ -18,9 +18,12 @@ import {
   PerfSummary,
   fetchServerPerf,
 } from "../../lib/api";
-import { publishSnapshot } from "../../lib/moduleStatus";
+import { REAL_MONEY_MODULES, publishSnapshot } from "../../lib/moduleStatus";
 
 const REFRESH_MS = 30000;
+
+// The server marks real-money modules itself; an older server is covered by the shared list.
+const isRealMoney = (m: ModuleSwitch) => m.real_money ?? REAL_MONEY_MODULES.has(m.module);
 
 export default function MainControlPage() {
   const [data, setData] = useState<ModuleSwitches | null>(null);
@@ -98,7 +101,7 @@ export default function MainControlPage() {
     !m.enabled ||
     window.confirm(
       `Switch OFF "${m.label}"?\n\n` +
-        (m.module === "live_trading" ? "This is the REAL-MONEY desk.\n\n" : "") +
+        (isRealMoney(m) ? "This is a REAL-MONEY desk.\n\n" : "") +
         (m.off_behaviour ||
           "It pauses at once; open positions are left as they are and are not managed while off."),
     );
@@ -335,7 +338,7 @@ export default function MainControlPage() {
                     <div className="m-text">
                       <div className="m-label">
                         {m.label}
-                        {m.module === "live_trading" && <span className="tag real">REAL MONEY</span>}
+                        {isRealMoney(m) && <span className="tag real">REAL MONEY</span>}
                         {m.shared && <span className="tag shared">SHARED</span>}
                         {!m.has_api && <span className="tag loop">LOOP ONLY</span>}
                       </div>

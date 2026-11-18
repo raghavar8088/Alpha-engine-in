@@ -364,6 +364,7 @@ async def _row(key: str, m, enabled: bool) -> dict:
         "state_label": STATE_LABELS[st],
         "open_positions": n,
         "drains": m.drains,
+        "real_money": key in REAL_MONEY,
         "off_behaviour": _drain_text(m),
         "last_drain_s": round(_time.monotonic() - last, 1) if last is not None else None,
         "api_prefixes": list(m.api_prefixes),
@@ -420,4 +421,4 @@ async def status() -> dict:
 
 
 # Switching one of these off asks for an explicit confirmation in the UI.
-REAL_MONEY: frozenset[str] = frozenset({"live_trading"})
+REAL_MONEY: frozenset[str] = frozenset({"live_trading", "delta_live"})

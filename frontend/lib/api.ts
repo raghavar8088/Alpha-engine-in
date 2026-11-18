@@ -83,21 +83,35 @@ const DEFAULT_GET_TIMEOUT_MS = 60000;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const inflightGets = new Map<string, Promise<any>>();
 let pausedApiPrefixes: string[] = [];
+let activeApiPrefixes: string[] = [];
 const frozenReads = new Map<string, { at: number; data: unknown }>();
 const FROZEN_READ_MS = 5 * 60_000;
 const FROZEN_READ_MAX = 60;
 
-/** Called by lib/moduleStatus with the API prefixes of every PAUSED module. */
-export function setPausedApiPrefixes(prefixes: string[]) {
+/** Called by lib/moduleStatus with the API prefixes of every PAUSED module, and of every other
+ *  module. A path belongs to the module with the LONGEST matching prefix, as on the server: the
+ *  real-money Delta desk's /api/premium-paper/live is its own module inside Premium Strategies'
+ *  /api/premium-paper, and must stay live while Premium Strategies is paused. */
+export function setPausedApiPrefixes(prefixes: string[], activePrefixes: string[] = []) {
   pausedApiPrefixes = prefixes.filter(Boolean);
+  activeApiPrefixes = activePrefixes.filter(Boolean);
   for (const key of Array.from(frozenReads.keys())) {
     if (!isPausedApi(key)) frozenReads.delete(key);
   }
 }
 
+function prefixLength(p: string, prefixes: string[]): number {
+  let best = -1;
+  for (const pre of prefixes) {
+    if ((p === pre || p.startsWith(pre + "/")) && pre.length > best) best = pre.length;
+  }
+  return best;
+}
+
 function isPausedApi(path: string): boolean {
   const p = path.split("?")[0];
-  return pausedApiPrefixes.some((pre) => p === pre || p.startsWith(pre + "/"));
+  const paused = prefixLength(p, pausedApiPrefixes);
+  return paused >= 0 && paused >= prefixLength(p, activeApiPrefixes);
 }
 
 // A caller that shares another's response gets its own copy, so sorting or editing it in place
@@ -7306,6 +7320,8 @@ export interface ModuleSwitch {
   drains?: boolean;
   off_behaviour?: string;
   hrefs?: string[];
+  // Real orders (Live Trading, the Delta desks). Sent since 2026-11-18; older servers leave it out.
+  real_money?: boolean;
   last_drain_s?: number | null;
 }
 

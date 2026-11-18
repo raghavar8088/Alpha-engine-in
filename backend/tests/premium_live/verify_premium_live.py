@@ -34,6 +34,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
+os.environ["MONGO_URL"] = "mongodb://127.0.0.1:1/?serverSelectionTimeoutMS=200"   # Main Control's store: never the real one
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "gold_desk"))
 from _harness import Coll, check, finish, section  # noqa: E402
 
@@ -976,6 +977,89 @@ async def main():
     check("its paper exit closes the real gold trade (legs cancelled first); the bitcoin trade is untouched",
           g26["status"] == "closed" and own_leg(g26, "stop")["state"] == own_leg(g26, "target")["state"] == "cancelled"
           and trade(db, tb26)["status"] == "open", (g26["status"], g26.get("close_reason")))
+
+    # ── 30. Main Control's switch (17 Nov) ──────────────────────────────────────────────────────────
+    section("30. Main Control OFF: no new entry on either desk, open trades still managed; flat = the loop skips")
+    from app.services import desk_switches as SW
+
+    class Switches:                     # the switch store, in memory (never the real database)
+        def __init__(self):
+            self.docs = {}
+
+        def find(self, flt):
+            docs = list(self.docs.values())
+
+            async def gen():
+                for d in docs:
+                    yield d
+            return gen()
+
+        async def update_one(self, flt, upd, upsert=False):
+            self.docs[flt["_id"]] = dict(upd["$set"])
+
+    SW.desk_switches_collection = Switches()
+    SW._invalidate()
+    db = fresh()
+    check("the probe counts no open trade on a fresh desk, and ON is ACTIVE",
+          await M.open_count() == 0 and await SW.state(M.MODULE) == SW.ACTIVE)
+    heartbeat(db)
+    r = await SW.gated(M.MODULE, M.cycle)
+    check("ON: the gated loop runs both desks as before", set(r) == {"gold", "crypto"}, r)
+    held = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
+    heartbeat(db)
+    await SW.gated(M.MODULE, M.cycle)
+    check("ON: a bitcoin signal opens a real trade", (trade(db, held) or {}).get("status") == "open")
+
+    await SW.set_module(M.MODULE, False)
+    check("OFF with a trade open: one open trade, STOPPING",
+          await M.open_count() == 1 and await SW.state(M.MODULE) == SW.STOPPING)
+    advance(60)
+    late_btc = paper(db, "TL-04", "BTCUSD", -1, 69000.0, 69400.0, 68400.0, ago=20)
+    late_gold = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0, ago=20)
+    n_orders = len(M.D.orders)
+    heartbeat(db)
+    r = await SW.gated(M.MODULE, M.cycle)
+    check("OFF: no new entry on either desk, no order sent", trade(db, late_btc) is None and trade(db, late_gold) is None
+          and len(M.D.orders) == n_orders and not r["crypto"]["entered"] and not r["gold"]["entered"], r)
+    check("OFF: the open bitcoin trade is still managed, and the pass says why it opened nothing",
+          held in r["crypto"]["managed"] and "managing" in r["crypto"].get("main_control", ""), r["crypto"])
+    check("OFF leaves each desk's own mode as it was", st_of(db, "crypto")["mode"] == st_of(db, "gold")["mode"] == "live")
+    check("the drain flag is gone after the pass", not SW.entries_blocked())
+
+    advance(600)
+    M.D.set_price("BTCUSD", 69200.0)
+    close_paper(db, held, "exit_signal", 69200.0)
+    heartbeat(db)
+    await SW.gated(M.MODULE, M.cycle)
+    t = trade(db, held)
+    check("OFF: the paper exit still closes the real trade (its stop cancelled first)",
+          t["status"] == "closed" and t["close_reason"] == "paper exit: exit_signal"
+          and own_leg(t, "stop")["state"] == "cancelled" and 27 not in M.D.pos, (t["status"], t.get("close_reason")))
+    check("flat and OFF: PAUSED", await M.open_count() == 0 and await SW.state(M.MODULE) == SW.PAUSED)
+    n_calls = len(M.D.calls)
+    r = await SW.gated(M.MODULE, M.cycle)
+    check("PAUSED: the pass is skipped, nothing is asked of Delta", r == {} and len(M.D.calls) == n_calls, r)
+
+    await SW.set_module(M.MODULE, True)
+    advance(60)
+    again = paper(db, "TH-05", "BTCUSD", -1, 69200.0, 69500.0, None)
+    heartbeat(db)
+    await SW.gated(M.MODULE, M.cycle)
+    check("back ON: the desk carries on in its mode and a new signal opens", (trade(db, again) or {}).get("status") == "open")
+    check("signals from the OFF stretch older than the lag limit are never entered late",
+          (trade(db, late_btc) or {}).get("status") in (None, "skipped")
+          and (trade(db, late_gold) or {}).get("status") in (None, "skipped"),
+          ((trade(db, late_btc) or {}).get("status"), (trade(db, late_gold) or {}).get("status")))
+
+    async def _down():
+        raise RuntimeError("database down")
+    real_db = M._db
+    M._db = lambda: SimpleNamespace(live_delta_trades=SimpleNamespace(count_documents=lambda q: _down()),
+                                    live_crypto_trades=db.live_crypto_trades)
+    await SW.set_module(M.MODULE, False)
+    check("a probe that cannot answer reads STOPPING (keep managing), never PAUSED", await SW.state(M.MODULE) == SW.STOPPING)
+    M._db = real_db
+    await SW.set_module(M.MODULE, True)
 
 
 if __name__ == "__main__":
