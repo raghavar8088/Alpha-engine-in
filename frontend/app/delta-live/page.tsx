@@ -18,9 +18,9 @@ import LiveDelta, { MODE, ago, usd, tone, type LiveStatus } from "../premium-str
 type DeskKey = "crypto" | "gold";
 const DESKS: { key: DeskKey; label: string; product: string; path: string; intro: string }[] = [
   { key: "crypto", label: "Bitcoin desk", product: "BTCUSD", path: "/api/premium-paper/live/desk/crypto",
-    intro: "TH-05, TL-04 and TH-01 were picked on 14 Nov, TD-02 on 15 Nov, and eleven more on 18 Nov from the Premium leaderboard (TH-06, DT-02, RU-06, NJ-47, RU-03, TH-04, DT-01, TH-07, NJ-27, PT-04, SB-04), each after 0 to 15 paper trades." },
+    intro: "TH-05, TL-04 and TH-01 were picked on 14 Nov, TD-02 on 15 Nov, and eleven more on 18 Nov from the Premium leaderboard (TH-06, DT-02, RU-06, NJ-47, RU-03, TH-04, DT-01, TH-07, NJ-27, PT-04, SB-04), each after 0 to 15 paper trades. From 19 Nov every signal of the 15 is copied to Delta at one contract, however late it is seen and however far the price has moved." },
   { key: "gold", label: "Gold desk", product: "XAUTUSD", path: "/api/premium-paper/live",
-    intro: "RU-02, CP-23, YT-14, DR-01 and CP-05 were picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, and on 18 Nov seventeen more gold books from the Premium leaderboard and six templates of the Gold Desk's H1 test (EMA Ribbon, Round Number, Donchian fast and slow, Pivot R1/S1, Keltner), each after 0 to 20 paper trades. Every gold signal comes from Delta's own XAUTUSD candles. From 19 Nov every open paper trade of the 30 is copied to Delta, however late it is seen and however far the price has moved." },
+    intro: "RU-02, CP-23, YT-14, DR-01 and CP-05 were picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, and on 18 Nov seventeen more gold books from the Premium leaderboard and six templates of the Gold Desk's H1 test (EMA Ribbon, Round Number, Donchian fast and slow, Pivot R1/S1, Keltner), each after 0 to 20 paper trades, and on 19 Nov the Gold Desk Strategy Factory board's top 20 (SF0181, SF0020, SF0245 and on). Every gold signal comes from Delta's own XAUTUSD data. From 19 Nov every open paper trade of the 50 is copied to Delta at one contract, however late it is seen and however far the price has moved." },
 ];
 const POLL_MS = 15000;
 

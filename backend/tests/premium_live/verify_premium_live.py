@@ -36,6 +36,7 @@ import math
 import os
 import sys
 import tempfile
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -287,7 +288,14 @@ class FakeDelta(Delta):
         raise AssertionError(f"unexpected call {method} {path}")
 
 
-def fresh(mode="live", btc=69000.0, gold=3885.0):
+_REAL_DESKS = dict(M.DESKS)          # production: both desks follow every paper trade (19 Nov)
+
+
+def fresh(mode="live", btc=69000.0, gold=3885.0, follow=True):
+    """A fresh scenario. follow=False runs it on the rules before 19 Nov (lag, drift, daily stop, $5 cap): the code
+    path every desk without follow_all still takes."""
+    M.DESKS.clear()
+    M.DESKS.update(_REAL_DESKS if follow else {k: replace(v, follow_all=False) for k, v in _REAL_DESKS.items()})
     db = SimpleNamespace(premium_trades=Coll("pt"), premium_meta=Coll("pm"), live_delta_trades=Coll("lt"),
                          live_delta_state=Coll("ls"), live_crypto_trades=Coll("ct"), live_crypto_state=Coll("cs"))
     db.premium_meta.docs.append({"_id": "status", "segments_at": datetime.fromtimestamp(CLOCK[0], UTC).isoformat()})
@@ -296,6 +304,10 @@ def fresh(mode="live", btc=69000.0, gold=3885.0):
     gpos, gstate = Coll("gpos"), Coll("gstate")
     gstate.docs.append({"_id": "delta", "last_run_at": datetime.fromtimestamp(CLOCK[0], UTC).replace(tzinfo=None)})
     M._h1_coll, M._h1_state_coll = (lambda: gpos), (lambda: gstate)
+    # the Gold Desk's Strategy Factory tab (the third source, 19 Nov): empty and running, unless section 34 says otherwise
+    sfpos, sfstate = Coll("sfpos"), Coll("sfstate")
+    sfstate.docs.append({"_id": "cycle:gold", "at": datetime.fromtimestamp(CLOCK[0], UTC).replace(tzinfo=None)})
+    M._sf_coll, M._sf_state_coll = (lambda: sfpos), (lambda: sfstate)
     M._PAPER_CACHE.clear()                  # the page's paper view is cached 30 s a desk: never across scenarios
     M._WAITING.clear()                      # copies a follow_all desk is waiting on (memory only): never across scenarios
     M.D = FakeDelta()
@@ -450,18 +462,18 @@ async def main():
           and st_of(db, "crypto")["mode"] == "live" and trade(db, g) is None)
 
     # ── 6. late, drifted and outside the levels ─────────────────────────────────────────────────────
-    section("6. Late or moved signals are refused, never chased")
-    db = fresh()
+    section("6. Late or moved signals are refused, never chased [a desk without follow_all: the rules before 19 Nov]")
+    db = fresh(follow=False)
     late = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68700.0, None, ago=700)
     await cyc(db)
     check("bitcoin seen 11+ minutes after its entry: skipped (its limit is 10)", trade(db, late)["status"] == "skipped"
           and "after its entry (limit 10)" in trade(db, late)["reason"], trade(db, late)["reason"])
-    db = fresh(btc=69150.0)
+    db = fresh(follow=False, btc=69150.0)
     drift = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68700.0, None)
     await cyc(db)
     check("the market already 50% of the risk away: skipped", trade(db, drift)["status"] == "skipped"
           and "moved" in trade(db, drift)["reason"], trade(db, drift)["reason"])
-    db = fresh(btc=68690.0)
+    db = fresh(follow=False, btc=68690.0)
     past = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68700.0, None)
     await cyc(db)
     check("the market already past the stop: skipped", trade(db, past)["status"] == "skipped"
@@ -518,8 +530,8 @@ async def main():
     check("a plain refusal is an error, with nothing on the account", trade(db, t9b)["status"] == "error" and BTC not in M.D.pos)
 
     # ── 10. the daily loss stop ─────────────────────────────────────────────────────────────────────
-    section("10. The $20 daily loss stop, and its reset the next day (IST)")
-    db = fresh()
+    section("10. The $20 daily loss stop, and its reset the next day (IST) [a desk without follow_all]")
+    db = fresh(follow=False)
     for i in range(4):
         tid = paper(db, "TH-01", "BTCUSD", 1, M.D.mid["BTCUSD"], M.D.mid["BTCUSD"] - 350.0, None, ago=10)
         await cyc(db)
@@ -557,13 +569,13 @@ async def main():
     stale_b = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68650.0, None, ago=10)
     n_orders = len(M.D.orders)
     r11 = await M.cycle()                                       # no heartbeat: the desk last wrote 25 minutes ago
-    check("a desk silent for 20+ minutes: no new entry; the bitcoin copy is skipped",
-          trade(db, stale_b)["status"] == "skipped" and "not updated" in trade(db, stale_b)["reason"]
-          and len(M.D.orders) == n_orders)
-    check("... the gold copy WAITS instead (19 Nov: the gold desk follows every paper trade): nothing recorded, the "
-          "reason kept for the page", trade(db, stale) is None and r11["gold"].get("waiting") == 1
-          and "not updated" in M._WAITING["gold"][stale]["why"], (r11["gold"], M._WAITING.get("gold")))
+    check("a desk silent for 20+ minutes: no new entry, no order sent", len(M.D.orders) == n_orders)
+    check("... each copy WAITS (19 Nov: both desks follow every paper trade): nothing recorded, the reason kept for the "
+          "page", trade(db, stale) is None and trade(db, stale_b) is None and r11["gold"].get("waiting") == 1
+          and r11["crypto"].get("waiting") == 1 and "not updated" in M._WAITING["gold"][stale]["why"]
+          and "not updated" in M._WAITING["crypto"][stale_b]["why"], (r11["gold"], r11["crypto"], M._WAITING))
     close_paper(db, stale, "exit_signal", 3885.0)
+    close_paper(db, stale_b, "exit_signal", 69000.0)
     advance(2200)
     await M.cycle()
     check("silent for an hour: the open position is closed", trade(db, t11b)["status"] == "closed"
@@ -642,8 +654,8 @@ async def main():
     # ── 15. the read model ──────────────────────────────────────────────────────────────────────────
     section("15. What the page reads")
     s = await M.status()
-    check("status (gold, the original routes): mode, keys, PIN, limits, its 30 gold picks (18 Nov), notes", s["keys"] and s["pin_set"]
-          and s["desk"] == "gold" and len(s["picks"]) == 30 and {p["product"] for p in s["picks"]} == {"XAUTUSD"}
+    check("status (gold, the original routes): mode, keys, PIN, limits, its 50 gold picks (18-19 Nov), notes", s["keys"] and s["pin_set"]
+          and s["desk"] == "gold" and len(s["picks"]) == 50 and {p["product"] for p in s["picks"]} == {"XAUTUSD"}
           and s["limits"]["risk_usd"] == 5 and s["limits"]["daily_stop_usd"] == 20 and s["limits"]["leverage"] == 10
           and len(s["notes"]) >= 5)
     c = await M.status("crypto")
@@ -671,8 +683,8 @@ async def main():
           trade(db, old) is None and trade(db, tlg) is None and len(M.D.orders) == 2)
     check("one position on each product", M.D.pos[BTC]["size"] > 0 and M.D.pos[GOLD]["size"] > 0)
     # ── 17. a bitcoin trade from before the split ───────────────────────────────────────
-    section("17. A live bitcoin trade the gold desk opened before the split is managed by it to its close")
-    db = fresh()
+    section("17. A live bitcoin trade the gold desk opened before the split is managed by it to its close [without follow_all]")
+    db = fresh(follow=False)
     leg = paper(db, "RU-04", "BTCUSD", 1, 69000.0, 68300.0, 70400.0, ago=600)
     M.D.pos[BTC] = {"size": 7, "entry": 69000.0}
     db.live_delta_trades.docs.append({"_id": leg, "acct": "RU-04", "mkt": "BTCUSD", "product": "BTCUSD", "name": "earlier pick",
@@ -698,15 +710,15 @@ async def main():
     r = await M.set_mode("live", PIN, "REAL MONEY", desk="crypto")
     check("then the crypto desk can go live", r["ok"], r.get("why"))
     # ── 18. separate switches and stops ─────────────────────────────────────────────────
-    section("18. Each desk has its own switch and its own $20 daily stop")
-    db = fresh()
+    section("18. Each desk has its own switch and its own $20 daily stop [without follow_all]")
+    db = fresh(follow=False)
     await M.set_mode("off")                                   # the gold desk only
     g18 = paper(db, "YT-14", "XAUUSD", 1, 3885.0, 3878.0, 3899.0)
     b18 = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
     await cyc(db)
     check("gold off: its signal is not taken; crypto live: its signal is", trade(db, g18) is None
           and trade(db, b18)["status"] == "open")
-    db = fresh()
+    db = fresh(follow=False)
     db.live_crypto_trades.docs.append({"_id": "lost-today", "acct": "TH-05", "mkt": "BTCUSD", "product": "BTCUSD", "mode": "live",
                                        "side": 1, "status": "closed", "day_closed": M._day(), "pnl_usd": -25.0})
     b18b = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68650.0, None)
@@ -716,8 +728,8 @@ async def main():
           and "daily loss stop" in trade(db, b18b)["reason"] and trade(db, g18b)["status"] == "open",
           (trade(db, b18b)["reason"], trade(db, g18b)["status"]))
     # ── 19. ten minutes on the bitcoin desk, five on the gold desk ─────────────────────────────────
-    section("19. A late signal: both desks copy one seen up to 10 minutes late (15 Nov), never later")
-    db = fresh()
+    section("19. A late signal: both desks copy one seen up to 10 minutes late (15 Nov), never later [without follow_all]")
+    db = fresh(follow=False)
     b19 = paper(db, "TL-04", "BTCUSD", -1, 69000.0, 69400.0, 68200.0, ago=406)    # as 03:30 IST on 15 Nov: 6.8 min late
     g19 = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0, ago=406)
     b19x = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68650.0, None, ago=700)
@@ -726,13 +738,12 @@ async def main():
     check("bitcoin seen 6.8 minutes late: copied", trade(db, b19)["status"] == "open", trade(db, b19).get("reason"))
     check("gold seen 6.8 minutes late: copied too (its limit is also 10 minutes from 15 Nov)", trade(db, g19)["status"] == "open",
           trade(db, g19).get("reason"))
-    check("bitcoin seen 11+ minutes late: skipped (limit 10)", trade(db, b19x)["status"] == "skipped"
-          and "(limit 10)" in trade(db, b19x)["reason"], trade(db, b19x).get("reason"))
-    check("gold seen 11+ minutes late: copied all the same (19 Nov: the gold desk has no lag limit)",
-          trade(db, g19x)["status"] == "open", trade(db, g19x).get("reason"))
+    check("seen 11+ minutes late on either desk: skipped (limit 10)", trade(db, b19x)["status"] == "skipped"
+          and trade(db, g19x)["status"] == "skipped" and "(limit 10)" in trade(db, b19x)["reason"]
+          and "(limit 10)" in trade(db, g19x)["reason"], (trade(db, b19x).get("reason"), trade(db, g19x).get("reason")))
     c, g = await M.status("crypto"), await M.status()
-    check("the page reads each desk's own limit, and the bitcoin notes say 10 minutes", c["limits"]["max_lag_s"] == 600
-          and g["limits"]["max_lag_s"] == 600 and any("10 minutes" in n for n in c["notes"]), (c["limits"], g["limits"]))
+    check("the page reads each desk's own limit", c["limits"]["max_lag_s"] == 600 and g["limits"]["max_lag_s"] == 600
+          and c["limits"]["follow_all"] is False and g["limits"]["follow_all"] is False, (c["limits"], g["limits"]))
     # ── 20. the owner's risk a trade ───────────────────────────────────────────────────────────────
     section("20. The risk a trade, $1 to $5, set by the owner with the PIN")
     db = fresh()
@@ -785,8 +796,8 @@ async def main():
     check("not re-written every cycle, but again within 10 minutes if it went missing", gone
           and any(d["_id"] == "live_priority" for d in db.premium_meta.docs))
     # ── 22. one contract a trade (the default from 15 Nov), and the new picks ───────────────────────────
-    section("22. One contract a trade, the smallest order, unless the owner picks $1-$5; TD-02 and CP-06 added")
-    db = fresh()
+    section("22. One contract a trade, the smallest order, unless the owner picks $1-$5; TD-02 and CP-06 added [without follow_all]")
+    db = fresh(follow=False)
     for coll in (db.live_delta_state, db.live_crypto_state):
         coll.docs[0].pop("sizing", None)                       # nothing chosen: the default
     c, g = await M.status("crypto"), await M.status()
@@ -805,7 +816,7 @@ async def main():
     check("a one-contract trade's risk is what that contract loses at its stop: cents on bitcoin, a fraction of a cent on gold",
           abs(tb["plan"]["risk_usd"] - (M.D.ask("BTCUSD") - 68810.0) * 0.001) < 1e-6 and tb["plan"]["risk_set_usd"] == tb["plan"]["risk_usd"]
           and tb["plan"]["risk_usd"] < 0.25 and tg["plan"]["risk_usd"] < 0.01, (tb["plan"], tg["plan"]))
-    db = fresh()
+    db = fresh(follow=False)
     for coll in (db.live_delta_state, db.live_crypto_state):
         coll.docs[0].pop("sizing", None)
     wide = paper(db, "TL-04", "BTCUSD", 1, 69000.0, 62500.0, 82000.0)    # 6,500 points: one contract would lose $6.50
@@ -821,11 +832,12 @@ async def main():
           and c3["sizing"] == "risk" and c3["risk_usd"] == 3 and r3["ok"] and c4["sizing"] == "min", (r1, r2, c3, r3, c4))
     c, g = await M.status("crypto"), await M.status()
     late = {("TD-02", "BTCUSD"): "2026-11-15", ("CP-06", "XAUUSD"): "2026-11-15", ("TL-04", "XAUTUSD"): "2026-11-16"}
-    late.update({(p["acct"], p["mkt"]): "2026-11-18" for p in c["picks"][4:] + g["picks"][7:]})   # section 31
+    late.update({(p["acct"], p["mkt"]): "2026-11-18" for p in c["picks"][4:] + g["picks"][7:30]})   # section 31
+    late.update({(p["acct"], p["mkt"]): "2026-11-19" for p in g["picks"][30:]})                    # section 34
     check("the picks: TD-02 joins TH-05, TL-04 and TH-01; CP-06 then TL-04's gold book join the five gold; each new one "
           "carries its own pick time",
           [p["acct"] for p in c["picks"]][:4] == ["TH-05", "TL-04", "TH-01", "TD-02"]
-          and [p["acct"] for p in g["picks"]][5:7] == ["CP-06", "TL-04"] and len(g["picks"]) == 30
+          and [p["acct"] for p in g["picks"]][5:7] == ["CP-06", "TL-04"] and len(g["picks"]) == 50
           and all((p.get("picked_at") or "").startswith(late[(p["acct"], p["mkt"])])
                   for p in c["picks"] + g["picks"] if (p["acct"], p["mkt"]) in late)
           and all(p.get("picked_at") is None for p in c["picks"] + g["picks"] if (p["acct"], p["mkt"]) not in late),
@@ -1070,9 +1082,8 @@ async def main():
     heartbeat(db)
     await SW.gated(M.MODULE, M.cycle)
     check("back ON: the desk carries on in its mode and a new signal opens", (trade(db, again) or {}).get("status") == "open")
-    check("bitcoin signals from the OFF stretch older than the lag limit are never entered late; the gold desk copies "
-          "its still-open one once back ON (it follows every paper trade)",
-          (trade(db, late_btc) or {}).get("status") in (None, "skipped")
+    check("signals from the OFF stretch still open on paper are copied once back ON, on both desks (19 Nov: they "
+          "follow every paper trade)", (trade(db, late_btc) or {}).get("status") == "open"
           and (trade(db, late_gold) or {}).get("status") == "open",
           ((trade(db, late_btc) or {}).get("status"), (trade(db, late_gold) or {}).get("status")))
 
@@ -1090,8 +1101,13 @@ async def main():
     section("31. 18 Nov: more Premium picks on both desks; six Gold Desk H1 templates on the gold desk")
     gp, cp = M.DESKS["gold"].picks, M.DESKS["crypto"].picks
     gk, ck = {(p.acct, p.mkt) for p in gp}, {(p.acct, p.mkt) for p in cp}
-    check("the gold desk: the 7 before, 13 + 4 Premium gold books and 6 H1 templates (30); the bitcoin desk: 4 + 5 + 6 (15)",
-          len(gp) == len(gk) == 30 and len(cp) == len(ck) == 15
+    check("the gold desk: the 7 before, 13 + 4 Premium gold books, 6 H1 templates and the Factory top 20 (50); the "
+          "bitcoin desk: 4 + 5 + 6 (15)",
+          len(gp) == len(gk) == 50 and len(cp) == len(ck) == 15
+          and [p.acct for p in gp if p.src == M.GOLD_SF] == ["SF0181", "SF0020", "SF0245", "SF0013", "SF0182", "SF0331",
+                                                             "SF0346", "SF0213", "SF0324", "SF0022", "SF0219", "SF0497",
+                                                             "SF0021", "SF0251", "SF0370", "SF0542", "SF0205", "SF0228",
+                                                             "SF0426", "SF0243"]
           and {("BB-11", "XAUUSD"), ("PT-04", "XAUTUSD"), ("RU-03", "XAUTUSD"), ("SB-06", "XAUUSD"), ("RU-04", "XAUTUSD"),
                ("PR-12", "XAUTUSD"), ("TP-05", "XAUTUSD"), ("DT-01", "XAUTUSD"), ("DT-03", "XAUTUSD"), ("CD-02", "XAUTUSD"),
                ("CP-02", "XAUUSD"), ("RU-05", "XAUTUSD"), ("FZ-02", "XAUTUSD"), ("BG-01", "XAUUSD"), ("JR-04", "XAUTUSD"),
@@ -1104,7 +1120,8 @@ async def main():
           and not any(p.src == M.GOLD_H1 for p in cp) and not any(p.acct in ("DD-03", "DD-04") for p in gp + cp),
           (len(gp), len(cp)))
     check("every 18 Nov pick's record is as of its batch (22:00 or 23:50 IST); the earlier picks keep theirs, untouched",
-          all(p.picked_at == M.NEW_PICKED_AT for p in gp[7:20] + gp[24:] + cp[4:9])
+          all(p.picked_at == M.NEW_PICKED_AT for p in gp[7:20] + gp[24:30] + cp[4:9])
+          and all(p.picked_at == M.NEW_PICKED_AT_3 and p.template == p.acct for p in gp[30:])
           and all(p.picked_at == M.NEW_PICKED_AT_2 for p in gp[20:24] + cp[9:])
           and [p.acct for p in gp[20:24]] == ["BG-01", "JR-04", "TD-04", "TC-11"]
           and [p.picked_at for p in cp[:4]] == [None, None, None, "2026-11-15T13:40:00+05:30"]
@@ -1226,7 +1243,7 @@ async def main():
     pr = next(p for p in g["picks"] if p["acct"] == "H1-RIB")
     check("the page lists the H1 template with its source, its own record and its real trades",
           pr["src"] == "gold_h1" and pr["template"] == "ema_ribbon" and pr["trades"] == 12 and pr["live"]["trades"] == 1
-          and pr["backtest"].startswith("pooled only") and len(g["picks"]) == 30, pr)
+          and pr["backtest"].startswith("pooled only") and len(g["picks"]) == 50, pr)
 
     # ── 32. the page's paper view: each strategy's own paper trades beside what the desk did with them ─────
     section("32. The paper view: each strategy's paper record and open trade now, its latest signals and the desk's decision")
@@ -1300,7 +1317,7 @@ async def main():
     advance(31)
     g = await M.status()
     check("the paper side unreadable: the page still gets the desk, its picks without a paper record, no signals",
-          g.get("mode") == "live" and len(g["picks"]) == 30 and all(p["paper"] is None for p in g["picks"])
+          g.get("mode") == "live" and len(g["picks"]) == 50 and all(p["paper"] is None for p in g["picks"])
           and g["signals"] is None and g["paper_view"] is None)
     db.premium_trades = good
     db2 = fresh(mode="off")
@@ -1311,7 +1328,7 @@ async def main():
 
 
     # ── 33. 19 Nov: the gold desk follows EVERY paper trade ─────────────────────────────────────────
-    section("33. 19 Nov: the gold desk copies every open paper trade, however late or far; a copy waits, never given up")
+    section("33. 19 Nov: the desks copy every open paper trade, however late or far; a copy waits, never given up")
     db = fresh(gold=3885.0)
     for coll in (db.live_delta_state, db.live_crypto_state):
         coll.docs[0].pop("sizing", None)                       # one contract a trade, as on the real desks
@@ -1345,9 +1362,12 @@ async def main():
           t is not None and t["status"] == "open" and t.get("guard_stop") and t.get("paper_stop", 1) is None
           and sl is not None and abs(float(sl["stop_price"]) - want_stop) <= 0.01 and t["legs"]["target_id"] is None,
           t and (t.get("status"), t.get("reason"), sl))
-    check("the bitcoin desk is unchanged: an old signal is never copied, a paper trade without a stop is skipped",
-          trade(db, b_old) is None and trade(db, b_nostop)["status"] == "skipped"
-          and trade(db, b_nostop)["reason"] == "no stop on the paper trade", (trade(db, b_nostop) or {}).get("reason"))
+    tb, tn = trade(db, b_old), trade(db, b_nostop)
+    check("the bitcoin desk follows every paper trade too: its 2-hour-old one is copied with the paper's levels; one "
+          "without a stop gets the protective stop 3% away", tb is not None and tb["status"] == "open"
+          and float(own_leg(tb, "stop")["stop_price"]) == 69400.0 and tn is not None and tn["status"] == "open"
+          and tn.get("guard_stop") and abs(float(own_leg(tn, "stop")["stop_price"]) - M.D.ask("BTCUSD") * 0.97) <= 0.5,
+          ((tb or {}).get("reason"), (tn or {}).get("reason")))
     check("Delta's gold position is the sum of the copies (a short and a long: flat)", GOLD not in M.D.pos
           and trade(db, old)["side"] + trade(db, ladder)["side"] == 0, M.D.pos.get(GOLD))
     g, c = await M.status(), await M.status("crypto")
@@ -1355,8 +1375,9 @@ async def main():
     check("the page: a waiting copy reads 'waiting' with its reason; the old closed one 'before'; the limits say "
           "follow_all on gold only", sig[beyond]["desk"]["status"] == "waiting" and "not inside" in sig[beyond]["desk"]["why"]
           and sig[old_shut]["desk"]["status"] == "before" and sig[old]["desk"]["status"] == "open"
-          and g["limits"]["follow_all"] is True and c["limits"]["follow_all"] is False and g["limits"]["waiting"] == 2
-          and any("EVERY open paper trade" in n for n in g["notes"]),
+          and g["limits"]["follow_all"] is True and c["limits"]["follow_all"] is True and g["limits"]["waiting"] == 2
+          and g["limits"]["daily_stop_on"] is False and c["limits"]["contract_cap_on"] is False
+          and all(any("EVERY signal becomes a real position" in n for n in x["notes"]) for x in (g, c)),
           [(x["acct"], x["desk"]["status"]) for x in g["signals"]])
 
     advance(60)
@@ -1379,13 +1400,10 @@ async def main():
     g_day = paper(db, "TL-04", "XAUTUSD", 1, 3890.0, 3886.0, 3898.0, ago=10)
     b_day = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None, ago=10)
     await cyc(db)
-    check("past the $20 daily stop: the gold copy waits for tomorrow (it is still open then), bitcoin's is skipped",
-          trade(db, g_day) is None and "daily loss stop" in M._WAITING["gold"][g_day]["why"]
-          and trade(db, b_day)["status"] == "skipped", (M._WAITING["gold"].get(g_day), trade(db, b_day)))
+    check("$25 down on the day: no daily stop on either desk (the owner, 19 Nov), both copies go in at once",
+          (trade(db, g_day) or {}).get("status") == "open" and (trade(db, b_day) or {}).get("status") == "open",
+          ((trade(db, g_day) or {}).get("reason"), (trade(db, b_day) or {}).get("reason")))
     M._day_pnl = real_day
-    advance(30)
-    await cyc(db)
-    check("... and goes in once the stop no longer applies", (trade(db, g_day) or {}).get("status") == "open")
 
     advance(60)
     many = [paper(db, a, m, 1, 3890.0, 3886.0, 3898.0, ago=10) for a, m in (("RU-03", "XAUTUSD"), ("FZ-02", "XAUTUSD"),
@@ -1401,6 +1419,133 @@ async def main():
     await cyc(db)
     check("... and all three go in on the next good pass", all((trade(db, x) or {}).get("status") == "open" for x in many)
           and st_of(db, "gold")["errors_in_row"] == 0)
+
+
+    # ── 34. 19 Nov (later): every signal on both desks at one contract; the Gold Desk Strategy Factory top 20 ─────────
+    section("34. Both desks: every signal at one contract, no cap, margin waits; the Factory top 20 as a third source")
+    db = fresh(gold=3885.0, btc=69150.0)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)                       # one contract a trade
+        coll.docs[0]["wallet_at"] = CLOCK[0]                   # the desk's own 5-minute wallet refresh is not due
+    sfp, sfs = Coll("sfp34"), Coll("sfs34")
+    sfs.docs.append({"_id": "cycle:gold", "at": utc_naive(CLOCK[0])})
+    M._sf_coll, M._sf_state_coll = (lambda: sfp), (lambda: sfs)
+
+    def sf_pos(pid, sid, side, entry, stop, target, ago=30, status="OPEN", **kw):
+        sfp.docs.append({"position_id": pid, "desk": "gold", "strategy_id": sid, "strategy_name": f"{sid} name",
+                         "symbol": "XAUTUSD", "signal_side": side, "side": side, "kind": "perp", "entry_px": entry,
+                         "under_entry": entry, "stop": stop, "target": target, "capital_deployed": 1111.11,
+                         "status": status, "opened_at": utc_naive(CLOCK[0] - ago), "closed_at": None, "exit_px": None,
+                         "exit_reason": None, "realized_pnl": None, "under_ltp": entry, "pattern": "p", **kw})
+        return "SF|" + pid
+
+    def sf_end(pid, reason, px, pnl):
+        for d in sfp.docs:
+            if d["position_id"] == pid:
+                d.update(status="CLOSED", exit_reason=reason, exit_px=px, realized_pnl=pnl, closed_at=utc_naive(CLOCK[0]))
+
+    late_far = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68700.0, None, ago=700)   # 11+ min late, 50% of its risk away
+    wide = paper(db, "TL-04", "BTCUSD", 1, 69000.0, 62000.0, None, ago=20)        # a stop 10% away: past liquidation
+    s1 = sf_pos("a1", "SF0181", "SELL", 3885.0, 3890.0, 3875.0)                    # a new Factory position
+    s_old = sf_pos("a2", "SF0020", "BUY", 3880.0, 3870.0, 3900.0, ago=7200)        # open since before the switch-on
+    s_shut = sf_pos("a3", "SF0245", "BUY", 3880.0, 3875.0, 3890.0, ago=6000, status="CLOSED", exit_px=3890.0,
+                    exit_reason="target", realized_pnl=2.86, closed_at=utc_naive(CLOCK[0] - 5000))
+    s_other = sf_pos("a4", "SF0999", "BUY", 3885.0, 3880.0, 3895.0)                # not one of the 20
+    r = await cyc(db)
+    t = trade(db, late_far)
+    check("bitcoin seen 11+ minutes late and 50% of its risk away: copied at today's price with the paper's stop",
+          t is not None and t["status"] == "open" and abs(t["fill"] - M.D.ask("BTCUSD")) < 1e-6
+          and float(own_leg(t, "stop")["stop_price"]) == 68700.0, t and (t.get("status"), t.get("reason")))
+    t = trade(db, wide)
+    ask = M.D.ask("BTCUSD")
+    check("a paper stop 10% away (past the ~9.5% at which Delta liquidates at 10x): copied, its stop pulled in to 7% on "
+          "Delta, the paper's kept on the trade", t is not None and t["status"] == "open" and t.get("stop_capped")
+          and t.get("paper_stop") == 62000.0 and abs(float(own_leg(t, "stop")["stop_price"]) - ask * 0.93) <= 0.5,
+          t and (t.get("status"), t.get("reason"), t.get("stop")))
+    t = trade(db, s1)
+    check("a Strategy Factory position of a picked strategy: one real XAUTUSD contract, short, with the tab's own stop "
+          "and target on Delta", t is not None and t["status"] == "open" and t["acct"] == "SF0181" and t["side"] == -1
+          and t["contracts"] == 1 and t["product"] == "XAUTUSD" and float(own_leg(t, "stop")["stop_price"]) == 3890.0
+          and float(own_leg(t, "target")["stop_price"]) == 3875.0, t and (t.get("status"), t.get("reason")))
+    check("... one open since before the switch-on is copied too; a closed one and a strategy outside the 20 are not",
+          (trade(db, s_old) or {}).get("status") == "open" and trade(db, s_shut) is None and trade(db, s_other) is None,
+          (trade(db, s_old) or {}).get("reason"))
+    g = await M.status()
+    by = {p["acct"]: p for p in g["picks"]}
+    sfr = by["SF0181"]
+    check("the page: the Factory pick with its source, strategy, record and real trade; its paper side from the tab",
+          sfr["src"] == M.GOLD_SF and sfr["template"] == "SF0181" and sfr["trades"] == 42
+          and sfr["backtest"].startswith("factory only") and sfr["live"]["open"] == 1
+          and len(sfr["paper"]["open"]) == 1 and by["SF0245"]["paper"]["trades"] == 1
+          and abs(by["SF0245"]["paper"]["sum_r"] - 2.86 / (5.0 * 1111.11 / 3880.0)) < 0.01
+          and g["paper_view"].get("factory_age_s") is not None
+          and any(x["src"] == M.GOLD_SF and x["id"] == s1 and x["desk"]["status"] == "open" for x in g["signals"]),
+          (sfr["paper"], by["SF0245"]["paper"], g["paper_view"]))
+
+    advance(60)
+    sfs.docs[0]["at"] = utc_naive(CLOCK[0])
+    M.D.set_price("XAUTUSD", 3880.0)
+    sf_end("a1", "max_hold", 3880.0, 1.20)                     # the tab's hold limit closes it
+    await cyc(db)
+    t = trade(db, s1)
+    check("the tab closes its position (hold limit): the real trade is closed, its legs cancelled first",
+          t["status"] == "closed" and t["close_reason"] == "paper exit: max_hold" and own_leg(t, "stop")["state"] == "cancelled"
+          and own_leg(t, "target")["state"] == "cancelled", (t["status"], t.get("close_reason")))
+
+    class _SfDown:
+        def find(self, *a, **k):
+            raise RuntimeError("factory store down")
+    M._sf_coll = lambda: _SfDown()
+    advance(60)
+    pr = paper(db, "DT-01", "XAUTUSD", 1, 3880.0, 3876.0, 3888.0, ago=10)
+    r = await cyc(db)
+    check("the Factory's store unreadable: its open copy waits, never closed; Premium copies still go in",
+          trade(db, s_old)["status"] == "open" and "could not be read" in r["gold"].get("factory", "")
+          and (trade(db, pr) or {}).get("status") == "open", (r["gold"].get("factory"), (trade(db, pr) or {}).get("reason")))
+    M._sf_coll = lambda: sfp
+    advance(60)
+    sfs.docs[0]["at"] = utc_naive(CLOCK[0] - 1500)            # the tab silent for 25 minutes
+    s_new = sf_pos("a5", "SF0013", "BUY", 3880.0, 3876.0, 3888.0, ago=10)
+    pr2 = paper(db, "DT-03", "XAUTUSD", 1, 3880.0, 3876.0, 3888.0, ago=10)
+    await cyc(db)
+    check("a silent Factory tab holds its own copies only (they wait); the paper desk's go in",
+          trade(db, s_new) is None and "Strategy Factory tab has not updated" in M._WAITING["gold"][s_new]["why"]
+          and (trade(db, pr2) or {}).get("status") == "open", (M._WAITING["gold"].get(s_new), (trade(db, pr2) or {}).get("reason")))
+    sfs.docs[0]["at"] = utc_naive(CLOCK[0])
+    advance(30)
+    sfs.docs[0]["at"] = utc_naive(CLOCK[0])
+    await cyc(db)
+    check("... and goes in once the tab is back", (trade(db, s_new) or {}).get("status") == "open")
+
+    advance(60)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0]["wallet_at"] = CLOCK[0]
+    M.D.balance = 5.0                                          # $5 left: one bitcoin contract needs about $8.6 free
+    blocked_now = [paper(db, a, "BTCUSD", -1, 69150.0, 69500.0, 68400.0, ago=10) for a in ("RU-06", "NJ-47", "DT-02")]
+    n_wallet = sum(1 for c in M.D.calls if c == ("GET", "/v2/wallet/balances"))
+    r = await cyc(db)
+    reads = sum(1 for c in M.D.calls if c == ("GET", "/v2/wallet/balances")) - n_wallet
+    check("too little free margin: the three bitcoin copies wait (never skipped), the wallet read once for the pass",
+          all(trade(db, x) is None for x in blocked_now) and r["crypto"].get("waiting") == 3 and reads == 1
+          and all("not enough free balance" in M._WAITING["crypto"][x]["why"] for x in blocked_now), (r["crypto"], reads))
+    M.D.balance = 400.0
+    advance(30)
+    await cyc(db)
+    check("... and all three go in once the margin is there", all((trade(db, x) or {}).get("status") == "open"
+                                                                  for x in blocked_now))
+    sc, sg = st_of(db, "crypto"), st_of(db, "gold")
+    check("both desks still live, no venue errors", sc["mode"] == sg["mode"] == "live"
+          and sc["errors_in_row"] == sg["errors_in_row"] == 0, (sc.get("switched_off"), sg.get("switched_off")))
+    db = fresh(btc=100000.0)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)
+    big = paper(db, "TH-05", "BTCUSD", 1, 100000.0, 93500.0, None, ago=20)        # 6.5% away: about $6.50 a contract
+    await cyc(db)
+    t = trade(db, big)
+    check("bitcoin at 100,000 and a stop 6.5% away, one contract losing about $6.50: copied, no $5 cap at one contract",
+          t is not None and t["status"] == "open" and t["contracts"] == 1 and t["plan"]["risk_usd"] > 5.0
+          and float(own_leg(t, "stop")["stop_price"]) == 93500.0 and not t.get("stop_capped"),
+          t and (t.get("status"), t.get("reason")))
 
 
 if __name__ == "__main__":

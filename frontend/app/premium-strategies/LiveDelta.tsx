@@ -23,7 +23,8 @@ type PaperOpen = { id: string; side: number; entry: number | null; stop: number 
 type PaperRec = { trades: number; wins: number; sum_r: number; open: PaperOpen[]; last_t: number | null };
 type Pick = { acct: string; mkt: string; product: string; name: string; trades: number; sum_r: number; t: number; win: number;
   backtest: string; live: Rec | null; shadow: Rec | null; picked_at?: string | null;
-  src?: string; template?: string | null;   // src "gold_h1": a Gold Desk H1 template (18 Nov), else a Premium book
+  src?: string; template?: string | null;   // src "gold_h1": a Gold Desk H1 template (18 Nov); "gold_sf": a Gold Desk
+  //                                           Strategy Factory strategy (19 Nov); else a Premium book
   paper?: PaperRec | null };                // undefined on an older server, null when the paper side cannot be read
 /** One of the strategies' latest paper trades, with what this desk did with it (18 Nov). */
 export type Signal = { id: string; acct: string; mkt: string; src?: string; side: number; entry_t: number; entry: number | null;
@@ -43,10 +44,13 @@ export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boole
   wallet_at?: number;
   limits: { risk_usd: number; daily_stop_usd: number; max_notional_usd: number; leverage: number; max_lag_s: number;
     drift_frac: number; tick_s: number; risk_cap_usd?: number; risk_min_usd?: number; risk_set_at?: number | null;
-    sizing?: "min" | "risk"; follow_all?: boolean; waiting?: number };
+    sizing?: "min" | "risk"; follow_all?: boolean; waiting?: number;
+    // false on a desk that copies every signal (19 Nov): no daily loss stop, no cap on what one contract may lose
+    daily_stop_on?: boolean; contract_cap_on?: boolean };
   today: { live: number; shadow: number }; totals: { live: Totals; shadow: Totals }; picked_at: string; picks: Pick[];
   open: LiveTrade[]; recent: LiveTrade[]; notes: string[]; desk?: string; title?: string; products?: Record<string, unknown>;
-  signals?: Signal[] | null; paper_view?: { at?: number; paper_age_s?: number | null; gold_desk_age_s?: number | null } | null };
+  signals?: Signal[] | null; paper_view?: { at?: number; paper_age_s?: number | null; gold_desk_age_s?: number | null;
+    factory_age_s?: number | null } | null };
 
 export const usd = (v: number | null | undefined, signed = false) => {
   if (v === null || v === undefined || Number.isNaN(v)) return "—";
@@ -99,11 +103,13 @@ const verdict = (picks: Pick[]) => {
   const n = picks.length;
   const count = (w: string) => picks.filter((p) => p.backtest.startsWith(w)).length;
   const lose = count("loses"), earn = count("earns"), never = count("never"), pooled = count("pooled");
+  const factory = count("factory");
   const parts: string[] = [];
   if (lose) parts.push(`${lose === n ? "All" : lose} of these ${n} ${lose === 1 ? "loses" : "lose"} in ${lose === 1 ? "its" : "their"} own 2-year backtest${lose === 1 ? "" : "s"}`);
   if (earn) parts.push(`${earn} ${earn === 1 ? "earns" : "earn"} too little in ${earn === 1 ? "its" : "their"} own to mean anything`);
   if (never) parts.push(`${never} ${never === 1 ? "was" : "were"} never backtested`);
   if (pooled) parts.push(`${pooled} ${pooled === 1 ? "was" : "were"} tested only as a family`);
+  if (factory) parts.push(`${factory} ${factory === 1 ? "was" : "were"} graded only by the Strategy Factory's own backtest`);
   const said = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}` : parts.join("");
   return `${said}${parts.length ? ":" : ""} a few good paper trades picked them.`;
 };
@@ -112,7 +118,8 @@ const verdict = (picks: Pick[]) => {
  *  or "pooled only" (the Gold Desk's H1 templates, replayed only as a family). */
 const btBadge = (b: string): [string, string] =>
   b.startsWith("loses") ? ["error", "loses"] : b.startsWith("earns") ? ["skipped", "not significant"]
-    : b.startsWith("pooled") ? ["skipped", "family only"] : ["skipped", "not tested"];
+    : b.startsWith("pooled") ? ["skipped", "family only"] : b.startsWith("factory") ? ["skipped", "not validated"]
+      : ["skipped", "not tested"];
 
 const rr = (v: number | null | undefined) => (v === null || v === undefined ? "—" : `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(2)}R`);
 const pct = (n: number, d: number) => (d ? `${Math.round((100 * n) / d)}%` : "—");
@@ -154,6 +161,8 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   const risks = L.risk_cap_usd ? [1, 2, 3, 4, 5].filter((r) => r >= (L.risk_min_usd ?? 1) && r <= (L.risk_cap_usd ?? 5)) : [];
   const oneContract = L.sizing === "min";       // one contract a trade, the smallest order (the default from 15 Nov)
   const sizeText = oneContract ? "1 contract a trade (the smallest order Delta allows)" : `${usd(L.risk_usd)} risked a trade`;
+  const noDayStop = L.daily_stop_on === false;   // a desk that copies every signal (19 Nov)
+  const noCap = L.contract_cap_on === false;
   const mixed = s.picks.some((p) => p.picked_at);   // some picks joined later: each record is as of its own pick
   const live = s.totals.live;
   const dayLeft = L.daily_stop_usd + s.today.live;
@@ -191,7 +200,8 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         <b>Real money, on strategies that are not proven.</b>{" "}
         {intro ?? <>Since 8 Nov the paper desk&apos;s bitcoin strategies lost a combined −397R and its gold strategies −166R.</>}{" "}
         {verdict(s.picks)}{" "}
-        {`The size is the one chosen for this: ${sizeText} and a ${usd(L.daily_stop_usd)} daily loss stop.`}
+        {noDayStop ? `The size is the one chosen for this: ${sizeText}, and every signal becomes a real position: no daily loss stop.`
+          : `The size is the one chosen for this: ${sizeText} and a ${usd(L.daily_stop_usd)} daily loss stop.`}
       </div>
 
       <section className={`ld-card ld-status ${m.cls}`} aria-label="Desk status and controls">
@@ -225,7 +235,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
               <span>
                 {busy === "live" ? "Checking Delta and switching on…" : busy === "off" ? "Switching off…" : isLive
                   ? "Real orders go to Delta for every new signal. Switch OFF to stop new trades; a position already open still closes at its stop, its target or its strategy's exit."
-                  : `Switch ON to start: a real order for every new signal, ${sizeText}, stopping for the day after a ${usd(L.daily_stop_usd)} loss.${s.mode === "shadow" ? " A shadow test is running now: decisions are logged, nothing is sent." : ""}`}
+                  : `Switch ON to start: a real order for every new signal, ${sizeText}${noDayStop ? "" : `, stopping for the day after a ${usd(L.daily_stop_usd)} loss`}.${s.mode === "shadow" ? " A shadow test is running now: decisions are logged, nothing is sent." : ""}`}
               </span>
             </div>
           </div>
@@ -247,7 +257,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
               </div>
               <span className="ld-risk-s">
                 {busy === "risk" ? "Saving…" : oneContract
-                  ? "Every trade is 1 contract, the smallest order Delta allows. What it loses at its stop depends on how far away the stop is: on bitcoin usually $0.20-0.60, on gold under 5 cents, plus fees. A trade whose one contract would lose more than $5 is skipped."
+                  ? `Every trade is 1 contract, the smallest order Delta allows. What it loses at its stop depends on how far away the stop is: on bitcoin usually $0.20-0.60, on gold under 5 cents, plus fees. ${noCap ? "Every signal is taken at one contract, however far its stop (a stop more than 7% away is pulled in to 7%, inside the point where Delta would liquidate at 10x)." : "A trade whose one contract would lose more than $5 is skipped."}`
                   : "A dollar amount is the most one trade loses if its stop is hit, plus about $0.10-0.30 of fees. A trade whose smallest order (one contract) would lose more is skipped."}
               </span>
             </div>
@@ -286,7 +296,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
           <span className="ld-k">Today, real money (IST)</span>
           <span className={`ld-v ${tone(s.today.live)}`}>{usd(s.today.live, true)}</span>
           <span className="ld-bar" aria-hidden="true"><span style={{ width: `${dayUsed}%` }} className={dayUsed >= 75 ? "hot" : ""} /></span>
-          <span className="ld-s">{dayLeft > 0 ? `${usd(dayLeft)} left before the ${usd(L.daily_stop_usd)} daily stop` : "daily stop reached: no new trade today"}</span>
+          <span className="ld-s">{noDayStop ? "no daily loss stop: every signal is copied" : dayLeft > 0 ? `${usd(dayLeft)} left before the ${usd(L.daily_stop_usd)} daily stop` : "daily stop reached: no new trade today"}</span>
         </div>
         <div className="ld-tile">
           <span className="ld-k">All real trades</span>
@@ -351,6 +361,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
                   <td className="l ld-strat">
                     <b>{p.acct}</b> <span className="ld-chip">{p.product}</span>
                     {p.src === "gold_h1" ? <span className="ld-chip ld-chip-src">Gold Desk H1</span> : null}
+                    {p.src === "gold_sf" ? <span className="ld-chip ld-chip-src">Strategy Factory</span> : null}
                     <div className="ld-sub">{p.name}</div>
                   </td>
                   {hasPaper && (
@@ -428,7 +439,8 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
                     return (
                       <tr key={x.id} className={notCopied(x) ? "ld-row-dim" : ""}>
                         <td className="l">{ist(x.entry_t)}</td>
-                        <td className="l"><b>{x.acct}</b>{x.src === "gold_h1" ? <span className="ld-chip ld-chip-src">H1</span> : null}</td>
+                        <td className="l"><b>{x.acct}</b>{x.src === "gold_h1" ? <span className="ld-chip ld-chip-src">H1</span>
+                          : x.src === "gold_sf" ? <span className="ld-chip ld-chip-src">SF</span> : null}</td>
                         <td><span className={`ld-side ${x.side > 0 ? "long" : "short"}`}>{x.side > 0 ? "Long" : "Short"}</span></td>
                         <td>{`${px(x.entry)} → ${x.open ? "open" : px(x.exit)}`}</td>
                         <td className={`ld-num ${tone(x.open ? x.r_now : x.r)}`}>
@@ -517,7 +529,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         <summary>How this desk works, and its limits</summary>
         <ul className="ld-notes">
           {s.notes.map((n, i) => <li key={i}>{n}</li>)}
-          <li>{`Limits: ${oneContract ? `1 contract a trade (skipped if it would lose more than ${usd(L.risk_cap_usd)})` : `${usd(L.risk_usd)} risk a trade`}, ${usd(L.daily_stop_usd)} daily stop, at most ${usd(L.max_notional_usd)} of notional a position, ${L.leverage}x leverage, ${L.follow_all ? "every open paper trade copied however late or far (it waits while the price is not inside its stop and target)" : `a signal older than ${Math.round(L.max_lag_s / 60)} minutes or already ${Math.round(L.drift_frac * 100)}% of its risk away is skipped`}.`}</li>
+          <li>{`Limits: ${oneContract ? (noCap ? "1 contract a trade, its stop at most 7% from the price" : `1 contract a trade (skipped if it would lose more than ${usd(L.risk_cap_usd)})`) : `${usd(L.risk_usd)} risk a trade`}, ${noDayStop ? "no daily stop" : `${usd(L.daily_stop_usd)} daily stop`}, at most ${usd(L.max_notional_usd)} of notional a position, ${L.leverage}x leverage, ${L.follow_all ? "every open paper trade copied however late or far (it waits while the price is not inside its stop and target, or for free margin)" : `a signal older than ${Math.round(L.max_lag_s / 60)} minutes or already ${Math.round(L.drift_frac * 100)}% of its risk away is skipped`}.`}</li>
         </ul>
       </details>
 

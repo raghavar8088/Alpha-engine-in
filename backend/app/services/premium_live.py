@@ -90,9 +90,24 @@ and target, at whatever the price is now:
   (tomorrow it copies what is still open), an older one-bracket trade on the product;
 - a paper trade with no stop (PR-12's ladder) gets a protective stop GUARD_STOP_FRAC from the price, because a real
   trade never stands on Delta without one; it otherwise closes when its paper trade closes, as every copy does.
-What still ends a copy for good: the paper trade closing first, one contract losing more than the cap at its stop, too
-little free balance, a refused or unfilled order. The switches (this desk's mode, Main Control) are untouched, and the
-bitcoin desk keeps its lag and drift limits.
+What still ends a copy for good: the paper trade closing first, a refused or unfilled order. The switches (this desk's
+mode, Main Control) are untouched.
+Later that evening the owner widened it: "all the gold and btc strategies can place trades at the same time ... no
+stop for signal to convert into positions, only thing is, buy or sell with least money/lot". So BOTH desks follow every
+paper trade, and a follow_all desk has no daily loss stop and no cap on what one contract may lose (at one contract,
+the default size; a dollar risk picked on the page still sizes and caps as before). Too little free margin waits for
+the next pass (the wallet is read once a pass and each entry takes its margin off it). With no cap on what a contract
+may lose, a copy's stop is pulled in to MAX_STOP_FRAC (7%) of the price when the paper's is farther: at 10x Delta
+liquidates about 9.5% against a position, so a farther stop would never be reached, and the trade's own stop order (not
+reduce-only) could open a position after a liquidation.
+
+19 NOV 2026: THE GOLD DESK'S STRATEGY FACTORY TOP 20, A THIRD SOURCE. The owner sent the Gold Desk "Strategy Factory ·
+546" board and asked for its top 20 on real money. They are not Premium books: the gold desk reads their positions from
+the tab itself (factory_desk_positions, desk gold, in the Factory's own store) and treats each one as a paper trade with
+the id "SF|<position_id>" (_paper_sf), exactly as the H1 positions: its stop and target (levels of XAUTUSD itself), its
+exit (stop, target or the tab's hold limit). Liveness = the tab's own cycle (factory_desk_state "cycle:gold" at); an
+unreadable store leaves its trades waiting, never closed. Records frozen at NEW_PICKED_AT_3 (21:29 IST, the owner's
+screenshot), in R; they match the board.
 """
 
 from __future__ import annotations
@@ -137,6 +152,9 @@ DESK_DEAD_S = 3600             # ... this long: open positions are closed (nothi
 FOLLOW_PAD_TICKS = 5           # it enters only with the price this many ticks inside the paper's stop and target ...
 FOLLOW_PAD_FRAC = 0.10         # ... and this share of the paper's risk, so a market fill cannot land past a level
 GUARD_STOP_FRAC = 0.03         # a paper trade with no stop at all (PR-12's ladder): its real copy's stop, 3% away
+MAX_STOP_FRAC = 0.07           # a copy's stop is never farther than this from its price: at LEVERAGE 10x Delta liquidates
+#                                a position about 9.5% against it, so a farther stop would never be reached (and the
+#                                trade's own stop order, not reduce-only, could later open a position nobody holds)
 MARGIN_BUFFER = 1.25           # free balance needed: margin x this
 ERRORS_TO_STOP = 3
 PIN_TRIES = 5                  # wrong PINs an hour before going live is locked for the hour
@@ -147,6 +165,9 @@ NEW_PICKED_AT = "2026-11-18T22:00:00+05:30"   # the 18 Nov additions on both des
 NEW_PICKED_AT_2 = "2026-11-18T23:50:00+05:30"  # ... and the second batch the owner sent that night
 PREMIUM, GOLD_H1 = "premium", "gold_h1"        # a pick's source: the Premium paper desk, or the Gold Desk's H1 test
 H1_ID = "H1|"                                  # a Gold Desk H1 position, as a paper trade id: "H1|<position_id>"
+GOLD_SF = "gold_sf"                            # ... or the Gold Desk's Strategy Factory tab (19 Nov)
+SF_ID = "SF|"                                  # a Strategy Factory tab position, as a paper trade id: "SF|<position_id>"
+NEW_PICKED_AT_3 = "2026-11-19T21:29:00+05:30"  # the Factory board's top 20 the owner sent: their records as of this time
 CONFIRM = "REAL MONEY"
 D = Delta()
 
@@ -163,8 +184,9 @@ class Pick:
     win: int            # % of trades won
     backtest: str       # what its own 2-year backtest said
     picked_at: str | None = None    # its own pick time, when it joined the desk after the others (its record's time)
-    src: str = PREMIUM              # where its trades come from: PREMIUM (premium_trades) or GOLD_H1 (the Gold Desk)
-    template: str | None = None     # GOLD_H1 only: the Gold Desk's strategy_template
+    src: str = PREMIUM              # where its trades come from: PREMIUM (premium_trades), GOLD_H1 (the Gold Desk's H1
+    #                                 test) or GOLD_SF (the Gold Desk's Strategy Factory tab)
+    template: str | None = None     # GOLD_H1: the Gold Desk's strategy_template; GOLD_SF: the Factory's strategy_id
 
 
 _H1_BACKTEST = ("pooled only: the nine H1 templates together earned +12.2 bp a trade net on Delta's 2026 data "
@@ -176,6 +198,17 @@ def _h1(code: str, template: str, name: str, trades: int, sum_r: float, t: float
     (realised P&L over |entry - stop| x quantity)."""
     return Pick(code, "XAUTUSD", "XAUTUSD", f"Gold Desk H1: {name}", trades, sum_r, t, win, _H1_BACKTEST,
                 NEW_PICKED_AT, GOLD_H1, template)
+
+
+_SF_BACKTEST = ("factory only: graded by the Strategy Factory's own backtest, whose replay reads future 4-hour bars; "
+                "none of the 546 is validated, and its forward paper record on the Gold Desk picked it")
+
+
+def _sf(sid: str, name: str, trades: int, sum_r: float, t: float, win: int) -> Pick:
+    """A strategy of the Gold Desk's "Strategy Factory · 546" tab on the gold desk (19 Nov 2026). Record = its closed
+    tab positions at NEW_PICKED_AT_3, in R (realised P&L over what its sleeve loses at its stop)."""
+    return Pick(sid, "XAUTUSD", "XAUTUSD", f"Gold Desk Strategy Factory: {name}", trades, sum_r, t, win, _SF_BACKTEST,
+                NEW_PICKED_AT_3, GOLD_SF, sid)
 
 
 GOLD_PICKS: tuple[Pick, ...] = (
@@ -239,6 +272,28 @@ GOLD_PICKS: tuple[Pick, ...] = (
     _h1("H1-PIV", "pivot_break", "Pivot R1/S1 Break · 4h", 20, 4.08, 0.58, 40),
     _h1("H1-DCS", "donchian_slow", "Donchian Breakout (slow) · 4h", 5, 1.30, 0.34, 40),
     _h1("H1-KLT", "keltner_break", "Keltner Breakout · 4h", 14, 0.95, 0.17, 36),
+    # the owner's 19 Nov pick: the Gold Desk "Strategy Factory · 546" board's Rank 1-20 at 21:29 IST, read from the tab's
+    # own positions (factory_desk_positions, desk gold); the records match the board (trades, % won, net P&L)
+    _sf("SF0181", "Three Soldiers / Crows · 45m", 42, 25.64, 1.94, 48),
+    _sf("SF0020", "Triple Top / Bottom · 30m", 43, 21.51, 1.58, 42),
+    _sf("SF0245", "Prior Session High/Low Break · 45m", 29, 23.06, 2.27, 52),
+    _sf("SF0013", "Double Top / Bottom · 45m", 40, 21.41, 1.83, 45),
+    _sf("SF0182", "Three Soldiers / Crows · 1h", 33, 11.51, 1.17, 42),
+    _sf("SF0331", "Trend Pullback to EMA · 45m", 31, 21.96, 1.89, 42),
+    _sf("SF0346", "Rectangle / Trading Range Break · 30m", 23, 7.03, 1.89, 65),
+    _sf("SF0213", "Donchian Breakout (fast) · 45m", 25, 16.45, 1.73, 48),
+    _sf("SF0324", "Opening Range Breakout · 45m", 47, 8.90, 0.76, 45),
+    _sf("SF0022", "Triple Top / Bottom · 1h", 28, 9.58, 0.96, 39),
+    _sf("SF0219", "Donchian Breakout (slow) · 15m", 41, 14.37, 1.12, 39),
+    _sf("SF0497", "S/R Flip Retest + Volume · 30m", 29, 8.52, 0.74, 38),
+    _sf("SF0021", "Triple Top / Bottom · 45m", 28, 19.12, 1.82, 46),
+    _sf("SF0251", "Round Number Break · 30m", 20, 13.32, 1.74, 60),
+    _sf("SF0370", "RSI Trend Regime (40/60) · 30m", 19, 18.89, 2.58, 63),
+    _sf("SF0542", "Rectangle + Volume + ATR · 30m", 19, 7.71, 2.65, 68),
+    _sf("SF0205", "Heikin Ashi Flip · 45m", 32, 7.40, 0.78, 41),
+    _sf("SF0228", "Keltner Breakout · 30m", 33, 5.95, 0.59, 36),
+    _sf("SF0426", "Parabolic SAR Flip · 30m", 24, 14.14, 1.77, 54),
+    _sf("SF0243", "Prior Session High/Low Break · 15m", 78, 17.38, 1.14, 41),
 )
 # picked by the owner on 14 Nov 2026 from the Crypto tab; records = their bitcoin paper trades at 09:44 IST
 CRYPTO_PICKS: tuple[Pick, ...] = (
@@ -278,31 +333,35 @@ CRYPTO_PICKS: tuple[Pick, ...] = (
          NEW_PICKED_AT_2),
 )
 GOLD_NOTES = (
-    "Real money on 30 unproven gold strategies: five picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, "
-    "and on 18 Nov seventeen more Premium gold books and six templates of the Gold Desk's H1 test, at the owner's chosen "
-    "size: one contract a trade, the smallest order (or $1 to $5 of risk picked on this page), and a $20 daily loss stop.",
-    "Eleven of the 30 lose in their own 2-year backtests, three earn too little there to mean anything (t under 2), ten "
-    "were never backtested and the six H1 templates were tested only as a family; a few good paper trades picked them.",
+    "Real money on 50 unproven gold strategies: five picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, "
+    "on 18 Nov seventeen more Premium gold books and six templates of the Gold Desk's H1 test, and on 19 Nov the Gold "
+    "Desk Strategy Factory board's top 20, at the owner's chosen size: one contract a trade, the smallest order Delta "
+    "allows (or $1 to $5 of risk picked on this page).",
+    "Eleven lose in their own 2-year backtests, three earn too little there to mean anything (t under 2), ten were never "
+    "backtested, the six H1 templates were tested only as a family and the 20 Factory strategies only by the Factory's "
+    "own backtest (whose replay reads future 4-hour bars); a few good paper trades picked them.",
     "Every one of them trades on Delta's own live data: the paper desk reads gold from Delta's XAUTUSD one-minute "
-    "candles (not from COMEX or Yahoo), and the real orders go to Delta's XAUTUSD perpetual.",
-    "This desk trades gold (XAUTUSD) only; the bitcoin desk is beside it on the Delta Exchange Live Trading page (since "
-    "16 Nov both desks are there). Each has its own switch and its own $20 daily stop.",
-    "Each real trade is the paper desk's trade: its entry signal, its stop, its target, its exit. From 19 Nov (the "
-    "owner's ask) EVERY open paper trade of the 30 is copied, however late this desk sees it and however far the price "
-    "has moved from the paper entry, and trades already open on paper when the desk was switched on are copied too. "
-    "So a real trade can start at a worse price than its paper twin, with the paper's own stop and target.",
+    "candles (not from COMEX or Yahoo), the Gold Desk's H1 test and its Strategy Factory tab trade Delta's XAUTUSD, and "
+    "the real orders go to Delta's XAUTUSD perpetual.",
+    "EVERY signal becomes a real position (the owner's ask, 19 Nov): an open paper trade of any of the 50 is copied, "
+    "however late this desk sees it and however far the price has moved from the paper entry, including trades already "
+    "open when the desk was switched on, with the paper's own stop and target. There is no daily loss stop and no cap on "
+    "what one contract may lose: the only rule is the size, one contract.",
     "A copy waits, and is tried again every cycle, while the price is not at least a little inside the paper's stop and "
-    "target (5 ticks and a tenth of its risk), while the paper desk is silent, or while Delta gives no quote; it is never "
-    "given up for being late. What still stops a copy: the paper trade closing first, the $20 daily loss stop, one "
-    "contract losing more than $5 at its stop, too little free balance, and the switches (this desk's and Main Control).",
+    "target (5 ticks and a tenth of its risk, so a fill cannot land past a level), while its source is silent, while "
+    "Delta gives no quote, or while the wallet has too little free margin; it is never given up for being late. A paper "
+    "trade that closes before it is copied is not copied, and the switches (this desk's and Main Control) still apply.",
     "A paper trade with no stop at all (PR-12's Supertrend ladder) gets a protective stop on Delta 3% from its fill, so no "
-    "real trade is ever without a stop; it otherwise closes when its paper trade does.",
-    "The six H1 templates' trades are the Gold Desk's own H1 positions (4-hour bars, held up to ten days), copied the "
-    "same way; this desk only reads the H1 record and never changes it.",
-    "One gold contract is 0.001 XAUT (about $4 of gold), so a trade of one contract loses cents at its stop. A trade "
-    "whose one contract would lose more than $5 is skipped (or more than the chosen risk, with a dollar risk).",
-    "All 30 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
+    "real trade is ever without a stop; it otherwise closes when its paper trade does. A stop farther than 7% from the "
+    "price is pulled in to 7%: at 10x leverage Delta liquidates a position about 9.5% against it.",
+    "The six H1 templates' trades are the Gold Desk's own H1 positions (4-hour bars, held up to ten days), and the 20 "
+    "Factory strategies' are the positions of the Gold Desk's Strategy Factory tab ($1,111 paper sleeves on closed bars "
+    "of 15 minutes to 1 hour); both are copied the same way, and this desk only reads them.",
+    "One gold contract is 0.001 XAUT (about $4 of gold), so a trade of one contract loses cents at its stop.",
+    "All 50 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
     "target on Delta, and Delta shows their sum as one gold position.",
+    "This desk trades gold (XAUTUSD) only; the bitcoin desk is beside it on the Delta Exchange Live Trading page. Each "
+    "has its own switch.",
     "Each trade's stop and target live on Delta itself, so it stays protected if this server goes down.",
     "Leverage is set to 10x on XAUTUSD before going live; positions are capped at $2,500 of notional.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
@@ -310,23 +369,29 @@ GOLD_NOTES = (
 CRYPTO_NOTES = (
     "Real money on 15 bitcoin strategies the owner picked (TH-05, TL-04, TH-01 on 14 Nov 2026 and TD-02 on 15 Nov "
     "from the Crypto tab; TH-06, DT-02, RU-06, NJ-47, RU-03, TH-04, DT-01, TH-07, NJ-27, PT-04 and SB-04 on 18 Nov from "
-    "the Premium leaderboard), at the owner's chosen size: one contract a trade, the smallest order (or $1 to $5 of risk "
-    "picked on this page), and a $20 daily loss stop.",
+    "the Premium leaderboard), at the owner's chosen size: one contract a trade, the smallest order Delta allows (or $1 "
+    "to $5 of risk picked on this page).",
     "None is proven: six lose in their own 2-year bitcoin backtests (TL-04 -0.31R a trade over 2,134 trades, TD-02 "
     "-0.37R over 998, DT-02 -0.18R over 1,170, RU-03 -0.081R over 417, DT-01 -0.11R over 281, PT-04 -0.20R over 270) "
     "and nine were never backtested; 0 to 15 paper trades picked them.",
-    "Each real trade is the paper desk's trade on Delta's live BTCUSD candles: its entry, stop, target and exit. A "
-    "signal seen more than 10 minutes late, or already 30% of its risk away, is skipped, never chased. One bitcoin "
-    "contract is 0.001 BTC; a trade whose one contract would lose more than $5 at its stop is skipped too (or more "
-    "than the chosen risk, with a dollar risk).",
+    "EVERY signal becomes a real position (the owner's ask, 19 Nov): each real trade is the paper desk's trade on "
+    "Delta's live BTCUSD candles, its entry, stop, target and exit, copied however late this desk sees it and however "
+    "far the price has moved, including trades already open when the desk was switched on. There is no daily loss stop "
+    "and no cap on what one contract may lose: the only rule is the size, one contract (0.001 BTC).",
+    "A copy waits, and is tried again every cycle, while the price is not at least a little inside the paper's stop and "
+    "target, while the paper desk is silent, while Delta gives no quote, or while the wallet has too little free margin: "
+    "each open bitcoin contract holds about a tenth of its notional (about $6) as margin. A paper trade that closes "
+    "before it is copied is not copied.",
+    "A stop farther than 7% from the price is pulled in to 7% on Delta (TH-04's paper stops have been 15-30% away): at "
+    "10x leverage Delta liquidates a position about 9.5% against it, so a farther stop could never be reached. A paper "
+    "trade with no stop gets one 3% away.",
     "All 15 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
-    "target on Delta, and Delta shows their sum as one bitcoin position. Each open trade holds about a tenth of its "
-    "notional as margin, so with several open at once a new one can be skipped for want of free balance.",
+    "target on Delta, and Delta shows their sum as one bitcoin position.",
     "Each trade's stop and target live on Delta itself, so it stays protected if this server goes down.",
     "Leverage is set to 10x on BTCUSD before going live; positions are capped at $2,500 of notional.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
     "This desk and the gold desk (beside it on this page, and on Premium Strategies > Real money · Delta gold) share the "
-    "Delta account and its keys; each has its own switch and its own $20 daily stop.",
+    "Delta account and its keys; each has its own switch.",
 )
 
 
@@ -357,15 +422,16 @@ DESKS: dict[str, Desk] = {
     "gold": Desk("gold", "Real money · Delta gold", GOLD_PICKS, "live_delta_state", "live_delta_trades", RISK_USD,
                  DAILY_STOP_USD, PICKED_AT, GOLD_NOTES, GOLD_MAX_LAG_S, follow_all=True),
     "crypto": Desk("crypto", "Delta Exchange Live Trading", CRYPTO_PICKS, "live_crypto_state", "live_crypto_trades",
-                   CRYPTO_RISK_USD, CRYPTO_DAILY_STOP_USD, CRYPTO_PICKED_AT, CRYPTO_NOTES, CRYPTO_MAX_LAG_S),
+                   CRYPTO_RISK_USD, CRYPTO_DAILY_STOP_USD, CRYPTO_PICKED_AT, CRYPTO_NOTES, CRYPTO_MAX_LAG_S,
+                   follow_all=True),
 }
 if set(DESKS["gold"].products) & set(DESKS["crypto"].products):
     raise RuntimeError("two desks may never trade the same product")
 for _k, _desk in DESKS.items():
     if len(_desk.pick) != len(_desk.picks):
         raise RuntimeError(f"the {_k} desk names one book twice")
-    if any(p.src == GOLD_H1 and not p.template for p in _desk.picks):
-        raise RuntimeError(f"the {_k} desk has an H1 pick without its template")
+    if any(p.src in (GOLD_H1, GOLD_SF) and not p.template for p in _desk.picks):
+        raise RuntimeError(f"the {_k} desk has an H1 or Factory pick without its template")
 # The desk the current task works for. The loop and every API call set it (_use); the default is the gold desk, so
 # a caller that names no desk gets the original one.
 _CUR: contextvars.ContextVar[str] = contextvars.ContextVar("premium_live_desk", default="gold")
@@ -550,7 +616,7 @@ async def _paper(db, since: float, ids: list[str]) -> dict[str, dict]:
     want = set(ids)
     accts = sorted({p.acct for p in _d().picks if p.src == PREMIUM})
     ors: list[dict] = [{"acct": {"$in": accts}, "entry_t": {"$gte": int(since) - _d().max_lag_s}},
-                       {"_id": {"$in": [i for i in ids if not i.startswith(H1_ID)]}}]
+                       {"_id": {"$in": [i for i in ids if not (i.startswith(H1_ID) or i.startswith(SF_ID))]}}]
     if _d().follow_all:
         ors.append({"acct": {"$in": accts}, "open": True})
     q = {"qty": {"$gt": 0}, "$or": ors}
@@ -643,6 +709,81 @@ async def _h1_age() -> float:
     return _now() - at if at else float("inf")
 
 
+# -- the third source: the Gold Desk's Strategy Factory tab (19 Nov 2026) -----------------------------------
+
+SF_DESK = "gold"                               # the Factory tab whose positions the gold desk copies
+_SF_FIELDS = {"position_id": 1, "strategy_id": 1, "strategy_name": 1, "signal_side": 1, "side": 1, "entry_px": 1,
+              "under_entry": 1, "stop": 1, "target": 1, "opened_at": 1, "status": 1, "exit_px": 1, "exit_reason": 1,
+              "pattern": 1, "capital_deployed": 1, "closed_at": 1, "under_ltp": 1, "realized_pnl": 1}
+
+
+def _sf_coll():
+    """The Factory tabs' positions, in the Factory's own store (a function, so a test can swap it)."""
+    from app.services.factory_desks import POSITIONS
+    return POSITIONS
+
+
+def _sf_state_coll():
+    from app.services.factory_desks import STATE
+    return STATE
+
+
+def _sf_picks() -> dict[str, Pick]:
+    """This desk's Factory picks by strategy_id."""
+    return {p.template: p for p in _d().picks if p.src == GOLD_SF and p.template}
+
+
+def is_sf(trade_id: str) -> bool:
+    return str(trade_id).startswith(SF_ID)
+
+
+def _sf_as_paper(pos: dict, pick: Pick | None) -> dict:
+    """A Factory tab position in the shape of a paper trade. Its stop and target are levels of XAUTUSD itself (the tab
+    trades the perpetual both sides at 1x); qty = its sleeve in ounces, for its R."""
+    status = str(pos.get("status") or "").upper()
+    side = str(pos.get("signal_side") or pos.get("side") or "").upper()
+    entry = float(pos.get("entry_px") or pos.get("under_entry") or 0.0)
+    reason = pos.get("exit_reason")
+    return {"_id": SF_ID + str(pos["position_id"]), "src": GOLD_SF,
+            "acct": pick.acct if pick else str(pos.get("strategy_id")), "mkt": pick.mkt if pick else "XAUTUSD",
+            "side": 1 if side == "BUY" else -1, "entry": entry, "stop": float(pos.get("stop") or 0.0),
+            "target": float(pos["target"]) if pos.get("target") else None,
+            "entry_t": _ts(pos.get("opened_at")) or 0.0, "open": status == "OPEN",
+            "exit": float(pos["exit_px"]) if pos.get("exit_px") is not None else None,
+            "reason": "stop" if reason == "stoploss" else reason,
+            "setup": pos.get("pattern") or pos.get("strategy_name"),
+            "qty": float(pos.get("capital_deployed") or 0.0) / entry if entry else 0.0}
+
+
+async def _paper_sf(since: float, ids: list[str]) -> dict[str, dict]:
+    """The desk's Factory picks' positions opened since `since` (every open one on a follow_all desk), plus any an open
+    real trade points at. Raises when the Factory's store cannot be read: the caller then leaves those trades waiting."""
+    picks = _sf_picks()
+    held = [i[len(SF_ID):] for i in ids if is_sf(i)]
+    if not picks and not held:
+        return {}
+    ors: list[dict] = []
+    if picks:
+        ors.append({"strategy_id": {"$in": sorted(picks)},
+                    "opened_at": {"$gte": datetime.fromtimestamp(int(since) - _d().max_lag_s, timezone.utc)}})
+        if _d().follow_all:
+            ors.append({"strategy_id": {"$in": sorted(picks)}, "status": "OPEN"})
+    if held:
+        ors.append({"position_id": {"$in": held}})
+    out = {}
+    async for pos in _sf_coll().find({"desk": SF_DESK, "symbol": "XAUTUSD", "$or": ors}, _SF_FIELDS):
+        t = _sf_as_paper(pos, picks.get(pos.get("strategy_id")))
+        out[t["_id"]] = t
+    return out
+
+
+async def _sf_age() -> float:
+    """Seconds since the Gold Desk's Strategy Factory tab last finished a cycle (factory_desk_state "cycle:gold" at)."""
+    s = await _sf_state_coll().find_one({"_id": f"cycle:{SF_DESK}"}, {"at": 1})
+    at = _ts((s or {}).get("at"))
+    return _now() - at if at else float("inf")
+
+
 # -- the page's paper view (18 Nov 2026): each strategy's own paper trades beside what this desk did with them ----
 
 PAPER_TTL_S = 30.0             # the paper view is re-read at most this often a desk (the page polls every 15 s)
@@ -688,6 +829,16 @@ async def _paper_rows(db) -> list[dict]:
             unit = abs(t["entry"] - t["stop"])
             closed = str(pos.get("status") or "").upper() == "CLOSED" and not pos.get("void")
             t.update(exit_t=_ts(pos.get("closed_at")), last=pos.get("ltp"), unit=unit,
+                     r_net=float(pos.get("realized_pnl") or 0.0) / (unit * t["qty"]) if closed and unit and t["qty"] else None)
+            rows.append(t)
+    sfp = _sf_picks()
+    if sfp:                                    # the Factory picks' tab positions, read the same way (19 Nov)
+        async for pos in _sf_coll().find({"desk": SF_DESK, "symbol": "XAUTUSD", "strategy_id": {"$in": sorted(sfp)}},
+                                         _SF_FIELDS):
+            t = _sf_as_paper(pos, sfp.get(pos.get("strategy_id")))
+            unit = abs(t["entry"] - t["stop"])
+            closed = str(pos.get("status") or "").upper() == "CLOSED"
+            t.update(exit_t=_ts(pos.get("closed_at")), last=pos.get("under_ltp"), unit=unit,
                      r_net=float(pos.get("realized_pnl") or 0.0) / (unit * t["qty"]) if closed and unit and t["qty"] else None)
             rows.append(t)
     return rows
@@ -754,6 +905,8 @@ async def _paper_view(db, st: dict) -> dict | None:
         view = {"per": per, "signals": signals, "at": _now(), "paper_age_s": round(await _desk_age(db), 1)}
         if _h1_picks():
             view["gold_desk_age_s"] = round(await _h1_age(), 1)
+        if _sf_picks():
+            view["factory_age_s"] = round(await _sf_age(), 1)
     except Exception:  # noqa: BLE001 - the page then shows the desk without its paper side
         logger.warning("[premium live] the paper view could not be read", exc_info=True)
         return None
@@ -1318,10 +1471,11 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
     guard = follow and stop <= 0 and entry > 0       # no stop on paper: the copy carries a protective one (19 Nov)
     if (stop <= 0 and not guard) or entry <= 0:
         return await skip("no stop on the paper trade")
-    if day_pnl <= -_d().daily_stop_usd:
-        return await hold(f"daily loss stop reached ({day_pnl:+.2f} USD today)")
+    if not follow and day_pnl <= -_d().daily_stop_usd:    # a follow_all desk has no daily stop (the owner, 19 Nov)
+        return await skip(f"daily loss stop reached ({day_pnl:+.2f} USD today)")
     if desk_age > DESK_STALE_S:
-        who = "the Gold Desk" if paper.get("src") == GOLD_H1 else "the paper desk"
+        who = {GOLD_H1: "the Gold Desk", GOLD_SF: "the Gold Desk's Strategy Factory tab"}.get(paper.get("src"),
+                                                                                           "the paper desk")
         return await hold(f"{who} has not updated for over 20 minutes")
     product = products[pick.product]
     if mode == "live" and pick.product in busy:
@@ -1336,6 +1490,11 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
     if guard:
         stop = round(px * (1 - GUARD_STOP_FRAC) if side > 0 else px * (1 + GUARD_STOP_FRAC), 6)
         base.update(stop=stop, paper_stop=None, guard_stop=True)
+    elif follow and side * (px - stop) > MAX_STOP_FRAC * px:
+        # with no cap on what one contract may lose, the liquidation distance is the limit: pulled in to 7%
+        base.update(paper_stop=stop, stop_capped=True)
+        stop = round(px * (1 - MAX_STOP_FRAC) if side > 0 else px * (1 + MAX_STOP_FRAC), 6)
+        base["stop"] = stop
     lo, hi = (stop, target if target else math.inf) if side > 0 else (target if target else 0.0, stop)
     if follow:
         # however late, however far: only the price must still sit inside both levels, with room for the fill
@@ -1353,8 +1512,8 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
         base["late_s"] = round(lag)
     sizing = _sizing(st)
     one = abs(px - stop) * product.contract_value           # what a single contract loses at the stop
-    if sizing == "min":                                     # the smallest order; the desk's own risk still caps it
-        if one > _d().risk_usd:
+    if sizing == "min":         # the smallest order; the desk's own risk caps it, except on a follow_all desk (19 Nov)
+        if one > _d().risk_usd and not follow:
             return await skip(f"one contract would lose ${one:.2f} at its stop, more than the ${_d().risk_usd:.2f} cap a "
                               "trade", price=px)
         risk, by_risk = one, 1
@@ -1381,15 +1540,19 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
 
     if cache.get("wallet_down"):                     # already failed this cycle: one venue error a cycle, not one a copy
         return await hold("could not read the wallet")
-    try:
-        w = await D.wallet()
-    except DeltaError as exc:
-        cache["wallet_down"] = True
-        await _venue_error(db, st, f"wallet read failed ({exc})")
-        return await hold("could not read the wallet")
+    w = cache.get("wallet")
+    if w is None:                                    # read once a pass; each entry then takes its margin off it
+        try:
+            w = dict(await D.wallet())
+        except DeltaError as exc:
+            cache["wallet_down"] = True
+            await _venue_error(db, st, f"wallet read failed ({exc})")
+            return await hold("could not read the wallet")
+        cache["wallet"] = w
     if w["available"] < plan["margin_usd"] * MARGIN_BUFFER:
-        return await skip(f"not enough free balance (${w['available']:.2f} for ${plan['margin_usd']:.2f} of margin)")
+        return await hold(f"not enough free balance (${w['available']:.2f} for ${plan['margin_usd']:.2f} of margin)")
     waits.pop(tid, None)
+    w["available"] -= plan["margin_usd"]
     await _tc(db).insert_one({**base, "status": "entering", "plan": plan, "contracts": contracts})
     try:
         o = await D.market(product.id, contracts, _side(side), client_order_id=_cid(tid))
@@ -1472,6 +1635,24 @@ async def _cycle_one() -> dict:
                 h1_ok = False
                 out["gold_desk"] = f"the Gold Desk's H1 positions could not be read ({str(exc)[:120]}): its trades wait"
                 logger.warning("[premium live] the Gold Desk's H1 positions could not be read", exc_info=True)
+        sf_age, sf_ok = float("inf"), True                 # the Gold Desk's Strategy Factory tab: the third source
+        if _sf_picks() or any(is_sf(i) for i in want):
+            try:
+                paper.update(await _paper_sf(since, want))
+                sf_age = await _sf_age()
+            except Exception as exc:  # noqa: BLE001 - its trades wait for the next good read, never closed for this
+                sf_ok = False
+                out["factory"] = (f"the Gold Desk's Strategy Factory positions could not be read ({str(exc)[:120]}): "
+                                  "its trades wait")
+                logger.warning("[premium live] the Gold Desk's Strategy Factory positions could not be read", exc_info=True)
+
+        def unread(i: str) -> bool:                         # a source that could not be read this pass
+            return (is_h1(i) and not h1_ok) or (is_sf(i) and not sf_ok)
+
+        def age_of(i: str, src: str | None = None) -> float:
+            if is_h1(i) or src == GOLD_H1:
+                return h1_age
+            return sf_age if (is_sf(i) or src == GOLD_SF) else desk_age
         live_rows = [t for t in open_rows if t.get("mode") == "live"]
         positions: dict | None = None
         resting: dict | None = {}
@@ -1495,10 +1676,9 @@ async def _cycle_one() -> dict:
                 await _venue_error(db, st, f"resting orders unavailable ({exc})")
                 resting = None
         for t in open_rows:
-            h1 = is_h1(t["_id"])
-            if h1 and not h1_ok and t.get("status") == "open":
+            if unread(t["_id"]) and t.get("status") == "open":
                 continue                    # unread, not gone: its stop and target rest on Delta until the next pass
-            age = h1_age if h1 else desk_age
+            age = age_of(t["_id"])
             if t.get("mode") == "live":
                 if positions is not None:
                     await _manage_live(db, st, t, paper.get(t["_id"]), positions, products, age, resting)
@@ -1521,7 +1701,7 @@ async def _cycle_one() -> dict:
                 return out
             busy = await _legacy_products(db)
         day_pnl = await _day_pnl(db, st["mode"], positions)
-        for tid in [i for i in waits if i in decided or (i not in paper and (h1_ok or not is_h1(i)))]:
+        for tid in [i for i in waits if i in decided or (i not in paper and not unread(i))]:
             waits.pop(tid, None)                            # decided elsewhere, or gone from the paper desk
         cache: dict = {}                                    # this pass's quotes, shared by its entries
         for tid, p in sorted(paper.items(), key=lambda kv: kv[1].get("entry_t") or 0):
@@ -1537,8 +1717,7 @@ async def _cycle_one() -> dict:
                 continue
             if st["mode"] == "live" and not books.get(pk.product, False):
                 continue                        # the account does not match the trades yet: wait, undecided
-            res = await _enter(db, st, pk, p, products, busy, day_pnl, h1_age if p.get("src") == GOLD_H1 else desk_age,
-                               cache)
+            res = await _enter(db, st, pk, p, products, busy, day_pnl, age_of(tid, p.get("src")), cache)
             if res.startswith("waiting:"):
                 out["waiting"] = out.get("waiting", 0) + 1     # counted, not listed: the loop logs only real decisions
             else:
@@ -1807,13 +1986,15 @@ async def _status_one() -> dict:
                    "risk_set_at": st.get("risk_set_at"), "sizing": _sizing(st), "daily_stop_usd": _d().daily_stop_usd,
                    "max_notional_usd": MAX_NOTIONAL_USD, "leverage": LEVERAGE, "max_lag_s": _d().max_lag_s,
                    "drift_frac": DRIFT_FRAC, "tick_s": TICK_S, "follow_all": _d().follow_all,
+                   "daily_stop_on": not _d().follow_all, "contract_cap_on": not _d().follow_all,
                    "waiting": len(_WAITING.get(_d().key, {}))},
         "today": today, "totals": totals, "picked_at": _d().picked_at, "picks": picks,
         "desk": _d().key, "title": _d().title, "desk_products": _d().products,
         "open": [_clean(t) for t in rows if t.get("status") in ("entering", "open", "closing")],
         "recent": [_clean(t) for t in rows[:150]], "notes": list(_d().notes),
         "signals": None if view is None else view["signals"],
-        "paper_view": None if view is None else {k: view[k] for k in ("at", "paper_age_s", "gold_desk_age_s") if k in view},
+        "paper_view": None if view is None else {k: view[k] for k in ("at", "paper_age_s", "gold_desk_age_s", "factory_age_s")
+                                                          if k in view},
     }
 
 
