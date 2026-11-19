@@ -52,6 +52,21 @@ Rs 10 lakh paper account for EACH of the top 5 strategies, read off the board as
 Keltner Breakout. Four are 12 Nov picks too; Keltner Breakout replaced HH/HL Structure Shift. These ten are new
 accounts (own2L_1..5, own10L_1..5) that start empty; the seven 12 Nov books keep their roster and their record.
 They are the each10L kind: one position at a time, each entry sized on that account's realised equity.
+
+ALL NINE H1 STRATEGIES ON Rs 2 LAKH AND Rs 10 LAKH (19 Nov 2026). The owner asked, from the Delta Gold H1 tab, for Rs 2
+lakh and Rs 10 lakh paper accounts trading the strategies on its board - all nine H1 templates, not a top five
+(PICKS_H1, read off the board at 20:15 IST 19 Nov: 9 ranked, 130 closed trades). Twenty new accounts that start empty:
+
+    h1_2L             one Rs 2 lakh account the nine share     at most 9 positions, each up to Rs 22,222
+    h1_10L            one Rs 10 lakh account the nine share    at most 9 positions, each up to Rs 1,11,111
+    h1own2L_1..9      each of the nine on its own Rs 2 lakh    one position at a time, sized on its own balance
+    h1own10L_1..9     each of the nine on its own Rs 10 lakh   one position at a time, sized on its own balance
+
+A shared account is H1 itself in rupees: H1 runs the nine in equal sleeves of capital / 9, one position per template at
+a time, so nine slots never turn a trade away. Five of the nine already have 18 Nov own accounts; these are separate
+accounts with their own start, and every earlier account keeps its roster and its record. Four of the nine (ATR
+Expansion Thrust, Prior Session High/Low Break, HH/HL Structure Shift and Donchian Breakout (slow)) had a negative
+t-stat or under ten trades when picked: they are in because the owner asked for the board's strategies, not for the best.
 """
 
 from __future__ import annotations
@@ -118,15 +133,32 @@ PICKS_1811: tuple[Pick, ...] = (
     Pick(4, "XAUTUSD-pivot_break-4h", "pivot_break", "4h", "Pivot R1/S1 Break · 4h", 57.7, 20, 12.72, 28.13, 0.50),
     Pick(5, "XAUTUSD-keltner_break-4h", "keltner_break", "4h", "Keltner Breakout · 4h", 49.7, 14, 6.45, 9.96, 0.16),
 )
-ALL_PICKS = (*PICKS, *PICKS_1811)
+# 19 Nov 2026: all nine H1 templates, in the board's Rank order at 20:15 IST (/api/strategy-rank/gold?venue=delta,
+# 9 ranked, 130 closed trades). net_usd is each one's realised P&L on the desk's Delta board then (one $10,000 / 9 sleeve).
+PICKED_AT_H1 = "2026-11-19T20:15:00+05:30"
+BOARD_H1 = "the Gold Desk's Rank on its Delta board: all nine of H1's 4h templates on XAUTUSD, 130 closed trades"
+PICKS_H1: tuple[Pick, ...] = (
+    Pick(1, "XAUTUSD-ema_ribbon-4h", "ema_ribbon", "4h", "EMA Ribbon Compression · 4h", 68.0, 12, 48.44, 64.39, 1.31),
+    Pick(2, "XAUTUSD-round_number_break-4h", "round_number_break", "4h", "Round Number Break · 4h", 67.5, 20, 14.87, 33.00, 0.78),
+    Pick(3, "XAUTUSD-donchian_fast-4h", "donchian_fast", "4h", "Donchian Breakout (fast) · 4h", 60.0, 16, 22.87, 40.56, 0.66),
+    Pick(4, "XAUTUSD-pivot_break-4h", "pivot_break", "4h", "Pivot R1/S1 Break · 4h", 53.8, 20, 12.72, 28.13, 0.50),
+    Pick(5, "XAUTUSD-donchian_slow-4h", "donchian_slow", "4h", "Donchian Breakout (slow) · 4h", 53.2, 5, 48.18, 26.85, 0.48),
+    Pick(6, "XAUTUSD-keltner_break-4h", "keltner_break", "4h", "Keltner Breakout · 4h", 44.8, 14, 6.45, 9.96, 0.16),
+    Pick(7, "XAUTUSD-hh_hl_shift-4h", "hh_hl_shift", "4h", "HH/HL Structure Shift · 4h", 44.4, 9, -3.06, -3.02, -0.07),
+    Pick(8, "XAUTUSD-atr_thrust-4h", "atr_thrust", "4h", "ATR Expansion Thrust · 4h", 35.2, 10, -46.92, -52.07, -1.84),
+    Pick(9, "XAUTUSD-prior_session_break-4h", "prior_session_break", "4h", "Prior Session High/Low Break · 4h",
+         17.5, 24, -17.00, -45.31, -0.66),
+)
+ALL_PICKS = (*PICKS, *PICKS_1811, *PICKS_H1)
 PICK = {p.key: p for p in ALL_PICKS}          # a strategy's name, whichever set it is in
 ROSTER = tuple(p.key for p in PICKS)
+ROSTER_H1 = tuple(p.key for p in PICKS_H1)
 
 
 @dataclass(frozen=True)
 class Book:
     id: str
-    group: str                 # "2L" | "10L" | "each10L"
+    group: str                 # "2L" | "10L" | "each10L" | "own2L" | "own10L" | "h1_2L" | "h1_10L" | "h1own2L" | "h1own10L"
     label: str
     capital: float
     roster: tuple[str, ...]
@@ -149,9 +181,17 @@ BOOKS: tuple[Book, ...] = (
     *(Book(f"own2L_{p.n}", "own2L", f"{p.name} · its own ₹2 lakh", CAPITAL_2L, (p.key,), 1, True) for p in PICKS_1811),
     *(Book(f"own10L_{p.n}", "own10L", f"{p.name} · its own ₹10 lakh", CAPITAL_10L, (p.key,), 1, True)
       for p in PICKS_1811),
+    # 19 Nov 2026: all nine H1 strategies - one ₹2 lakh and one ₹10 lakh account the nine share, and each on its own
+    Book("h1_2L", "h1_2L", "H1 nine · ₹2 lakh", CAPITAL_2L, ROSTER_H1, len(ROSTER_H1), False),
+    Book("h1_10L", "h1_10L", "H1 nine · ₹10 lakh", CAPITAL_10L, ROSTER_H1, len(ROSTER_H1), False),
+    *(Book(f"h1own2L_{p.n}", "h1own2L", f"{p.name} · H1 nine, its own ₹2 lakh", CAPITAL_2L, (p.key,), 1, True)
+      for p in PICKS_H1),
+    *(Book(f"h1own10L_{p.n}", "h1own10L", f"{p.name} · H1 nine, its own ₹10 lakh", CAPITAL_10L, (p.key,), 1, True)
+      for p in PICKS_H1),
 )
 BOOK = {b.id: b for b in BOOKS}
-EACH_GROUPS = ("each10L", "own2L", "own10L")      # one account a strategy
+EACH_GROUPS = ("each10L", "own2L", "own10L", "h1own2L", "h1own10L")      # one account a strategy
+H1_GROUPS = ("h1_2L", "h1_10L", "h1own2L", "h1own10L")                   # the 19 Nov accounts on all nine
 GROUPS = (
     {"group": "2L", "label": "Top 5 · ₹2 lakh", "about": "one ₹2 lakh account the five share: up to 5 positions of ₹40,000"},
     {"group": "10L", "label": "Top 5 · ₹10 lakh", "about": "one ₹10 lakh account the five share: up to 5 positions of ₹2,00,000"},
@@ -161,6 +201,14 @@ GROUPS = (
      "about": "five ₹2 lakh accounts, one per strategy of the 18 Nov top 5: each trade uses that account's own balance"},
     {"group": "own10L", "label": "18 Nov top 5 · ₹10 lakh each",
      "about": "five ₹10 lakh accounts, one per strategy of the 18 Nov top 5: each trade uses that account's own balance"},
+    {"group": "h1_2L", "label": "H1 nine · ₹2 lakh",
+     "about": "one ₹2 lakh account all nine H1 strategies share: up to 9 positions of ₹22,222"},
+    {"group": "h1_10L", "label": "H1 nine · ₹10 lakh",
+     "about": "one ₹10 lakh account all nine H1 strategies share: up to 9 positions of ₹1,11,111"},
+    {"group": "h1own2L", "label": "H1 nine · ₹2 lakh each",
+     "about": "nine ₹2 lakh accounts, one per H1 strategy: each trade uses that account's own balance"},
+    {"group": "h1own10L", "label": "H1 nine · ₹10 lakh each",
+     "about": "nine ₹10 lakh accounts, one per H1 strategy: each trade uses that account's own balance"},
 )
 NOTES = (
     "The five are the top of this desk's Rank on 12 Nov 2026 at 22:54 IST and stay fixed. They had 8 to 18 closed "
@@ -180,6 +228,22 @@ NOTES = (
     "Breakout replaced HH/HL Structure Shift in the five; the 12 Nov accounts keep their five. They had 12 to 20 closed "
     "trades each and the best t-stat was 1.31 - still a short record, not an edge. A ₹2 lakh account's position is "
     "about twice H1's size.",
+    "19 Nov 2026: all nine H1 strategies, not a top five, on twenty more accounts - a ₹2 lakh and a ₹10 lakh account "
+    "the nine share (each position up to a ninth, as H1's sleeves are) and each of the nine on its own ₹2 lakh and its "
+    "own ₹10 lakh. Four of the nine had a negative t-stat or under ten trades when picked; they are in because the "
+    "owner asked for the board's strategies. They copy H1's Delta XAUTUSD trades from their start; nothing is "
+    "back-filled.",
+)
+# What the page's H1-nine view says (19 Nov 2026): the general notes, with the pick and the depth stated for these accounts
+NOTES_H1 = (
+    "The nine are all of H1's pre-registered templates, in this desk's Rank order on 19 Nov 2026 at 20:15 IST, and stay "
+    "fixed. They had 5 to 24 closed trades each; the best t-stat was 1.31 and four were below zero. A record, not an edge.",
+    NOTES[1], NOTES[2], NOTES[3],
+    "H1 fills at the touch for about 280 contracts a trade. A shared ₹2 lakh account's position (up to ₹22,222) is about "
+    "a fifth of that and a shared ₹10 lakh one's (up to ₹1,11,111) about the same; an own ₹2 lakh account's is about "
+    "twice and an own ₹10 lakh account's about ten times. The extra depth the larger ones would eat is not modelled.",
+    "These twenty accounts started when they first ran and copy only trades H1 opens after that; nothing is back-filled. "
+    "Main Control's Gold Desk switch stops new copies.",
 )
 
 
@@ -628,6 +692,9 @@ async def overview() -> dict:
         # 18 Nov 2026: that day's top 5, each on its own Rs 2 lakh and Rs 10 lakh (own2L_n / own10L_n)
         "picks_1811": [asdict(p) for p in PICKS_1811], "picked_at_1811": PICKED_AT_1811, "board_1811": BOARD_1811,
         "group_totals": {g: _sum_books([b for b in books if b["group"] == g]) for g in EACH_GROUPS},
+        # 19 Nov 2026: all nine H1 strategies (h1_2L / h1_10L shared, h1own2L_n / h1own10L_n each on its own)
+        "picks_h1": [asdict(p) for p in PICKS_H1], "picked_at_h1": PICKED_AT_H1, "board_h1": BOARD_H1,
+        "h1_groups": list(H1_GROUPS), "notes_h1": list(NOTES_H1),
         "usd_inr": {"rate": fx.get("rate"), "asof": fx.get("asof"), "at": _iso(fx.get("at"))} if fx else None,
         "notes": list(NOTES),
     }

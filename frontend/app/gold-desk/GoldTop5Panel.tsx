@@ -6,6 +6,9 @@
 // (backend app/services/gold_top5_books.py). Paper only: nothing here can place an order.
 // 18 Nov 2026: that day's top 5 (Keltner Breakout in for HH/HL Structure Shift), each on its own ₹2 lakh and its own
 // ₹10 lakh account (own2L_n / own10L_n) - a second section below the 12 Nov accounts, which keep their five.
+// 19 Nov 2026: all nine H1 strategies on twenty more accounts - a ₹2 lakh and a ₹10 lakh account the nine share
+// (h1_2L / h1_10L) and each of the nine on its own ₹2 lakh and ₹10 lakh (h1own2L_n / h1own10L_n). They are the
+// same engine's books, so this panel shows them as a second view (view="h1"), on its own tab of the page.
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../../lib/api";
 import { DAY_COL_TITLES, dayCell, istDaysSince, pctCell, perDayTraded, toneOf } from "../../lib/dayReturns";
@@ -17,7 +20,8 @@ type StratRow = { key: string; name: string; trades: number; wins: number; net: 
 type Money = { capital: number; equity: number; realized_pnl: number; unrealized_pnl: number; deployed: number;
   available_cash: number; fees: number; gross_pnl: number; open_positions: number; closed_positions: number; wins: number;
   win_rate: number | null; roi_pct: number };
-type Book = Money & { id: string; group: "2L" | "10L" | "each10L" | "own2L" | "own10L"; label: string; roster: string[];
+type Book = Money & { id: string;
+  group: "2L" | "10L" | "each10L" | "own2L" | "own10L" | "h1_2L" | "h1_10L" | "h1own2L" | "h1own10L"; label: string; roster: string[];
   max_open: number; position_cap: number | null; compound: boolean; skipped: Record<string, number>; voided: number;
   started_at: string | null; strategies: StratRow[];
   /** The IST days a copy closed on (18 Nov 2026; absent on a server not yet updated). */
@@ -35,7 +39,10 @@ export type Overview = { mode: string; enabled: boolean; tick_seconds: number; p
   picks: Pick[]; groups: { group: string; label: string; about: string }[]; books: Book[]; each_total: Total;
   usd_inr: { rate: number | null; asof: string | null; at: string | null } | null; notes: string[];
   // 18 Nov 2026 (absent on a server not yet updated): that day's top 5, each on its own ₹2 lakh and ₹10 lakh
-  picks_1811?: Pick[]; picked_at_1811?: string; board_1811?: string; group_totals?: Record<string, Total> };
+  picks_1811?: Pick[]; picked_at_1811?: string; board_1811?: string; group_totals?: Record<string, Total>;
+  // 19 Nov 2026 (absent on a server not yet updated): all nine H1 strategies, shared and each on its own
+  picks_h1?: Pick[]; picked_at_h1?: string; board_h1?: string; h1_groups?: string[]; notes_h1?: string[] };
+export type View = "top5" | "h1";
 export type Copy = { position_id: string; book: string; key: string; strategy_name: string; side: "BUY" | "SELL"; qty: number;
   ounces: number; entry_px: number; exit_px: number | null; ltp: number | null; usd_inr: number | null;
   capital_deployed: number; unrealized_pnl: number; realized_pnl: number | null; gross_pnl: number | null;
@@ -49,7 +56,8 @@ const inr = (v: number | null | undefined, signed = false) => {
   return `${sign}₹${a.toLocaleString("en-IN", { minimumFractionDigits: d, maximumFractionDigits: d })}`;
 };
 const usd = (v: number | null | undefined) =>
-  v === null || v === undefined ? "—" : `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  v === null || v === undefined ? "—"
+    : `${v < 0 ? "−" : ""}$${Math.abs(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const pct = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(2)}%`;
 const tone = (v: number | null | undefined) => (!v ? "" : v > 0 ? "gain" : "loss");
@@ -76,10 +84,11 @@ function Card({ title, sub, m, on, onClick }: { title: string; sub: string; m: M
   );
 }
 
-export default function GoldTop5Panel() {
+export default function GoldTop5Panel({ view = "top5" }: { view?: View }) {
   const [ov, setOv] = useState<Overview | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [sel, setSel] = useState("top5_2L");
+  const [sel, setSel] = useState(view === "h1" ? "h1_2L" : "top5_2L");
+  const what = view === "h1" ? "the H1-nine accounts" : "the Top-5 books";
   const [open, setOpen] = useState<Copy[]>([]);
   const [closed, setClosed] = useState<Copy[]>([]);
   const [busy, setBusy] = useState(false);
@@ -90,9 +99,9 @@ export default function GoldTop5Panel() {
       setOv(await apiFetch("/api/gold-desk/top5"));
       setErr(null);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Could not read the Top-5 books.");
+      setErr(e instanceof Error ? e.message : `Could not read ${what}.`);
     }
-  }, []);
+  }, [what]);
   const loadBook = useCallback(async (id: string) => {
     try {
       const q = `book=${encodeURIComponent(id)}`;
@@ -137,35 +146,137 @@ export default function GoldTop5Panel() {
   if (err && !ov) {
     return (
       <div style={{ fontSize: 13, color: "var(--loss)", padding: "6px 2px" }}>
-        {`The Top-5 books could not be read: ${err}.`}
+        {`${what[0].toUpperCase()}${what.slice(1)} could not be read: ${err}.`}
         {err === "Not Found" ? " The backend that runs them has not been deployed to the server yet." : ""}
       </div>
     );
   }
-  if (!ov) return <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Loading the Top-5 books…</div>;
-  return <Top5View ov={ov} sel={sel} onSel={setSel} open={open} closed={closed} busy={busy} note={note} onRun={runNow} />;
+  if (!ov) return <div style={{ fontSize: 13, color: "var(--text-muted)" }}>{`Loading ${what}…`}</div>;
+  return <Top5View ov={ov} view={view} sel={sel} onSel={setSel} open={open} closed={closed} busy={busy} note={note} onRun={runNow} />;
 }
 
 /** What the panel shows, given what it read: no state of its own beyond its props, so it can be rendered on its own. */
-export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
-  ov: Overview; sel: string; onSel: (id: string) => void; open: Copy[]; closed: Copy[]; busy: boolean;
+export function Top5View({ ov, view = "top5", sel, onSel, open, closed, busy, note, onRun }: {
+  ov: Overview; view?: View; sel: string; onSel: (id: string) => void; open: Copy[]; closed: Copy[]; busy: boolean;
   note: string | null; onRun: () => void;
 }) {
   const setSel = onSel;
   const runNow = onRun;
   const byId: Record<string, Book> = Object.fromEntries(ov.books.map((b) => [b.id, b]));
   const each = ov.books.filter((b) => b.group === "each10L");
-  const started = ov.books.map((b) => b.started_at).filter((x): x is string => !!x).sort()[0] ?? null;
+  const H1G = ov.h1_groups ?? ["h1_2L", "h1_10L", "h1own2L", "h1own10L"];
+  const inView = (b: Book) => (view === "h1") === H1G.includes(b.group);
+  const started = ov.books.filter(inView).map((b) => b.started_at).filter((x): x is string => !!x).sort()[0] ?? null;
   const cur = byId[sel];
-  const allPicks = [...(ov.picks_1811 ?? []), ...ov.picks];
+  const notes = view === "h1" ? (ov.notes_h1 ?? ov.notes) : ov.notes;
+  const allPicks = [...(ov.picks_h1 ?? []), ...(ov.picks_1811 ?? []), ...ov.picks];
   const pickOf = (key: string) => allPicks.find((p) => p.key === key);
   const p18 = ov.picks_1811 ?? [];
   const own2 = ov.books.filter((b) => b.group === "own2L");
   const own10 = ov.books.filter((b) => b.group === "own10L");
   const gt = ov.group_totals ?? {};
+  const ph = ov.picks_h1 ?? [];
+  const h1own2 = ov.books.filter((b) => b.group === "h1own2L");
+  const h1own10 = ov.books.filter((b) => b.group === "h1own10L");
 
   return (
     <div className="t5">
+      {view === "h1" ? (
+        <>
+          <div className="t5-warn">
+            <b>Paper only, and not proven.</b>{" "}All nine of H1&apos;s strategies, in this desk&apos;s Rank order on 19 Nov
+            at 20:15 IST, fixed from then. They had 5 to 24 closed trades each; the best t-stat was 1.31 and four were below
+            zero. Every account copies H1&apos;s own trades on Delta&apos;s live XAUTUSD at its own size; no order is sent.
+          </div>
+          <h4 className="t5-h">All nine H1 strategies · a ₹2 lakh and a ₹10 lakh account they share, and each on its own ₹2 lakh and ₹10 lakh</h4>
+          {!ov.picks_h1 ? (
+            <p className="t5-dim">
+              These twenty accounts are set up, but the server has not been updated with them yet. They start copying H1 on
+              the first pass after the backend is deployed; nothing is back-filled.
+            </p>
+          ) : (
+            <>
+              <div className="t5-cards">
+                <Card title="H1 nine · ₹2 lakh" sub="one account the nine share · up to 9 positions of ₹22,222"
+                  m={byId.h1_2L} on={sel === "h1_2L"} onClick={() => setSel("h1_2L")} />
+                <Card title="H1 nine · ₹10 lakh" sub="one account the nine share · up to 9 positions of ₹1,11,111"
+                  m={byId.h1_10L} on={sel === "h1_10L"} onClick={() => setSel("h1_10L")} />
+                <Card title="₹2 lakh each" sub={`${gt.h1own2L?.accounts ?? h1own2.length} accounts, one per strategy · each trade uses its own balance`}
+                  m={gt.h1own2L} on={sel.startsWith("h1own2L")} onClick={() => setSel(h1own2[0]?.id ?? "h1own2L_1")} />
+                <Card title="₹10 lakh each" sub={`${gt.h1own10L?.accounts ?? h1own10.length} accounts, one per strategy · each trade uses its own balance`}
+                  m={gt.h1own10L} on={sel.startsWith("h1own10L")} onClick={() => setSel(h1own10[0]?.id ?? "h1own10L_1")} />
+              </div>
+              <div className="t5-scroll">
+                <table className="t5-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th className="l">Strategy</th>
+                      <th className="l">At the pick (19 Nov, 20:15 IST)</th>
+                      <th title="Its trades inside the ₹2 lakh account the nine share">Shared ₹2 lakh</th>
+                      <th title="Its trades inside the ₹10 lakh account the nine share">Shared ₹10 lakh</th>
+                      <th>Its own ₹2 lakh</th>
+                      <th>Its own ₹10 lakh</th>
+                      <th>Open now</th>
+                      <th title={`${DAY_COL_TITLES.traded}, in its own ₹2 lakh account`}>Days traded</th>
+                      <th title="Days since its accounts started, today counted (Delta's XAUTUSD trades every day)">Total days</th>
+                      <th title="Its own ₹2 lakh account's total return: realised + open P&L on ₹2 lakh (the ₹10 lakh twin copies the same trades; its return is in its cell)">
+                        Total return
+                      </th>
+                      <th title={DAY_COL_TITLES.avg}>Avg / day</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ph.map((p) => {
+                      const s2 = byId.h1_2L?.strategies.find((x) => x.key === p.key);
+                      const s10 = byId.h1_10L?.strategies.find((x) => x.key === p.key);
+                      const a = byId[`h1own2L_${p.n}`];
+                      const b = byId[`h1own10L_${p.n}`];
+                      const openNow = (s2?.open ?? 0) + (s10?.open ?? 0) + (a?.open_positions ?? 0) + (b?.open_positions ?? 0);
+                      const dd = dayFigures(a);
+                      return (
+                        <tr key={p.key}>
+                          <td>{p.n}</td>
+                          <td className="l"><b>{p.name}</b><div className="t5-dim">H1 template · {p.template}</div></td>
+                          <td className="l">
+                            score {p.score.toFixed(1)} · {p.trades} trades
+                            <div className="t5-dim">{`${p.bp >= 0 ? "+" : ""}${p.bp.toFixed(1)} bp a trade · t ${p.t.toFixed(2)} · ${usd(p.net_usd)} on the desk`}</div>
+                          </td>
+                          {[s2, s10].map((s, i) => {
+                            const v = s ? s.net + s.unrealized : null;     // realised + open, in the shared account
+                            return (
+                              <td key={`s${i}`} className={tone(v)}>
+                                {s ? <>{inr(v, true)}<div className="t5-dim">{s.trades} trades{s.open ? ` · ${s.open} open` : ""}</div></> : "—"}
+                              </td>
+                            );
+                          })}
+                          {[a, b].map((acct, i) => (
+                            <td key={`o${i}`} className={tone(acct?.roi_pct)}>
+                              {acct ? (
+                                <button className={`t5-cell${sel === acct.id ? " on" : ""}`} onClick={() => setSel(acct.id)}
+                                  title={`Open ${acct.label}`}>
+                                  {inr(acct.equity)}
+                                  <div className="t5-dim">{pct(acct.roi_pct)} · {acct.closed_positions} trades</div>
+                                </button>
+                              ) : "—"}
+                            </td>
+                          ))}
+                          <td>{openNow || "—"}</td>
+                          <td>{dayCell(dd.days)}</td>
+                          <td>{dayCell(dd.total)}</td>
+                          <td className={toneOf(dd.ret)}>{pctCell(dd.ret)}</td>
+                          <td className={toneOf(dd.avg)}>{pctCell(dd.avg)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </>
+      ) : (
+      <>
       <div className="t5-warn">
         <b>Paper only, and not proven.</b>{" "}Each set of five is the top of this desk&apos;s Rank on the day it was picked
         and stays fixed. They had 8 to 20 closed trades each and none a t-stat of 2: a short good record, not an edge.
@@ -300,8 +411,25 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
           </tbody>
         </table>
       </div>
+      </>
+      )}
 
       <div className="t5-bar">
+        {view === "h1" ? (
+          <div className="t5-chips" role="group" aria-label="Account">
+            {ov.picks_h1 && (
+              <>
+                <button className={`t5-chip${sel === "h1_2L" ? " on" : ""}`} onClick={() => setSel("h1_2L")}>Shared ₹2 lakh</button>
+                <button className={`t5-chip${sel === "h1_10L" ? " on" : ""}`} onClick={() => setSel("h1_10L")}>Shared ₹10 lakh</button>
+              </>
+            )}
+            {[...h1own2, ...h1own10].map((b) => (
+              <button key={b.id} className={`t5-chip${sel === b.id ? " on" : ""}`} onClick={() => setSel(b.id)}>
+                {`${SHORT(pickOf(b.roster[0])?.name ?? b.label)} · ${b.group === "h1own2L" ? "₹2L" : "₹10L"}`}
+              </button>
+            ))}
+          </div>
+        ) : (
         <div className="t5-chips" role="group" aria-label="Account">
           {[...own2, ...own10].map((b) => (
             <button key={b.id} className={`t5-chip${sel === b.id ? " on" : ""}`} onClick={() => setSel(b.id)}>
@@ -316,6 +444,7 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
             </button>
           ))}
         </div>
+        )}
         <button className="t5-run" disabled={busy} onClick={runNow} title="Copy the desk's latest trades into every account now">
           {busy ? "Copying…" : "Copy now"}
         </button>
@@ -398,7 +527,7 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
       )}
 
       <ul className="t5-notes">
-        {ov.notes.map((n, i) => <li key={i}>{n}</li>)}
+        {notes.map((n, i) => <li key={i}>{n}</li>)}
       </ul>
       <div className="t5-foot">
         {`Copies the desk every ${Math.round(ov.tick_seconds / 60)} minutes${ov.enabled ? "" : " (switched off)"}`}

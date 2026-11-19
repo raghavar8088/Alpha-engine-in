@@ -100,6 +100,9 @@ export default function GoldDeskPage() {
   const [t5, setT5] = useState(false);
   // The Strategy Factory top-25 tab (2026-11-18): a ₹2 lakh account for each of that board's Rank 1-25, in five sets.
   const [sf, setSf] = useState(false);
+  // The H1-nine tab (2026-11-19): all nine H1 strategies on a ₹2 lakh and a ₹10 lakh account they share, and each
+  // on its own ₹2 lakh and ₹10 lakh - twenty paper accounts copying H1's Delta XAUTUSD trades (gold_top5_books).
+  const [h1b, setH1b] = useState(false);
   const [labSum, setLabSum] = useState<GoldLabSummary | null>(null);
   const [venues, setVenues] = useState<GoldSummary[]>([]);
   const [strats, setStrats] = useState<GoldStrategy[]>([]);
@@ -235,12 +238,13 @@ export default function GoldDeskPage() {
         {ordered.map((v) => (
           <button
             key={v.venue}
-            className={!lab && !fac && !t5 && !sf && tab === v.venue ? "ptab on" : "ptab"}
+            className={!lab && !fac && !t5 && !sf && !h1b && tab === v.venue ? "ptab on" : "ptab"}
             onClick={() => {
               setLab(false);
               setFac(false);
               setT5(false);
               setSf(false);
+              setH1b(false);
               setTab(v.venue);
             }}
           >
@@ -257,7 +261,7 @@ export default function GoldDeskPage() {
           </button>
         ))}
         {!ordered.length && <div className="ptab muted">loading books…</div>}
-        <button className={lab && !fac && !t5 && !sf ? "ptab on" : "ptab"} onClick={() => { setFac(false); setT5(false); setSf(false); setLab(true); }}>
+        <button className={lab && !fac && !t5 && !sf && !h1b ? "ptab on" : "ptab"} onClick={() => { setFac(false); setT5(false); setSf(false); setH1b(false); setLab(true); }}>
           <span>Gold Lab · 7 tested strategies</span>
           <span className={`tv ${tone(labSum?.net_pnl)}`}>
             {!labSum
@@ -269,17 +273,21 @@ export default function GoldDeskPage() {
                   : "off"}
           </span>
         </button>
-        <button className={fac && !t5 && !sf ? "ptab on" : "ptab"} onClick={() => { setLab(false); setT5(false); setSf(false); setFac(true); }}>
+        <button className={fac && !t5 && !sf && !h1b ? "ptab on" : "ptab"} onClick={() => { setLab(false); setT5(false); setSf(false); setH1b(false); setFac(true); }}>
           <span>Strategy Factory · 546</span>
           <span className="tv">records beside H1 · Delta XAUTUSD</span>
         </button>
-        <button className={sf ? "ptab on" : "ptab"} onClick={() => { setLab(false); setFac(false); setT5(false); setSf(true); }}>
+        <button className={sf && !h1b ? "ptab on" : "ptab"} onClick={() => { setLab(false); setFac(false); setT5(false); setH1b(false); setSf(true); }}>
           <span>Factory Top 1-25 · 25 paper accounts</span>
           <span className="tv">₹2 lakh each · 5 sets: Top 1-5 … 20-25</span>
         </button>
-        <button className={t5 && !sf ? "ptab on" : "ptab"} onClick={() => { setLab(false); setFac(false); setSf(false); setT5(true); }}>
+        <button className={t5 && !sf && !h1b ? "ptab on" : "ptab"} onClick={() => { setLab(false); setFac(false); setSf(false); setH1b(false); setT5(true); }}>
           <span>Top 5 · 17 paper accounts</span>
           <span className="tv">₹2 lakh &amp; ₹10 lakh each · shared ₹2L / ₹10L</span>
+        </button>
+        <button className={h1b ? "ptab on" : "ptab"} onClick={() => { setLab(false); setFac(false); setSf(false); setT5(false); setH1b(true); }}>
+          <span>H1 nine · 20 paper accounts</span>
+          <span className="tv">all 9 strategies · ₹2L &amp; ₹10L shared + each</span>
         </button>
         <a href="/gold-desk/ai-approved" className="ptab" style={{ textDecoration: "none" }}>
           <span>AI Approved</span>
@@ -287,7 +295,12 @@ export default function GoldDeskPage() {
         </a>
       </div>
 
-      {sf ? (
+      {h1b ? (
+        <GlassPanel title="H1 nine — twenty paper accounts"
+                    note="all nine H1 strategies on Delta's live XAUTUSD, copied at their own size">
+          <GoldTop5Panel view="h1" />
+        </GlassPanel>
+      ) : sf ? (
         <GlassPanel title="Strategy Factory Top 1-25 — a ₹2 lakh paper account each"
                     note="the 546 board's Rank 1-25 on 18 Nov, in five sets, copied at their own size">
           <GoldSfBooksPanel />
