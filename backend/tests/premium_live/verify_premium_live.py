@@ -179,6 +179,7 @@ class FakeDelta(Delta):
                      "mark_price": f"{self.mid[BY_ID[pid]]}", "unrealised_pnl": "0", "margin": "1"}
                     for pid, p in self.pos.items()]
         if method == "GET" and base == "/v2/wallet/balances":
+            self._fail("wallet")
             blocked = sum(abs(p["size"]) * float(SPECS[BY_ID[pid]]["cv"]) * p["entry"] / self.lev[pid] for pid, p in self.pos.items())
             return [{"asset_symbol": "USD", "balance": f"{self.balance}", "available_balance": f"{self.balance - blocked}",
                      "blocked_margin": f"{blocked}"}]
@@ -296,6 +297,7 @@ def fresh(mode="live", btc=69000.0, gold=3885.0):
     gstate.docs.append({"_id": "delta", "last_run_at": datetime.fromtimestamp(CLOCK[0], UTC).replace(tzinfo=None)})
     M._h1_coll, M._h1_state_coll = (lambda: gpos), (lambda: gstate)
     M._PAPER_CACHE.clear()                  # the page's paper view is cached 30 s a desk: never across scenarios
+    M._WAITING.clear()                      # copies a follow_all desk is waiting on (memory only): never across scenarios
     M.D = FakeDelta()
     M.D.mid.update(BTCUSD=btc, XAUTUSD=gold)
     if mode != "off":
@@ -552,9 +554,16 @@ async def main():
     await cyc(db)
     advance(1500)
     stale = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0, ago=10)
-    await M.cycle()                                             # no heartbeat: the desk last wrote 25 minutes ago
-    check("a desk silent for 20+ minutes: no new entry", trade(db, stale)["status"] == "skipped"
-          and "not updated" in trade(db, stale)["reason"])
+    stale_b = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68650.0, None, ago=10)
+    n_orders = len(M.D.orders)
+    r11 = await M.cycle()                                       # no heartbeat: the desk last wrote 25 minutes ago
+    check("a desk silent for 20+ minutes: no new entry; the bitcoin copy is skipped",
+          trade(db, stale_b)["status"] == "skipped" and "not updated" in trade(db, stale_b)["reason"]
+          and len(M.D.orders) == n_orders)
+    check("... the gold copy WAITS instead (19 Nov: the gold desk follows every paper trade): nothing recorded, the "
+          "reason kept for the page", trade(db, stale) is None and r11["gold"].get("waiting") == 1
+          and "not updated" in M._WAITING["gold"][stale]["why"], (r11["gold"], M._WAITING.get("gold")))
+    close_paper(db, stale, "exit_signal", 3885.0)
     advance(2200)
     await M.cycle()
     check("silent for an hour: the open position is closed", trade(db, t11b)["status"] == "closed"
@@ -717,9 +726,10 @@ async def main():
     check("bitcoin seen 6.8 minutes late: copied", trade(db, b19)["status"] == "open", trade(db, b19).get("reason"))
     check("gold seen 6.8 minutes late: copied too (its limit is also 10 minutes from 15 Nov)", trade(db, g19)["status"] == "open",
           trade(db, g19).get("reason"))
-    check("seen 11+ minutes late on either desk: skipped (limit 10)", trade(db, b19x)["status"] == "skipped"
-          and trade(db, g19x)["status"] == "skipped" and "(limit 10)" in trade(db, b19x)["reason"]
-          and "(limit 10)" in trade(db, g19x)["reason"], (trade(db, b19x).get("reason"), trade(db, g19x).get("reason")))
+    check("bitcoin seen 11+ minutes late: skipped (limit 10)", trade(db, b19x)["status"] == "skipped"
+          and "(limit 10)" in trade(db, b19x)["reason"], trade(db, b19x).get("reason"))
+    check("gold seen 11+ minutes late: copied all the same (19 Nov: the gold desk has no lag limit)",
+          trade(db, g19x)["status"] == "open", trade(db, g19x).get("reason"))
     c, g = await M.status("crypto"), await M.status()
     check("the page reads each desk's own limit, and the bitcoin notes say 10 minutes", c["limits"]["max_lag_s"] == 600
           and g["limits"]["max_lag_s"] == 600 and any("10 minutes" in n for n in c["notes"]), (c["limits"], g["limits"]))
@@ -1060,9 +1070,10 @@ async def main():
     heartbeat(db)
     await SW.gated(M.MODULE, M.cycle)
     check("back ON: the desk carries on in its mode and a new signal opens", (trade(db, again) or {}).get("status") == "open")
-    check("signals from the OFF stretch older than the lag limit are never entered late",
+    check("bitcoin signals from the OFF stretch older than the lag limit are never entered late; the gold desk copies "
+          "its still-open one once back ON (it follows every paper trade)",
           (trade(db, late_btc) or {}).get("status") in (None, "skipped")
-          and (trade(db, late_gold) or {}).get("status") in (None, "skipped"),
+          and (trade(db, late_gold) or {}).get("status") == "open",
           ((trade(db, late_btc) or {}).get("status"), (trade(db, late_gold) or {}).get("status")))
 
     async def _down():
@@ -1150,8 +1161,10 @@ async def main():
           and any(d["_id"] == h_rib for d in db.live_delta_trades.docs)
           and float(own_leg(t, "stop")["stop_price"]) == 3888.0 and float(own_leg(t, "target")["stop_price"]) == 3879.0,
           t and (t["status"], t.get("reason")))
-    check("not copied: an H1 template not picked, a position outside the H1 record, one from before the desk's start",
-          trade(db, h_atr) is None and trade(db, h_rec) is None and trade(db, h_old) is None)
+    check("not copied: an H1 template not picked, a position outside the H1 record",
+          trade(db, h_atr) is None and trade(db, h_rec) is None)
+    check("copied: an H1 position still open from before the desk's start (19 Nov: every open one)",
+          (trade(db, h_old) or {}).get("status") == "open", (trade(db, h_old) or {}).get("reason"))
     check("the new Premium picks trade too: BB-11's gold book on the gold desk, RU-06 on the bitcoin desk",
           (trade(db, bb) or {}).get("product") == "XAUTUSD" and trade(db, bb)["status"] == "open"
           and (trade(db, ru6) or {}).get("product") == "BTCUSD" and trade(db, ru6)["status"] == "open"
@@ -1191,17 +1204,18 @@ async def main():
     h_dcf = h1pos("p4", "donchian_fast", "BUY", 3885.0, 3882.0, 3891.0, ago=10)
     cp2 = paper(db, "CP-02", "XAUUSD", 1, 3885.0, 3882.0, 3891.0, ago=10)
     await cyc(db)                                                       # the paper desk itself is fresh
-    check("each source has its own clock: a silent Gold Desk stops H1 entries only", (trade(db, h_dcf) or {}).get("status")
-          == "skipped" and "the Gold Desk has not updated" in trade(db, h_dcf)["reason"]
-          and (trade(db, cp2) or {}).get("status") == "open", ((trade(db, h_dcf) or {}).get("reason"), (trade(db, cp2) or {}).get("reason")))
+    check("each source has its own clock: a silent Gold Desk holds H1 entries only (they wait)",
+          trade(db, h_dcf) is None and "the Gold Desk has not updated" in M._WAITING["gold"][h_dcf]["why"]
+          and (trade(db, cp2) or {}).get("status") == "open", (M._WAITING["gold"].get(h_dcf), (trade(db, cp2) or {}).get("reason")))
     advance(1500)
     gstate.docs[0]["last_run_at"] = utc_naive(CLOCK[0])
     h_piv = h1pos("p5", "pivot_break", "BUY", 3885.0, 3882.0, 3891.0, ago=10)
     dt1 = paper(db, "DT-01", "XAUTUSD", 1, 3885.0, 3882.0, 3891.0, ago=10)
     await M.cycle()                                                     # no paper-desk heartbeat: it is 25 minutes old
-    check("... and a silent paper desk stops Premium entries only", (trade(db, h_piv) or {}).get("status") == "open"
-          and (trade(db, dt1) or {}).get("status") == "skipped" and "the paper desk has not updated" in trade(db, dt1)["reason"],
-          ((trade(db, h_piv) or {}).get("reason"), (trade(db, dt1) or {}).get("reason")))
+    check("... and a silent paper desk holds Premium entries only; the waiting H1 copy goes in once its desk is back",
+          (trade(db, h_piv) or {}).get("status") == "open" and (trade(db, h_dcf) or {}).get("status") == "open"
+          and trade(db, dt1) is None and "the paper desk has not updated" in M._WAITING["gold"][dt1]["why"],
+          ((trade(db, h_piv) or {}).get("reason"), M._WAITING["gold"].get(dt1)))
     h1_end("p5", "VOID", None, None)
     advance(60)
     gstate.docs[0]["last_run_at"] = utc_naive(CLOCK[0])
@@ -1294,6 +1308,99 @@ async def main():
     c = await M.status("crypto")
     check("a desk that is off: its strategies' new paper trades read 'this desk is off'",
           c["signals"] and c["signals"][0]["desk"]["status"] == "off", c["signals"] and c["signals"][0]["desk"])
+
+
+    # ── 33. 19 Nov: the gold desk follows EVERY paper trade ─────────────────────────────────────────
+    section("33. 19 Nov: the gold desk copies every open paper trade, however late or far; a copy waits, never given up")
+    db = fresh(gold=3885.0)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)                       # one contract a trade, as on the real desks
+    old = paper(db, "RU-02", "XAUTUSD", -1, 3900.0, 3920.0, 3870.0, ago=7200)   # 2 h old, before the switch-on, 75% away
+    old_shut = paper(db, "YT-14", "XAUUSD", 1, 3880.0, 3875.0, 3890.0, ago=7000)
+    close_paper(db, old_shut, "target", 3890.0)                 # closed before the switch-on: nothing to copy
+    beyond = paper(db, "CP-05", "XAUUSD", -1, 3895.0, 3900.0, 3886.0, ago=20)    # short; the price is already past its target
+    tight = paper(db, "DR-01", "XAUTUSD", 1, 3885.5, 3884.99, 3890.0, ago=20)   # long; the price 2.5 ticks over its stop
+    ladder = paper(db, "PR-12", "XAUTUSD", 1, 3921.15, None, None, ago=7 * 86400, unit=392.1)   # PR-12: no stop, no target
+    b_old = paper(db, "TL-04", "BTCUSD", -1, 69000.0, 69400.0, 68400.0, ago=7200)
+    b_nostop = paper(db, "TH-05", "BTCUSD", 1, 69000.0, None, None, ago=20)
+    r = await cyc(db)
+    t = trade(db, old)
+    bid = M.D.bid("XAUTUSD")
+    check("a 2-hour-old paper trade from before the switch-on, 75% of its risk away: copied at today's price, one "
+          "contract, with the paper's own stop and target on Delta", t is not None and t["status"] == "open"
+          and t["contracts"] == 1 and abs(t["fill"] - bid) < 1e-6 and float(own_leg(t, "stop")["stop_price"]) == 3920.0
+          and float(own_leg(t, "target")["stop_price"]) == 3870.0 and t.get("late_s", 0) >= 7200,
+          t and (t.get("status"), t.get("reason"), t.get("fill")))
+    check("a paper trade that closed before the switch-on is not copied", trade(db, old_shut) is None)
+    wb, wt = M._WAITING["gold"].get(beyond), M._WAITING["gold"].get(tight)
+    check("the price past a target, or within reach of a stop: the copy WAITS (no record, no order), with the reason",
+          trade(db, beyond) is None and trade(db, tight) is None and wb and "not inside the stop and the target" in wb["why"]
+          and wt and "not inside" in wt["why"] and r["gold"].get("waiting") == 2, (wb, wt, r["gold"]))
+    check("waiting copies are counted, not listed as decisions (the loop logs only real ones)",
+          not any(str(x["result"]).startswith("waiting") for x in r["gold"]["entered"]), r["gold"]["entered"])
+    t = trade(db, ladder)
+    sl = own_leg(t, "stop")
+    want_stop = round(M.D.ask("XAUTUSD") * (1 - M.GUARD_STOP_FRAC), 2)
+    check("PR-12 (no stop on paper): copied with a protective stop 3% under the price on Delta, no target",
+          t is not None and t["status"] == "open" and t.get("guard_stop") and t.get("paper_stop", 1) is None
+          and sl is not None and abs(float(sl["stop_price"]) - want_stop) <= 0.01 and t["legs"]["target_id"] is None,
+          t and (t.get("status"), t.get("reason"), sl))
+    check("the bitcoin desk is unchanged: an old signal is never copied, a paper trade without a stop is skipped",
+          trade(db, b_old) is None and trade(db, b_nostop)["status"] == "skipped"
+          and trade(db, b_nostop)["reason"] == "no stop on the paper trade", (trade(db, b_nostop) or {}).get("reason"))
+    check("Delta's gold position is the sum of the copies (a short and a long: flat)", GOLD not in M.D.pos
+          and trade(db, old)["side"] + trade(db, ladder)["side"] == 0, M.D.pos.get(GOLD))
+    g, c = await M.status(), await M.status("crypto")
+    sig = {x["id"]: x for x in g["signals"]}
+    check("the page: a waiting copy reads 'waiting' with its reason; the old closed one 'before'; the limits say "
+          "follow_all on gold only", sig[beyond]["desk"]["status"] == "waiting" and "not inside" in sig[beyond]["desk"]["why"]
+          and sig[old_shut]["desk"]["status"] == "before" and sig[old]["desk"]["status"] == "open"
+          and g["limits"]["follow_all"] is True and c["limits"]["follow_all"] is False and g["limits"]["waiting"] == 2
+          and any("EVERY open paper trade" in n for n in g["notes"]),
+          [(x["acct"], x["desk"]["status"]) for x in g["signals"]])
+
+    advance(60)
+    M.D.set_price("XAUTUSD", 3890.0)                            # back inside CP-05's levels; DR-01's paper hits its target
+    close_paper(db, tight, "target", 3890.0)
+    await cyc(db)
+    t = trade(db, beyond)
+    check("the price back inside: the waiting copy goes in at once, with the paper's stop and target",
+          t is not None and t["status"] == "open" and float(own_leg(t, "target")["stop_price"]) == 3886.0, t and t.get("reason"))
+    check("a waiting copy whose paper trade closes is recorded as closed on paper before it could be copied, and stops "
+          "waiting", trade(db, tight)["status"] == "skipped" and trade(db, tight)["reason"]
+          == "closed on paper before it could be copied" and not M._WAITING["gold"], (trade(db, tight), M._WAITING["gold"]))
+
+    real_day = M._day_pnl
+
+    async def _lost(db_, mode, positions):
+        return -25.0
+    M._day_pnl = _lost
+    advance(60)
+    g_day = paper(db, "TL-04", "XAUTUSD", 1, 3890.0, 3886.0, 3898.0, ago=10)
+    b_day = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None, ago=10)
+    await cyc(db)
+    check("past the $20 daily stop: the gold copy waits for tomorrow (it is still open then), bitcoin's is skipped",
+          trade(db, g_day) is None and "daily loss stop" in M._WAITING["gold"][g_day]["why"]
+          and trade(db, b_day)["status"] == "skipped", (M._WAITING["gold"].get(g_day), trade(db, b_day)))
+    M._day_pnl = real_day
+    advance(30)
+    await cyc(db)
+    check("... and goes in once the stop no longer applies", (trade(db, g_day) or {}).get("status") == "open")
+
+    advance(60)
+    many = [paper(db, a, m, 1, 3890.0, 3886.0, 3898.0, ago=10) for a, m in (("RU-03", "XAUTUSD"), ("FZ-02", "XAUTUSD"),
+                                                                             ("DT-03", "XAUTUSD"))]
+    M.D.fail["wallet"] = "definite"
+    r = await cyc(db)
+    sg = st_of(db, "gold")
+    check("the wallet unreadable: three copies wait, ONE venue error is counted for the pass, the desk stays live",
+          all(trade(db, x) is None for x in many) and r["gold"].get("waiting") == 3 and sg["errors_in_row"] == 1
+          and sg["mode"] == "live", (r["gold"], sg.get("errors_in_row"), sg.get("mode")))
+    M.D.fail.pop("wallet")
+    advance(30)
+    await cyc(db)
+    check("... and all three go in on the next good pass", all((trade(db, x) or {}).get("status") == "open" for x in many)
+          and st_of(db, "gold")["errors_in_row"] == 0)
 
 
 if __name__ == "__main__":

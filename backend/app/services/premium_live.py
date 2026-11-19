@@ -77,6 +77,22 @@ as a paper trade with the id "H1|<position_id>" (_paper_h1). The H1 record itsel
 it. Its liveness is the Gold Desk's own (gold_desk_state "delta" last_run_at), and when those positions cannot be read
 the H1 trades wait - managed again on the next good read, their stop and target resting on Delta meanwhile - rather
 than being closed as disappeared.
+
+FOLLOW EVERY PAPER TRADE (19 Nov 2026, the gold desk). The owner asked that all 30 gold strategies take a real position
+whenever their paper trade does, with nothing stopping the copy. That desk has follow_all: it reads every open paper
+trade of its picks however long ago it entered (and every open H1 position), and copies it, with the paper's own stop
+and target, at whatever the price is now:
+- no lag limit and no drift limit, and a trade already open on paper when the desk was switched on is copied too;
+- a copy that cannot go in yet WAITS (nothing recorded, tried again next cycle, the reason in _WAITING for the page)
+  instead of being skipped for good: the price not inside the paper's stop and target with FOLLOW_PAD_TICKS and
+  FOLLOW_PAD_FRAC of the risk to spare (so a market fill cannot land past a level, which would close the trade and
+  switch the desk off), a silent paper desk or Gold Desk, no quote, a failed wallet read, the daily loss stop
+  (tomorrow it copies what is still open), an older one-bracket trade on the product;
+- a paper trade with no stop (PR-12's ladder) gets a protective stop GUARD_STOP_FRAC from the price, because a real
+  trade never stands on Delta without one; it otherwise closes when its paper trade closes, as every copy does.
+What still ends a copy for good: the paper trade closing first, one contract losing more than the cap at its stop, too
+little free balance, a refused or unfilled order. The switches (this desk's mode, Main Control) are untouched, and the
+bitcoin desk keeps its lag and drift limits.
 """
 
 from __future__ import annotations
@@ -117,6 +133,10 @@ TICK_S = int(os.getenv("PREMIUM_LIVE_TICK_S", "20"))
 MISSING_GRACE_S = 300          # a paper trade gone this long is treated as closed
 DESK_STALE_S = 1200            # the paper desk silent this long: no new entry
 DESK_DEAD_S = 3600             # ... this long: open positions are closed (nothing can manage them)
+# A desk that follows EVERY paper trade (the gold desk, the owner's ask on 19 Nov 2026; see FOLLOW EVERY PAPER TRADE)
+FOLLOW_PAD_TICKS = 5           # it enters only with the price this many ticks inside the paper's stop and target ...
+FOLLOW_PAD_FRAC = 0.10         # ... and this share of the paper's risk, so a market fill cannot land past a level
+GUARD_STOP_FRAC = 0.03         # a paper trade with no stop at all (PR-12's ladder): its real copy's stop, 3% away
 MARGIN_BUFFER = 1.25           # free balance needed: margin x this
 ERRORS_TO_STOP = 3
 PIN_TRIES = 5                  # wrong PINs an hour before going live is locked for the hour
@@ -267,8 +287,16 @@ GOLD_NOTES = (
     "candles (not from COMEX or Yahoo), and the real orders go to Delta's XAUTUSD perpetual.",
     "This desk trades gold (XAUTUSD) only; the bitcoin desk is beside it on the Delta Exchange Live Trading page (since "
     "16 Nov both desks are there). Each has its own switch and its own $20 daily stop.",
-    "Each real trade is the paper desk's trade: its entry signal, its stop, its target, its exit. The paper desk sees a "
-    "new bar up to a few minutes late, so a fast strategy's copy is often skipped as late or drifted rather than chased.",
+    "Each real trade is the paper desk's trade: its entry signal, its stop, its target, its exit. From 19 Nov (the "
+    "owner's ask) EVERY open paper trade of the 30 is copied, however late this desk sees it and however far the price "
+    "has moved from the paper entry, and trades already open on paper when the desk was switched on are copied too. "
+    "So a real trade can start at a worse price than its paper twin, with the paper's own stop and target.",
+    "A copy waits, and is tried again every cycle, while the price is not at least a little inside the paper's stop and "
+    "target (5 ticks and a tenth of its risk), while the paper desk is silent, or while Delta gives no quote; it is never "
+    "given up for being late. What still stops a copy: the paper trade closing first, the $20 daily loss stop, one "
+    "contract losing more than $5 at its stop, too little free balance, and the switches (this desk's and Main Control).",
+    "A paper trade with no stop at all (PR-12's Supertrend ladder) gets a protective stop on Delta 3% from its fill, so no "
+    "real trade is ever without a stop; it otherwise closes when its paper trade does.",
     "The six H1 templates' trades are the Gold Desk's own H1 positions (4-hour bars, held up to ten days), copied the "
     "same way; this desk only reads the H1 record and never changes it.",
     "One gold contract is 0.001 XAUT (about $4 of gold), so a trade of one contract loses cents at its stop. A trade "
@@ -314,6 +342,7 @@ class Desk:
     picked_at: str
     notes: tuple[str, ...]
     max_lag_s: int = MAX_LAG_S      # a paper entry seen later than this after its entry time is skipped
+    follow_all: bool = False        # True: every open paper trade is copied, however late or far (lag/drift unused)
 
     @property
     def pick(self) -> dict:
@@ -326,7 +355,7 @@ class Desk:
 
 DESKS: dict[str, Desk] = {
     "gold": Desk("gold", "Real money · Delta gold", GOLD_PICKS, "live_delta_state", "live_delta_trades", RISK_USD,
-                 DAILY_STOP_USD, PICKED_AT, GOLD_NOTES, GOLD_MAX_LAG_S),
+                 DAILY_STOP_USD, PICKED_AT, GOLD_NOTES, GOLD_MAX_LAG_S, follow_all=True),
     "crypto": Desk("crypto", "Delta Exchange Live Trading", CRYPTO_PICKS, "live_crypto_state", "live_crypto_trades",
                    CRYPTO_RISK_USD, CRYPTO_DAILY_STOP_USD, CRYPTO_PICKED_AT, CRYPTO_NOTES, CRYPTO_MAX_LAG_S),
 }
@@ -516,12 +545,15 @@ async def _desk_age(db) -> float:
 
 async def _paper(db, since: float, ids: list[str]) -> dict[str, dict]:
     """The desk's picks' sized paper trades that entered since `since`, plus any an open real trade points at (kept
-    even when its book is no longer a pick, so a trade from before a re-pick is still managed to its close)."""
+    even when its book is no longer a pick, so a trade from before a re-pick is still managed to its close). A desk that
+    follows every paper trade (follow_all) also reads every one still open, however long ago it entered."""
     want = set(ids)
-    q = {"qty": {"$gt": 0},
-         "$or": [{"acct": {"$in": sorted({p.acct for p in _d().picks if p.src == PREMIUM})},
-                  "entry_t": {"$gte": int(since) - _d().max_lag_s}},
-                 {"_id": {"$in": [i for i in ids if not i.startswith(H1_ID)]}}]}
+    accts = sorted({p.acct for p in _d().picks if p.src == PREMIUM})
+    ors: list[dict] = [{"acct": {"$in": accts}, "entry_t": {"$gte": int(since) - _d().max_lag_s}},
+                       {"_id": {"$in": [i for i in ids if not i.startswith(H1_ID)]}}]
+    if _d().follow_all:
+        ors.append({"acct": {"$in": accts}, "open": True})
+    q = {"qty": {"$gt": 0}, "$or": ors}
     out = {}
     async for t in db.premium_trades.find(q):
         if t["_id"] in want or (t.get("acct"), t.get("mkt")) in _d().pick:
@@ -593,6 +625,8 @@ async def _paper_h1(since: float, ids: list[str]) -> dict[str, dict]:
     if picks:
         ors.append({"strategy_template": {"$in": sorted(picks)},
                     "opened_at": {"$gte": datetime.fromtimestamp(int(since) - _d().max_lag_s, timezone.utc)}})
+        if _d().follow_all:                        # every open position of the picks, however old (19 Nov)
+            ors.append({"strategy_template": {"$in": sorted(picks)}, "status": "OPEN"})
     if held:
         ors.append({"position_id": {"$in": held}})
     out = {}
@@ -690,6 +724,7 @@ async def _paper_view(db, st: dict) -> dict | None:
         latest = rows[:SIGNALS_N]
         real = {d["_id"]: d async for d in _tc(db).find({"_id": {"$in": [t["_id"] for t in latest]}}, _REAL_FIELDS)}
         since, mode = float(st.get("since") or 0), st.get("mode")
+        follow, waits = _d().follow_all, _WAITING.get(_d().key, {})
         signals = []
         for t in latest:
             et, d = float(t.get("entry_t") or 0), real.get(t["_id"])
@@ -699,8 +734,14 @@ async def _paper_view(db, st: dict) -> dict | None:
                         "unrealised_usd": d.get("unrealised_usd"), "contracts": d.get("contracts")}
             elif mode not in ("live", "shadow"):
                 desk = {"status": "off", "why": "this desk is off"}
+            elif follow and t.get("open") and t["_id"] in waits:
+                desk = {"status": "waiting", "why": waits[t["_id"]]["why"]}
+            elif follow and t.get("open"):
+                desk = {"status": "pending", "why": "being copied"}       # however old: this desk copies every open one
             elif since and et < since:
                 desk = {"status": "before", "why": "before this desk was switched on"}
+            elif follow:
+                desk = {"status": "missed", "why": "closed on paper before this desk copied it"}
             else:
                 desk = {"status": "pending", "why": "being decided"}
             closed = not t.get("open") and t.get("r_net") is not None
@@ -1235,10 +1276,17 @@ async def _manage_shadow(db, t: dict, paper: dict | None, desk_age: float, produ
 # -- entries -------------------------------------------------------------------------------------------
 
 
+_WAITING: dict[str, dict[str, dict]] = {}   # desk -> paper trade id -> why its copy waits (follow_all desks; memory only)
+
+
 async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: set, day_pnl: float,
-                 desk_age: float) -> str:
-    """Decide one new paper trade, once. Returns what happened, for the cycle's report."""
+                 desk_age: float, cache: dict | None = None) -> str:
+    """Decide one new paper trade, once. Returns what happened, for the cycle's report. On a desk that follows every
+    paper trade (follow_all), a copy that cannot go in yet WAITS instead (nothing is recorded, it is tried again next
+    cycle, and the reason is kept in _WAITING for the page): see FOLLOW EVERY PAPER TRADE."""
     tid, mode = paper["_id"], st["mode"]
+    follow = _d().follow_all
+    waits = _WAITING.setdefault(_d().key, {})
     side = 1 if int(paper.get("side") or 0) > 0 else -1
     stop = float(paper.get("stop") or 0.0)
     target = float(paper["target"]) if paper.get("target") else None
@@ -1248,38 +1296,61 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
             "setup": paper.get("setup"), "day": _day(), "created_at": _now(), "protect": "own"}
 
     async def skip(why: str, **extra) -> str:
+        waits.pop(tid, None)
         try:
             await _tc(db).insert_one({**base, **extra, "status": "skipped", "reason": why})
         except Exception:  # noqa: BLE001 - decided by an earlier pass
             pass
         return f"skipped: {why}"
 
+    async def hold(why: str, **extra) -> str:
+        """Not yet: a follow_all desk waits and tries again next cycle; any other desk skips, as it always has."""
+        if not follow:
+            return await skip(why, **extra)
+        waits[tid] = {"why": why, "at": _now()}
+        return f"waiting: {why}"
+
     lag = _now() - float(paper.get("entry_t") or 0)
     if not paper.get("open"):
         return await skip("closed on paper before it could be copied")
-    if lag > _d().max_lag_s:
+    if not follow and lag > _d().max_lag_s:
         return await skip(f"seen {lag / 60:.0f} min after its entry (limit {_d().max_lag_s // 60})", lag_s=round(lag))
-    if stop <= 0 or entry <= 0:
+    guard = follow and stop <= 0 and entry > 0       # no stop on paper: the copy carries a protective one (19 Nov)
+    if (stop <= 0 and not guard) or entry <= 0:
         return await skip("no stop on the paper trade")
     if day_pnl <= -_d().daily_stop_usd:
-        return await skip(f"daily loss stop reached ({day_pnl:+.2f} USD today)")
+        return await hold(f"daily loss stop reached ({day_pnl:+.2f} USD today)")
     if desk_age > DESK_STALE_S:
         who = "the Gold Desk" if paper.get("src") == GOLD_H1 else "the paper desk"
-        return await skip(f"{who} has not updated for over 20 minutes")
+        return await hold(f"{who} has not updated for over 20 minutes")
     product = products[pick.product]
     if mode == "live" and pick.product in busy:
-        return await skip(f"{pick.product} holds an older trade whose one bracket covers the whole position")
+        return await hold(f"{pick.product} holds an older trade whose one bracket covers the whole position")
+    cache = {} if cache is None else cache          # one cycle's quotes (and a failed wallet read), shared by its entries
     try:
-        q = await D.ticker(product.symbol)
+        q = cache.get(("quote", product.symbol)) or await D.ticker(product.symbol)
     except DeltaError as exc:
-        return await skip(f"no quote ({exc})")
+        return await hold(f"no quote ({exc})")
+    cache[("quote", product.symbol)] = q
     px = q["ask"] if side > 0 else q["bid"]
+    if guard:
+        stop = round(px * (1 - GUARD_STOP_FRAC) if side > 0 else px * (1 + GUARD_STOP_FRAC), 6)
+        base.update(stop=stop, paper_stop=None, guard_stop=True)
     lo, hi = (stop, target if target else math.inf) if side > 0 else (target if target else 0.0, stop)
-    if not lo < px < hi:
-        return await skip(f"price {px} is no longer between the stop and the target", price=px)
-    if abs(px - entry) > DRIFT_FRAC * abs(entry - stop):
-        return await skip(f"price moved {abs(px - entry) / abs(entry - stop):.0%} of the risk away from the paper entry",
-                          price=px)
+    if follow:
+        # however late, however far: only the price must still sit inside both levels, with room for the fill
+        pad = max(FOLLOW_PAD_TICKS * product.tick, FOLLOW_PAD_FRAC * abs((px if guard else entry) - stop))
+        if not lo + pad < px < hi - pad:
+            return await hold(f"price {px} is not inside the stop and the target with room to fill "
+                              f"({pad:.2f} from each)", price=px)
+    else:
+        if not lo < px < hi:
+            return await skip(f"price {px} is no longer between the stop and the target", price=px)
+        if abs(px - entry) > DRIFT_FRAC * abs(entry - stop):
+            return await skip(f"price moved {abs(px - entry) / abs(entry - stop):.0%} of the risk away from the paper "
+                              "entry", price=px)
+    if follow:
+        base["late_s"] = round(lag)
     sizing = _sizing(st)
     one = abs(px - stop) * product.contract_value           # what a single contract loses at the stop
     if sizing == "min":                                     # the smallest order; the desk's own risk still caps it
@@ -1302,18 +1373,23 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
             "capped": by_cap < by_risk}
 
     if mode == "shadow":
+        waits.pop(tid, None)
         fee = _fee(notional, product.taker_rate)
         await _tc(db).insert_one({**base, "status": "open", "plan": plan, "contracts": contracts, "fill": px,
                                                "entry_fee": round(fee, 6), "opened_at": _now(), "unrealised_usd": -fee})
         return f"shadow entry: {contracts} {pick.product} at {px}"
 
+    if cache.get("wallet_down"):                     # already failed this cycle: one venue error a cycle, not one a copy
+        return await hold("could not read the wallet")
     try:
         w = await D.wallet()
     except DeltaError as exc:
+        cache["wallet_down"] = True
         await _venue_error(db, st, f"wallet read failed ({exc})")
-        return await skip("could not read the wallet")
+        return await hold("could not read the wallet")
     if w["available"] < plan["margin_usd"] * MARGIN_BUFFER:
         return await skip(f"not enough free balance (${w['available']:.2f} for ${plan['margin_usd']:.2f} of margin)")
+    waits.pop(tid, None)
     await _tc(db).insert_one({**base, "status": "entering", "plan": plan, "contracts": contracts})
     try:
         o = await D.market(product.id, contracts, _side(side), client_order_id=_cid(tid))
@@ -1383,11 +1459,14 @@ async def _cycle_one() -> dict:
             return {**out, "error": str(exc)}
         desk_age = await _desk_age(db)
         since, held = float(st.get("since") or _now()), [t["_id"] for t in open_rows]
-        paper = await _paper(db, since, held)
+        follow = _d().follow_all
+        waits = _WAITING.setdefault(_d().key, {})
+        want = held + [i for i in waits if i not in held]   # a waiting copy is read even once it closes on paper
+        paper = await _paper(db, since, want)
         h1_age, h1_ok = float("inf"), True                 # the Gold Desk's H1 positions: the second source
-        if _h1_picks() or any(is_h1(i) for i in held):
+        if _h1_picks() or any(is_h1(i) for i in want):
             try:
-                paper.update(await _paper_h1(since, held))
+                paper.update(await _paper_h1(since, want))
                 h1_age = await _h1_age()
             except Exception as exc:  # noqa: BLE001 - its trades wait for the next good read, never closed for this
                 h1_ok = False
@@ -1442,9 +1521,15 @@ async def _cycle_one() -> dict:
                 return out
             busy = await _legacy_products(db)
         day_pnl = await _day_pnl(db, st["mode"], positions)
+        for tid in [i for i in waits if i in decided or (i not in paper and (h1_ok or not is_h1(i)))]:
+            waits.pop(tid, None)                            # decided elsewhere, or gone from the paper desk
+        cache: dict = {}                                    # this pass's quotes, shared by its entries
         for tid, p in sorted(paper.items(), key=lambda kv: kv[1].get("entry_t") or 0):
-            if tid in decided or float(p.get("entry_t") or 0) < float(st.get("since") or 0):
+            if tid in decided:
                 continue
+            if float(p.get("entry_t") or 0) < float(st.get("since") or 0) and not (
+                    follow and (p.get("open") or tid in waits)):
+                continue                    # from before the switch-on: only a follow_all desk takes it, while open
             if st["mode"] not in ("shadow", "live"):
                 break
             pk = _d().pick.get((p["acct"], p["mkt"]))
@@ -1452,8 +1537,12 @@ async def _cycle_one() -> dict:
                 continue
             if st["mode"] == "live" and not books.get(pk.product, False):
                 continue                        # the account does not match the trades yet: wait, undecided
-            res = await _enter(db, st, pk, p, products, busy, day_pnl, h1_age if p.get("src") == GOLD_H1 else desk_age)
-            out["entered"].append({"id": tid, "result": res})
+            res = await _enter(db, st, pk, p, products, busy, day_pnl, h1_age if p.get("src") == GOLD_H1 else desk_age,
+                               cache)
+            if res.startswith("waiting:"):
+                out["waiting"] = out.get("waiting", 0) + 1     # counted, not listed: the loop logs only real decisions
+            else:
+                out["entered"].append({"id": tid, "result": res})
         return out
 
 
@@ -1717,7 +1806,8 @@ async def _status_one() -> dict:
         "limits": {"risk_usd": _risk(st), "risk_cap_usd": _d().risk_usd, "risk_min_usd": RISK_MIN_USD,
                    "risk_set_at": st.get("risk_set_at"), "sizing": _sizing(st), "daily_stop_usd": _d().daily_stop_usd,
                    "max_notional_usd": MAX_NOTIONAL_USD, "leverage": LEVERAGE, "max_lag_s": _d().max_lag_s,
-                   "drift_frac": DRIFT_FRAC, "tick_s": TICK_S},
+                   "drift_frac": DRIFT_FRAC, "tick_s": TICK_S, "follow_all": _d().follow_all,
+                   "waiting": len(_WAITING.get(_d().key, {}))},
         "today": today, "totals": totals, "picked_at": _d().picked_at, "picks": picks,
         "desk": _d().key, "title": _d().title, "desk_products": _d().products,
         "open": [_clean(t) for t in rows if t.get("status") in ("entering", "open", "closing")],

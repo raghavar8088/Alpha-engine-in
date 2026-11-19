@@ -43,7 +43,7 @@ export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boole
   wallet_at?: number;
   limits: { risk_usd: number; daily_stop_usd: number; max_notional_usd: number; leverage: number; max_lag_s: number;
     drift_frac: number; tick_s: number; risk_cap_usd?: number; risk_min_usd?: number; risk_set_at?: number | null;
-    sizing?: "min" | "risk" };
+    sizing?: "min" | "risk"; follow_all?: boolean; waiting?: number };
   today: { live: number; shadow: number }; totals: { live: Totals; shadow: Totals }; picked_at: string; picks: Pick[];
   open: LiveTrade[]; recent: LiveTrade[]; notes: string[]; desk?: string; title?: string; products?: Record<string, unknown>;
   signals?: Signal[] | null; paper_view?: { at?: number; paper_age_s?: number | null; gold_desk_age_s?: number | null } | null };
@@ -129,10 +129,13 @@ const DESK_STATE: Record<string, { label: string; cls: string }> = {
   skipped: { label: "Skipped", cls: "skipped" }, error: { label: "Error", cls: "error" },
   before: { label: "Not copied", cls: "skipped" }, off: { label: "Not copied", cls: "skipped" },
   pending: { label: "Deciding", cls: "open" },
+  // a desk that copies every paper trade (gold, 19 Nov): a copy that cannot go in yet waits; one whose paper trade
+  // closed first, unseen by this desk, was missed
+  waiting: { label: "Waiting to copy", cls: "open" }, missed: { label: "Not copied", cls: "skipped" },
 };
 type SFilter = "all" | "copied" | "skipped" | "not";
 const copied = (x: Signal) => ["open", "entering", "closing", "closed"].includes(x.desk.status);
-const notCopied = (x: Signal) => ["before", "off"].includes(x.desk.status);
+const notCopied = (x: Signal) => ["before", "off", "missed"].includes(x.desk.status);
 
 /** What the page shows, given the desk's status: no state of its own beyond its props (and the trade-log filter). */
 export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, saved, ask, pendingRisk, busy, msg, onToggle,
@@ -306,7 +309,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         <div className="ld-tile">
           <span className="ld-k">Signals not taken</span>
           <span className="ld-v">{live.skipped}</span>
-          <span className="ld-s">{`skipped as late, drifted or too big${live.errors ? ` · ${live.errors} error${live.errors === 1 ? "" : "s"}` : ""}`}</span>
+          <span className="ld-s">{`${L.follow_all ? "skipped: closed on paper first, too big or no balance" : "skipped as late, drifted or too big"}${live.errors ? ` · ${live.errors} error${live.errors === 1 ? "" : "s"}` : ""}`}</span>
         </div>
         <div className="ld-tile">
           <span className="ld-k">Delta wallet</span>
@@ -514,7 +517,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         <summary>How this desk works, and its limits</summary>
         <ul className="ld-notes">
           {s.notes.map((n, i) => <li key={i}>{n}</li>)}
-          <li>{`Limits: ${oneContract ? `1 contract a trade (skipped if it would lose more than ${usd(L.risk_cap_usd)})` : `${usd(L.risk_usd)} risk a trade`}, ${usd(L.daily_stop_usd)} daily stop, at most ${usd(L.max_notional_usd)} of notional a position, ${L.leverage}x leverage, a signal older than ${Math.round(L.max_lag_s / 60)} minutes or already ${Math.round(L.drift_frac * 100)}% of its risk away is skipped.`}</li>
+          <li>{`Limits: ${oneContract ? `1 contract a trade (skipped if it would lose more than ${usd(L.risk_cap_usd)})` : `${usd(L.risk_usd)} risk a trade`}, ${usd(L.daily_stop_usd)} daily stop, at most ${usd(L.max_notional_usd)} of notional a position, ${L.leverage}x leverage, ${L.follow_all ? "every open paper trade copied however late or far (it waits while the price is not inside its stop and target)" : `a signal older than ${Math.round(L.max_lag_s / 60)} minutes or already ${Math.round(L.drift_frac * 100)}% of its risk away is skipped`}.`}</li>
         </ul>
       </details>
 
