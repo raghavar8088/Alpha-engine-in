@@ -7,6 +7,7 @@ import DeskHistory from "../../components/DeskHistory";
 import LineChart from "../../components/charts/LineChart";
 import ErrorBanner from "../../components/ErrorBanner";
 import PaperTwin from "./PaperTwin";
+import TradeHistory from "./TradeHistory";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
@@ -649,6 +650,8 @@ export default function LiveTradingPage() {
           </div>
         )}
       </GlassPanel>
+
+      <TradeHistory closedCount={summary?.closed_positions} realized={summary?.realized_pnl} />
 
       <DeskHistory deskKey={"live-trading"} />
       </>

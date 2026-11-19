@@ -1342,6 +1342,45 @@ export async function fetchLiveTradingLeaderboard(): Promise<LiveTradingScore[]>
 export async function fetchLiveTradingPositions(): Promise<{ open: LiveTradingOpenPosition[]; summary: LiveTradingSummary }> {
   return apiFetch("/api/live-trading/positions?status=OPEN");
 }
+
+/** One closed REAL-money round trip, as the desk's positions ledger holds it (19 Nov 2026). The
+ *  positions ledger, not the trades collection, is what the Realised P&L tile and the daily table
+ *  sum, so the trade history reads the same rows and its totals match them. */
+export interface LiveTradingClosedPosition {
+  position_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  is_anti?: boolean;
+  symbol: string;
+  side: string;
+  qty: number;
+  entry_price: number;
+  exit_price: number | null;
+  capital_deployed?: number | null;
+  gross_pnl?: number | null;
+  fees?: number | null;
+  fee_breakdown?: Record<string, number | string> | null;
+  /** "rate_card" = Angel's published rates; the contract note is the final word. */
+  charges_basis?: string | null;
+  /** Net of charges. */
+  realized_pnl: number | null;
+  exit_reason: string | null;
+  exit_basis?: string | null;
+  /** reconciled = priced at Angel's own fills; needs_contract_note = an estimate. */
+  reconcile_status?: string | null;
+  entry_fill_price?: number | null;
+  exit_fill_price?: number | null;
+  entry_order_id?: string | null;
+  /** A broker square-off can carry several closing order ids. */
+  exit_order_id?: string | string[] | null;
+  opened_at: string | null;
+  closed_at: string | null;
+  closed_on?: string | null;
+}
+export async function fetchLiveTradingClosed(limit = 1000): Promise<LiveTradingClosedPosition[]> {
+  const r = await apiFetch(`/api/live-trading/positions?status=CLOSED&limit=${limit}`);
+  return r.positions ?? [];
+}
 export async function fetchLiveTradingArming(): Promise<LiveTradingArming> {
   return apiFetch("/api/live-trading/arming");
 }
