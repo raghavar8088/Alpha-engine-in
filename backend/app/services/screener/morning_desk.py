@@ -104,8 +104,17 @@ async def _eligible_symbols():
     return longs, shorts
 
 
+def _entries_blocked() -> bool:
+    """Main Control's drain flag. An older Main Control (no draining, as the box ran on 21 Nov) has no such
+    function: then nothing is blocked from here, as before this module had a switch of its own."""
+    try:
+        from app.services.desk_switches import entries_blocked
+    except ImportError:
+        return False
+    return entries_blocked()
+
+
 async def tick(index,now):
-    from app.services.desk_switches import entries_blocked
     doc=await state(index)
     day=now.date().isoformat()
     start=int(now.replace(hour=9,minute=15,second=0,microsecond=0).timestamp())
@@ -123,7 +132,7 @@ async def tick(index,now):
     positions=doc.get("positions",[])
     approved=doc.get("approved",[])
     enabled=(doc.get("paper",False) and approved and board.get("day")==day and elapsed<18900
-             and not entries_blocked())   # Main Control OFF: manage what is open, open nothing
+             and not _entries_blocked())   # Main Control OFF: manage what is open, open nothing
     rows=board.get("rows",[]) if enabled else []
     if not rows and not positions: return
     quotes=await _live_quotes(sorted({p["symbol"] for p in positions+rows}))

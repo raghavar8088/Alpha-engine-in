@@ -27,7 +27,7 @@ sys.path.insert(0, str(ROOT.parent / "shared"))
 sys.path.insert(0, str(ROOT))
 
 from app.services import desk_switches as sw  # noqa: E402
-from app.services.module_registry import REGISTRY, pages_for, resolve  # noqa: E402
+from app.services import module_registry as reg  # noqa: E402
 from app.services.screener import morning_desk as M  # noqa: E402
 
 IST = M.m.store.IST
@@ -270,6 +270,14 @@ async def main():
     TRIGGER_CALLS.clear()
     book(paper=True, approved=["orb15"], positions=[pos("AAA")],
          board={"day": DAY.date().isoformat(), "rows": [row], "excluded": {}, "scanned_at": START + 900})
+    if not hasattr(sw, "_DRAINING"):
+        # an older Main Control (no draining, as the box ran on 21 Nov): the cycle must still run, nothing blocked
+        d = await tick()
+        check(not d["positions"] and TRIGGER_CALLS == ["BBB"],
+              "older Main Control without entries_blocked(): the cycle runs, exits and entries as before", (d, TRIGGER_CALLS))
+        print("\n(older Main Control: its own module and draining are not on this server; sections 5-6 skipped)")
+        print("\n" + (f"{len(FAILS)} FAILED of {N[0]}" if FAILS else f"all {N[0]} checks passed"))
+        sys.exit(1 if FAILS else 0)
     token = sw._DRAINING.set("stock_momentum")
     try:
         d = await tick()
@@ -283,13 +291,13 @@ async def main():
     check(TRIGGER_CALLS == ["BBB"], "ON (outside the drain): the same board's entries are evaluated", TRIGGER_CALLS)
 
     print("\n6. Its own Main Control module")
-    m = REGISTRY.get("stock_momentum")
+    m = reg.REGISTRY.get("stock_momentum")
     check(m is not None and m.href == "/stock-momentum" and m.drains
           and m.positions == ("app.services.screener.morning_desk:open_count",),
           "registered: page /stock-momentum, OFF drains, its open-position probe", m)
-    check(resolve("/api/screener/morning/nifty500") == "stock_momentum" and resolve("/api/screener/summary") == "screener",
+    check(reg.resolve("/api/screener/morning/nifty500") == "stock_momentum" and reg.resolve("/api/screener/summary") == "screener",
           "its API is its own (the longer prefix wins); the rest of /api/screener stays the Stock Screener's")
-    check("stock_momentum" in pages_for("/stock-momentum") and "stock_momentum" not in pages_for("/stock-screener"),
+    check("stock_momentum" in reg.pages_for("/stock-momentum") and "stock_momentum" not in reg.pages_for("/stock-screener"),
           "its switch shows on its own page, not on the Stock Screener's")
     M.db = Coll([{"_id": M.key("nifty50"), "positions": [pos("AAA"), pos("BBB")]},
                  {"_id": M.key("nifty500"), "positions": [pos("CCC")]}, {"_id": "other-doc", "positions": [pos("X")]}])
