@@ -785,6 +785,8 @@ async def start_screener_scheduler() -> None:
 
     if SCREENER_ON:
         asyncio.create_task(screener_loop())
+        from app.services.screener.morning_desk import loop as morning_equity_loop
+        asyncio.create_task(morning_equity_loop())
         logger.info(
             "Stock Screener enabled — snapshot refresh every %ss during the session, "
             "full recompute + persist at %s IST (momentum, sectors, daily/weekly patterns)",

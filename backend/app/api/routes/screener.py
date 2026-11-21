@@ -387,3 +387,38 @@ async def paper_reset(
             detail="Refusing to wipe the paper desk without ?confirm=true. The trade log is "
                    "the only record of which signals worked; deleting it is not undoable.")
     return await PA.reset()
+
+class MorningControls(BaseModel):
+    scan: bool | None = None
+    paper: bool | None = None
+    strategy: str | None = None
+    approve: bool | None = None
+
+
+@router.get("/morning/{index}")
+async def morning_board(index: str, _current_user: dict = Depends(get_current_user)):
+    from app.services.screener import morning_desk as desk
+    if index not in INDEX_LABELS:
+        raise HTTPException(422, "Unknown universe")
+    state = await desk.state(index)
+    return {"scan": True, "paper": False, "approved": [], **state,
+            "rules": desk.m.RULES, "policy": desk.m.POLICY, "report": desk.REPORT}
+
+
+@router.post("/morning/{index}")
+async def morning_controls(index: str, body: MorningControls, _current_user: dict = Depends(get_current_user)):
+    from app.services.screener import morning_desk as desk
+    if index not in INDEX_LABELS:
+        raise HTTPException(422, "Unknown universe")
+    if body.strategy is not None:
+        if body.strategy not in desk.m.RULES or body.approve is None:
+            raise HTTPException(422, "Specify a strategy and approval decision")
+        op = "$addToSet" if body.approve else "$pull"
+        await desk.db.update_one({"_id": desk.key(index)}, {op: {"approved": body.strategy},
+                                 "$inc": {"revision": 1}}, upsert=True)
+    else:
+        values = {k: getattr(body, k) for k in ("scan", "paper") if getattr(body,k) is not None}
+        if not values:
+            raise HTTPException(422, "Specify a control")
+        await desk.controls(index, values)
+    return {"updated": True}

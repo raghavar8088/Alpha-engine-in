@@ -15,6 +15,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import MorningMomentum from "./MorningMomentum";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
@@ -41,9 +42,10 @@ import {
   ScreenerVolumeBoard, ScreenerPaperSummary, ScreenerPaperPositions,
 } from "../../lib/api";
 
-type Tab = "momentum" | "sectors" | "volume" | "patterns" | "setups" | "paper" | "chartink" | "analysis" | "athsweep" | "sources";
+type Tab = "morning" | "momentum" | "sectors" | "volume" | "patterns" | "setups" | "paper" | "chartink" | "analysis" | "athsweep" | "sources";
 const TABS: { key: Tab; label: string }[] = [
   { key: "momentum", label: "Momentum" },
+  { key: "morning", label: "Stock Momentum Trading" },
   { key: "sectors", label: "Sectors" },
   { key: "volume", label: "Volume" },
   { key: "patterns", label: "Chart Patterns" },
@@ -321,6 +323,7 @@ export default function StockScreenerPage() {
       </div>
 
       {/* ══ MOMENTUM ═══════════════════════════════════════════════════════ */}
+      {tab === "morning" && index && <MorningMomentum key={index} index={index} />}
       {tab === "momentum" && (
         <>
           <div className="subcontrols">
