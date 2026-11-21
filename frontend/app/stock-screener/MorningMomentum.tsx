@@ -1,55 +1,66 @@
-﻿"use client";
+"use client";
+
 import { useCallback, useEffect, useState } from "react";
+import GlassPanel from "../../components/GlassPanel";
+import StatusPill from "../../components/StatusPill";
 import { apiFetch } from "../../lib/api";
 
-type Candidate = {symbol:string; sector:string; side:number; rank:number; score:number; change:number; gap:number; market:number; relative:number; vwap:number; volume:number};
-type Result = {rule:string;mode:string;period:string;side:string;trades:number;win_pct:number|null;profit_factor:number|null;drawdown_rs:number;mean_net_pct:number|null;net_rs:number;failed_exits:number};
-type Board = {day:string;asof:string;processed:string;total:number;usable:number;rows:Candidate[];excluded:Record<string,string>};
-type Position = {id:string;symbol:string;rule:string;entry:number;qty:number;stop:number;target:number;side:number;net?:number};
-type Desk = {scan:boolean;paper:boolean;approved:string[];board?:Board;rules:Record<string,string>;policy:string;report:{split:string;rows:Result[];coverage:[string,number,number][]};positions?:Position[];recent?:Position[];failed?:string[];rejected?:string[][]};
-const number=(x:number|null)=>x===null?"—":x.toLocaleString("en-IN",{maximumFractionDigits:3});
-function Grid({headers,rows}:{headers:string[];rows:(string|number)[][]}){
-  return <div style={{overflowX:"auto"}}><table><thead><tr>{headers.map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i}>{r.map((v,j)=><td key={j}>{v}</td>)}</tr>)}</tbody></table></div>;
+type Candidate = { symbol: string; sector: string; side: number; rank: number; score: number; change: number; market: number; relative: number; vwap: number; volume: number };
+type Result = { rule: string; mode: string; period: string; side: string; trades: number; win_pct: number | null; profit_factor: number | null; drawdown_rs: number; mean_net_pct: number | null; net_rs: number; failed_exits: number };
+type Board = { asof: string; total: number; usable: number; rows: Candidate[]; excluded: Record<string, string> };
+type Position = { symbol: string; rule: string; entry: number; qty: number; stop: number; target: number; side: number; net?: number };
+type Desk = { scan: boolean; paper: boolean; approved: string[]; board?: Board; rules: Record<string, string>; policy: string; report: { split: string; rows: Result[]; coverage: [string, number, number][] }; positions?: Position[]; recent?: Position[]; failed?: string[]; rejected?: string[][] };
+
+const n = (value: number | null, decimals = 2) => value === null ? "—" : value.toLocaleString("en-IN", { maximumFractionDigits: decimals });
+const pct = (value: number) => `${value >= 0 ? "+" : ""}${n(value)}%`;
+
+function Table({ headers, rows }: { headers: string[]; rows: (string | number)[][] }) {
+  return <div className="table-wrap"><table><thead><tr>{headers.map(x => <th key={x}>{x}</th>)}</tr></thead><tbody>{rows.map((row, i) => <tr key={i}>{row.map((cell, j) => <td key={j}>{cell}</td>)}</tr>)}</tbody></table></div>;
 }
-export default function MorningMomentum({index}:{index:string}){
-  const [desk,setDesk]=useState<Desk>(),[error,setError]=useState(""),[busy,setBusy]=useState(false);
-  const [side,setSide]=useState("both"),[period,setPeriod]=useState("test");
-  const url="/api/screener/morning/"+encodeURIComponent(index);
-  const refresh=useCallback(async()=>{try{setDesk(await apiFetch(url+"?fresh=true"));setError("");}catch(e){setError(String(e));}},[url]);
-  useEffect(()=>{void refresh();const id=setInterval(refresh,20000);return ()=>clearInterval(id);},[refresh]);
-  async function update(values:Record<string,boolean|string>){
-    setBusy(true);
-    try{await apiFetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(values)});await refresh();}
-    catch(e){setError(String(e));}finally{setBusy(false);}
-  }
-  const b=desk?.board;
-  return <section><h2>Stock Momentum Trading</h2>{error&&<p role="alert">{error}</p>}
-    {!desk?<p>Loading morning desk…</p>:<>
-    <div className="subcontrols"><strong>{index.toUpperCase()} · NSE equity paper book</strong>
-      <button disabled={busy} onClick={()=>update({scan:!desk.scan})}>{desk.scan?"Pause scan":"Enable scan"}</button>
-      <button disabled={busy} onClick={()=>update({paper:!desk.paper})}>{desk.paper?"Pause new entries":"Enable paper entries"}</button></div>
-    <p>{b?("Opening snapshot "+b.asof+" · "+b.usable+" / "+b.total+" usable · processed "+b.processed):"Waiting for the 09:30 IST opening scan."}</p>
-    <p>Ranks require ₹1 crore opening turnover, above-baseline volume, and agreement between the opening move, VWAP, Nifty and sector-relative returns. Volume uses the median opening interval of up to 20 previous sessions.</p>
-    {[1,-1].map(s=><section key={s}><h3>{s===1?"Long":"Short"} candidates</h3>{b?.rows.some(r=>r.side===s)?
-      <Grid headers={["Rank","Stock","Sector","Strength","Open %","Gap %","vs Nifty pp","vs sector peers pp","vs VWAP %","Volume ×"]} rows={b.rows.filter(r=>r.side===s).map(r=>[r.rank,r.symbol,r.sector,...[r.score,r.change,r.gap,r.market,r.relative,r.vwap,r.volume].map(number)])}/>:<p>No qualifying candidates.</p>}</section>)}
-    {b&&<details><summary>Excluded symbols ({Object.keys(b.excluded).length})</summary><Grid headers={["Stock","Reason"]} rows={Object.entries(b.excluded)}/></details>}
-    <h3>Execution gates</h3>
-    <ul>
-      <li>Completed five-minute bars only, with no missing opening bars or stale source data.</li>
-      <li>Quote must contain a trade in the preceding five seconds. A missing or stale quote rejects the entry.</li>
-      <li>Longs require the current intraday eligible universe. Shorts also require a listed F&amp;O underlying.</li>
-      <li>₹1 crore opening turnover, above-baseline opening volume, rank within the top ten, and the strategy&apos;s confirmed closing trigger are required.</li>
-      <li>Size is capped by ₹100 risk, ₹10,000 notional, one percent of signal-bar volume, available ₹100,000 margin, and five concurrent positions.</li>
-      <li>No duplicate symbol-strategy signal. Entries stop at 14:30 IST. Open positions retain stop and 15:10 IST square-off monitoring after paper entries are paused.</li>
-    </ul>
-    <h3>Strategy review</h3><p>{desk.policy}</p>
-    <p>Historical liquid universe from the preceding archived session. Test window {desk.report.coverage[0][0]} through {desk.report.coverage.at(-1)?.[0]}, with {desk.report.coverage.filter(day=>day[2]>0).length} usable sessions out of {desk.report.coverage.length}. Holdout begins {desk.report.split}. Results model individual trades. Drawdown is cumulative realized rupees.</p>
-    <label>Sample <select value={period} onChange={e=>setPeriod(e.target.value)}><option value="test">Out of sample</option><option value="train">In sample</option></select></label>{" "}
-    <label>Direction <select value={side} onChange={e=>setSide(e.target.value)}>{["both","long","short"].map(s=><option key={s}>{s}</option>)}</select></label>
-    <Grid headers={["Strategy","Selection","Trades","Win %","Profit factor","Drawdown ₹","Mean net %","Net ₹","Failed exits"]} rows={desk.report.rows.filter(r=>r.period===period&&r.side===side).map(r=>[r.rule,r.mode,r.trades,...[r.win_pct,r.profit_factor,r.drawdown_rs,r.mean_net_pct,r.net_rs].map(number),r.failed_exits])}/>
-    {Object.entries(desk.rules).map(([key,rule])=><p key={key}><strong>{key}</strong> · {rule} <button disabled={busy} onClick={()=>update({strategy:key,approve:!desk.approved.includes(key)})}>{desk.approved.includes(key)?"Revoke approval":"Approve for paper"}</button></p>)}
-    <h3>Paper positions and exits</h3><Grid headers={["Stock","Strategy","Side","Qty","Entry","Stop","Target","Net ₹"]} rows={[...(desk.positions||[]),...(desk.recent||[]).slice(-10).reverse()].map(p=>[p.symbol,p.rule,p.side===1?"Long":"Short",p.qty,number(p.entry),number(p.stop),number(p.target),p.net===undefined?"Open":number(p.net)])}/>
-    {!!desk.failed?.length&&<p role="alert">Missed square-off · {desk.failed.join(", ")}</p>}
-    {!!desk.rejected?.length&&<details><summary>Entry gate decisions</summary><Grid headers={["Stock","Strategy","Reason"]} rows={desk.rejected}/></details>}
-    </>}</section>;
+
+function Candidates({ title, side, board }: { title: string; side: number; board?: Board }) {
+  const rows = board?.rows.filter(item => item.side === side) ?? [];
+  return <GlassPanel title={title} note={rows.length ? `${rows.length} ranked` : "No active signals"}>
+    {rows.length ? <Table headers={["#", "Stock", "Strength", "Open", "vs Nifty", "vs sector", "VWAP", "Volume"]} rows={rows.map(item => [item.rank, item.symbol, n(item.score), pct(item.change), pct(item.market), pct(item.relative), pct(item.vwap), `${n(item.volume)}×`])} /> : <div className="empty">No qualifying candidates. The next completed scan updates this panel.</div>}
+  </GlassPanel>;
+}
+
+export default function MorningMomentum({ index }: { index: string }) {
+  const [desk, setDesk] = useState<Desk>();
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [period, setPeriod] = useState("test");
+  const [side, setSide] = useState("both");
+  const url = `/api/screener/morning/${encodeURIComponent(index)}`;
+  const refresh = useCallback(async () => { try { setDesk(await apiFetch(`${url}?fresh=true`)); setError(""); } catch (caught) { setError(String(caught)); } }, [url]);
+  useEffect(() => { void refresh(); const timer = setInterval(refresh, 20_000); return () => clearInterval(timer); }, [refresh]);
+  async function update(values: Record<string, boolean | string>) { setBusy(true); try { await apiFetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) }); await refresh(); } catch (caught) { setError(String(caught)); } finally { setBusy(false); } }
+
+  const board = desk?.board;
+  const results = desk?.report.rows.filter(item => item.period === period && item.side === side) ?? [];
+  const positions = [...(desk?.positions ?? []), ...(desk?.recent ?? []).slice(-10).reverse()];
+
+  return <section className="desk">
+    <div className="head"><div><h2>Stock Momentum Trading</h2><p>Morning-ranked NSE equity candidates with controlled paper execution.</p></div>{desk && <div className="status"><StatusPill label={desk.scan ? "Scanner active" : "Scanner paused"} tone={desk.scan ? "gain" : "warn"} pulse={desk.scan} /><StatusPill label={desk.paper ? "Paper entries on" : "Paper entries off"} tone={desk.paper ? "accent" : "muted"} /></div>}</div>
+    {error && <div className="alert">{error}</div>}
+    {!desk ? <GlassPanel><div className="empty">Loading Stock Momentum Trading…</div></GlassPanel> : <>
+      <GlassPanel><div className="control"><div><span className="eyebrow">Selected universe</span><b>{index.toUpperCase()}</b><span className="muted">NSE equity paper book</span></div><div className="actions"><button className="secondary" disabled={busy} onClick={() => update({ scan: !desk.scan })}>{desk.scan ? "Pause scanner" : "Enable scanner"}</button><button className={desk.paper ? "danger" : "primary"} disabled={busy} onClick={() => update({ paper: !desk.paper })}>{desk.paper ? "Pause new entries" : "Enable paper entries"}</button></div></div><div className="cards"><div><span>Scan status</span><b>{board ? "Completed" : "Waiting for 09:30"}</b><small>{board?.asof ?? "First completed opening range"}</small></div><div><span>Usable data</span><b>{board ? `${board.usable} / ${board.total}` : "—"}</b><small>Complete market inputs</small></div><div><span>Market rule</span><b>Top 10 / side</b><small>Ranked candidates</small></div><div><span>Entry window</span><b>09:30–14:30</b><small>Square-off 15:10 IST</small></div></div></GlassPanel>
+      <div className="basis"><b>Ranking basis.</b> Opening move, Nifty and sector relative strength, session VWAP, turnover, and same-interval volume.</div>
+      <div className="grid"><Candidates title="Long candidates" side={1} board={board} /><Candidates title="Short candidates" side={-1} board={board} /></div>
+      {board && Object.keys(board.excluded).length > 0 && <details><summary>Data exclusions <span>{Object.keys(board.excluded).length} stocks</span></summary><Table headers={["Stock", "Reason"]} rows={Object.entries(board.excluded)} /></details>}
+      <div className="grid"><GlassPanel title="Execution gates" note="Required before any paper entry"><div className="gates"><div><b>Data and trigger</b><span>Completed five-minute bars, confirmed closing trigger, and quote no older than five seconds.</span></div><div><b>Liquidity and instrument</b><span>₹1 crore opening turnover, volume confirmation, and F&O eligibility for short candidates.</span></div><div><b>Risk and lifecycle</b><span>₹100 risk, ₹10,000 notional, five positions, duplicate prevention, and protected exits.</span></div></div></GlassPanel><GlassPanel title="Paper positions" note={positions.length ? `${positions.length} recent or open` : "No position activity"}>{positions.length ? <Table headers={["Stock", "Strategy", "Side", "Qty", "Entry", "Stop", "Target", "Net"]} rows={positions.map(p => [p.symbol, p.rule, p.side === 1 ? "Long" : "Short", p.qty, n(p.entry), n(p.stop), n(p.target), p.net === undefined ? "Open" : `₹${n(p.net)}`])} /> : <div className="empty">No paper positions yet.</div>}</GlassPanel></div>
+      <GlassPanel title="Strategy review" note={`Holdout from ${desk.report.split}`}><div className="intro"><p>{desk.policy}</p><div className="filters"><label>Sample<select value={period} onChange={e => setPeriod(e.target.value)}><option value="test">Out of sample</option><option value="train">In sample</option></select></label><label>Direction<select value={side} onChange={e => setSide(e.target.value)}>{["both", "long", "short"].map(value => <option key={value}>{value}</option>)}</select></label></div></div><Table headers={["Strategy", "Selection", "Trades", "Win rate", "Profit factor", "Drawdown", "Avg net", "Net", "Failed exits"]} rows={results.map(r => [r.rule, r.mode === "ranked" ? "Morning ranked" : "All signals", r.trades, r.win_pct === null ? "—" : `${n(r.win_pct)}%`, n(r.profit_factor), `₹${n(r.drawdown_rs)}`, r.mean_net_pct === null ? "—" : `${n(r.mean_net_pct, 3)}%`, `₹${n(r.net_rs)}`, r.failed_exits])} /><div className="approvals">{Object.entries(desk.rules).map(([rule, description]) => <div className="approval" key={rule}><div><b>{rule}</b><span>{description}</span></div><button className={desk.approved.includes(rule) ? "secondary" : "primary"} disabled={busy} onClick={() => update({ strategy: rule, approve: !desk.approved.includes(rule) })}>{desk.approved.includes(rule) ? "Approved" : "Approve for paper"}</button></div>)}</div></GlassPanel>
+      {(desk.failed?.length || desk.rejected?.length) && <details><summary>Order audit <span>{(desk.failed?.length ?? 0) + (desk.rejected?.length ?? 0)} events</span></summary>{desk.failed?.length ? <div className="audit">Missed square-off: {desk.failed.join(", ")}</div> : null}{desk.rejected?.length ? <Table headers={["Stock", "Strategy", "Reason"]} rows={desk.rejected} /> : null}</details>}
+    </>}
+    <style jsx>{`
+      .desk { display:flex; flex-direction:column; gap:16px; padding:4px 0 32px; } .head,.control,.intro { display:flex; justify-content:space-between; gap:16px; align-items:center; flex-wrap:wrap; } h2 { margin:0; font-size:24px; letter-spacing:-.02em; } .head p { margin:5px 0 0; color:var(--text-muted); font-size:13px; } .status,.actions,.filters { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+      .alert,.basis { border:1px solid var(--panel-border); border-radius:10px; padding:10px 14px; font-size:12.5px; line-height:1.55; } .alert,.audit { color:var(--loss); background:var(--loss-dim); } .basis { color:var(--text-muted); background:var(--canvas-soft); } .basis b { color:var(--text); } .control { padding:14px 18px; border-bottom:1px solid var(--panel-border); } .control>div:first-child { display:flex; gap:9px; align-items:baseline; flex-wrap:wrap; } .eyebrow { color:var(--text-faint); font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; } .muted { color:var(--text-muted); font-size:12px; }
+      button,select { font:inherit; } button { border:1px solid var(--panel-border); border-radius:8px; padding:7px 11px; font-size:12px; font-weight:700; cursor:pointer; } button:disabled { opacity:.55; cursor:default; } .primary { background:var(--brand); border-color:var(--brand); color:var(--on-brand); } .secondary { background:var(--panel); color:var(--text-muted); } .danger { background:var(--loss-dim); color:var(--loss); border-color:rgba(var(--loss-rgb),.3); }
+      .cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); } .cards div { padding:14px 18px; display:grid; gap:3px; border-right:1px solid var(--panel-border); } .cards div:last-child { border:0; } .cards span { color:var(--text-muted); font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; } .cards b { font-size:17px; font-variant-numeric:tabular-nums; } .cards small { color:var(--text-faint); font-size:11px; }
+      .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; } .empty { padding:22px 20px; color:var(--text-muted); font-size:12.5px; } .table-wrap { overflow-x:auto; } table { width:100%; border-collapse:collapse; font-size:11.5px; } th,td { padding:9px 11px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--panel-border); font-variant-numeric:tabular-nums; } th { background:var(--panel); color:var(--text-muted); text-transform:uppercase; font-size:9.5px; letter-spacing:.05em; font-weight:700; } th:first-child,td:first-child { text-align:left; } tr:last-child td { border-bottom:0; }
+      details { background:var(--panel); border:1px solid var(--panel-border); border-radius:12px; overflow:hidden; } summary { cursor:pointer; padding:12px 15px; font-size:12.5px; font-weight:700; display:flex; justify-content:space-between; } summary span { color:var(--text-faint); font-weight:500; } .gates { padding:2px 16px 14px; display:grid; gap:8px; } .gates div { border-left:3px solid var(--brand); border-radius:0 8px 8px 0; padding:9px 11px; background:var(--canvas-soft); display:grid; gap:3px; } .gates b { font-size:12px; } .gates span,.approval span { color:var(--text-muted); font-size:11.5px; line-height:1.45; }
+      .intro { padding:14px 16px; border-bottom:1px solid var(--panel-border); } .intro p { max-width:780px; margin:0; color:var(--text-muted); font-size:12px; line-height:1.55; } label { display:grid; gap:4px; color:var(--text-faint); font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; } select { padding:6px 8px; color:var(--text); background:var(--panel); border:1px solid var(--panel-border); border-radius:7px; font-size:12px; text-transform:none; letter-spacing:normal; } .approvals { padding:12px 16px 16px; display:grid; gap:7px; } .approval { padding:9px 10px; border:1px solid var(--panel-border); border-radius:9px; display:flex; justify-content:space-between; gap:12px; align-items:center; } .approval div { display:grid; gap:2px; } .approval b { font-size:12px; text-transform:uppercase; letter-spacing:.04em; } .audit { margin:0 12px 12px; border-radius:8px; padding:8px 10px; font-size:12px; }
+      @media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.cards div:nth-child(2){border-right:0}.cards div:nth-child(-n+2){border-bottom:1px solid var(--panel-border)}} @media(max-width:700px){.grid,.cards{grid-template-columns:1fr}.cards div{border-right:0;border-bottom:1px solid var(--panel-border)}.cards div:last-child{border-bottom:0}}
+    `}</style>
+  </section>;
 }
