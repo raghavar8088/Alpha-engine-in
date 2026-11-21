@@ -1,13 +1,8 @@
-import { Sora, Manrope, JetBrains_Mono } from "next/font/google";
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
 import SortableTables from "@/components/SortableTables";
 import CommandPalette from "@/components/CommandPalette";
 import "./globals.css";
-
-const sora = Sora({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-display" });
-const manrope = Manrope({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-ui" });
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-data" });
 
 export const metadata = {
   title: "TradingAI",
@@ -16,7 +11,7 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sora.variable} ${manrope.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en">
       <head>
         {/* Applies the saved theme BEFORE first paint. Without this a dark-mode user gets
             a full-white flash on every navigation, because React only reaches the toggle

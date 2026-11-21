@@ -22,6 +22,9 @@
    (4.6:1 on white), the bright #ff6700 only fills buttons. Navy ink is 14.6:1.
    ───────────────────────────────────────────────────────────────────────────── */
 :root {
+  --font-display: "Arial", "Helvetica Neue", sans-serif;
+  --font-ui: "Segoe UI", Arial, sans-serif;
+  --font-data: "Consolas", "Courier New", monospace;
   --canvas: #f4f6f8;
   --canvas-soft: #f2f4fb;
   --canvas-edge: #eaf0f8;
