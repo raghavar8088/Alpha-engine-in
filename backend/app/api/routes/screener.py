@@ -402,7 +402,8 @@ async def morning_board(index: str, _current_user: dict = Depends(get_current_us
         raise HTTPException(422, "Unknown universe")
     state = await desk.state(index)
     return {"scan": True, "paper": False, "approved": [], **state,
-            "rules": desk.m.RULES, "policy": desk.m.POLICY, "report": desk.REPORT}
+            "rules": desk.m.RULES, "policy": desk.m.POLICY, "report": desk.REPORT,
+            "label": INDEX_LABELS[index], "limits": desk.LIMITS}
 
 
 @router.post("/morning/{index}")

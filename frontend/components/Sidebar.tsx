@@ -217,6 +217,19 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Directly below Stock Screener, as asked (21 Nov 2026): it was the Screener's "Stock Momentum Trading"
+        // tab. Three rising bars under an up-and-right arrow - the morning's strongest movers, ranked at 09:30 and
+        // traded on paper.
+        href: "/stock-momentum",
+        label: "Stock Momentum Trading",
+        icon: (
+          <>
+            <path d="M4 20v-4M9 20v-7M14 20v-10" />
+            <path d="M15 9l5-5M16 4h4v4" />
+          </>
+        ),
+      },
+      {
         // Sits beside the Screener: both read the market rather than trade it. The
         // Screener narrows a universe down to candidates; this one takes names you
         // already have and judges the business behind each.

@@ -89,6 +89,8 @@ _MODULES: list[Module] = [
     _m("ath_trading", "All Time High Trading", "Trading", "/all-time-high-trading",
        ["/api/ath"]),
     _m("screener", "Stock Screener", "Trading", "/stock-screener", ["/api/screener"]),
+    # its own page since 21 Nov 2026 (it was a Stock Screener tab); the longer prefix wins, so its switch is its own
+    _m("stock_momentum", "Stock Momentum Trading", "Trading", "/stock-momentum", ["/api/screener/morning"]),
     _m("fundamentals", "Fundamental Rating", "Trading", "/fundamentals",
        ["/api/fundamentals"],
        note="OFF stops new screener.in lookups; ratings already stored still read back."),
@@ -255,6 +257,8 @@ _OFF_BEHAVIOUR: dict[str, tuple[tuple[str, ...], bool]] = {
     "banknifty_desk": (("bn_desk_positions",), True),
     "ath_trading": (("ath_positions",), True),
     "trending_stocks": (("ts_positions",), True),
+    # morning_desk.loop runs through gated() and tick() checks entries_blocked() before any entry
+    "stock_momentum": (("app.services.screener.morning_desk:open_count",), True),
     # real money on Delta: premium_live.loop runs through gated() and _cycle_one checks
     # entries_blocked() before its entry pass; the count covers both desks (bitcoin + gold)
     "delta_live": (("app.services.premium_live:open_count",), True),
