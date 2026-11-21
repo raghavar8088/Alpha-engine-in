@@ -13,6 +13,10 @@
 // 19 Nov 2026: each strategy's own paper side beside the real one (the server's paper view): "Paper now" (in a paper
 // trade, its R now, or waiting) and "Paper so far" in the strategies table, with filters; a table of the strategies'
 // latest paper trades with what the desk did with each (copied, skipped and why, not copied); no t under five trades.
+// 21 Nov 2026: the strategies table shows each one's REAL-money results from the server (trades, win %, PF, t, net P&L,
+// return % on the most margin it held at once, trading days, avg % a trading day, open now) in place of the record at
+// the pick and the 2-year backtest; one value a cell, so the app-wide sorter sorts them as numbers. Above it, the desk's
+// results (12 figures); below it, the desk day by day.
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { apiFetch } from "../../lib/api";
 
@@ -21,11 +25,21 @@ type Rec = { trades: number; wins: number; pnl_usd: number; open: number };
 type PaperOpen = { id: string; side: number; entry: number | null; stop: number | null; target: number | null; entry_t: number;
   r_now: number | null };
 type PaperRec = { trades: number; wins: number; sum_r: number; open: PaperOpen[]; last_t: number | null };
+/** Real-money results (21 Nov), counted by the server from every trade of a strategy or a desk. Return % = net P&L / the
+ *  most margin held at one time; a trading day = an IST day on which one of its real trades closed. */
+export type Results = { trades: number; wins: number; open: number; win_pct: number | null; net_usd: number; fees_usd: number;
+  won_usd: number; lost_usd: number; pf: number | null; t: number | null; peak_margin_usd: number; return_pct: number | null;
+  days: number; avg_day_pct: number | null; avg_day_usd: number | null; avg_trade_usd: number | null;
+  avg_trade_pct: number | null; best_usd: number | null; worst_usd: number | null; max_dd_usd: number;
+  avg_hold_s: number | null; open_usd: number; first_at: number | null; last_at: number | null };
+export type DeskResults = Results & { green_days: number;
+  by_day: { day: string; trades: number; wins: number; pnl_usd: number; return_pct: number | null }[] };
 type Pick = { acct: string; mkt: string; product: string; name: string; trades: number; sum_r: number; t: number; win: number;
   backtest: string; live: Rec | null; shadow: Rec | null; picked_at?: string | null;
   src?: string; template?: string | null;   // src "gold_h1": a Gold Desk H1 template (18 Nov); "gold_sf": a Gold Desk
   //                                           Strategy Factory strategy (19 Nov); else a Premium book
-  paper?: PaperRec | null };                // undefined on an older server, null when the paper side cannot be read
+  paper?: PaperRec | null;                  // undefined on an older server, null when the paper side cannot be read
+  results?: Results | null };               // null until it has a real trade (21 Nov)
 /** One of the strategies' latest paper trades, with what this desk did with it (18 Nov). */
 export type Signal = { id: string; acct: string; mkt: string; src?: string; side: number; entry_t: number; entry: number | null;
   stop: number | null; target: number | null; open: boolean; exit: number | null; exit_t: number | null; reason: string | null;
@@ -50,7 +64,7 @@ export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boole
   today: { live: number; shadow: number }; totals: { live: Totals; shadow: Totals }; picked_at: string; picks: Pick[];
   open: LiveTrade[]; recent: LiveTrade[]; notes: string[]; desk?: string; title?: string; products?: Record<string, unknown>;
   signals?: Signal[] | null; paper_view?: { at?: number; paper_age_s?: number | null; gold_desk_age_s?: number | null;
-    factory_age_s?: number | null } | null };
+    factory_age_s?: number | null } | null; results?: DeskResults | null };
 
 export const usd = (v: number | null | undefined, signed = false) => {
   if (v === null || v === undefined || Number.isNaN(v)) return "—";
@@ -63,6 +77,24 @@ const sizeLabel = (r: number | "min" | null) => (r === "min" ? "1 contract a tra
 const px = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : v.toLocaleString("en-US", { maximumFractionDigits: v > 1000 ? 1 : 2 });
 export const tone = (v: number | null | undefined) => (!v ? "" : v > 0 ? "gain" : "loss");
+/** A signed percent with the U+2212 minus (the app's table sorter reads both). */
+export const spct = (v: number | null | undefined, d = 2) =>
+  v === null || v === undefined || Number.isNaN(v) ? "—" : `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(d)}%`;
+/** No t-stat under this many trades: two near-equal trades give a t in the hundreds. */
+export const MIN_T = 5;
+const num = (v: number | null | undefined, d = 2) => (v === null || v === undefined ? "—" : v.toFixed(d));
+const holdText = (s: number | null | undefined) =>
+  s === null || s === undefined ? "—" : s < 5400 ? `${Math.round(s / 60)} min` : s < 172800 ? `${(s / 3600).toFixed(1)} h` : `${(s / 86400).toFixed(1)} days`;
+/** IST calendar days from the first real trade to today, both counted. */
+export const spanDays = (first: number | null | undefined, now: number) => {
+  if (!first) return 0;
+  const d = (t: number) => Math.floor((t + 19800) / 86400);
+  return d(now) - d(first) + 1;
+};
+const dayText = (iso: string) => new Date(`${iso}T12:00:00+05:30`).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata",
+  weekday: "short", day: "2-digit", month: "short" });
+export const dateText = (t: number | null | undefined) => (!t ? "—" : new Date(t * 1000).toLocaleDateString("en-IN",
+  { timeZone: "Asia/Kolkata", day: "2-digit", month: "short" }));
 export const ist = (t: number | null | undefined) =>
   !t ? "—" : new Date(t * 1000).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short",
     hour: "2-digit", minute: "2-digit", hour12: false });
@@ -114,19 +146,9 @@ const verdict = (picks: Pick[]) => {
   return `${said}${parts.length ? ":" : ""} a few good paper trades picked them.`;
 };
 
-/** A pick's backtest badge, from the server's wording: "loses ...", "earns ..., not significant", "never backtested",
- *  or "pooled only" (the Gold Desk's H1 templates, replayed only as a family). */
-const btBadge = (b: string): [string, string] =>
-  b.startsWith("loses") ? ["error", "loses"] : b.startsWith("earns") ? ["skipped", "not significant"]
-    : b.startsWith("pooled") ? ["skipped", "family only"] : b.startsWith("factory") ? ["skipped", "not validated"]
-      : ["skipped", "not tested"];
-
 const rr = (v: number | null | undefined) => (v === null || v === undefined ? "—" : `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(2)}R`);
 const pct = (n: number, d: number) => (d ? `${Math.round((100 * n) / d)}%` : "—");
 const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
-/** The record at the pick: a t-stat of under five trades means nothing (two near-equal trades give a t in the hundreds). */
-const pickRecord = (p: Pick) =>
-  `${plural(p.trades, "trade")} · ${p.sum_r >= 0 ? "+" : ""}${p.sum_r.toFixed(1)}R · ${p.trades >= 5 ? `t ${p.t.toFixed(2)}` : "too few for a t"} · ${p.win}% won`;
 type PFilter = "all" | "inTrade" | "real" | "waiting";
 const inTrade = (p: Pick) => !!p.paper && p.paper.open.length > 0;
 /** What this desk did with a paper trade, as a badge (the reason goes under it). */
@@ -163,8 +185,13 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   const sizeText = oneContract ? "1 contract a trade (the smallest order Delta allows)" : `${usd(L.risk_usd)} risked a trade`;
   const noDayStop = L.daily_stop_on === false;   // a desk that copies every signal (19 Nov)
   const noCap = L.contract_cap_on === false;
-  const mixed = s.picks.some((p) => p.picked_at);   // some picks joined later: each record is as of its own pick
   const live = s.totals.live;
+  const R = s.results;                          // the desk's real-money results (21 Nov); undefined on an older server
+  const oneMargin = s.recent.find((t) => t.contracts === 1 && t.plan?.margin_usd)?.plan?.margin_usd;
+  const span = spanDays(R?.first_at, now);
+  const days = R?.by_day ?? [];
+  const best = days.reduce<(typeof days)[number] | null>((a, d) => (!a || d.pnl_usd > a.pnl_usd ? d : a), null);
+  const worst = days.reduce<(typeof days)[number] | null>((a, d) => (!a || d.pnl_usd < a.pnl_usd ? d : a), null);
   const dayLeft = L.daily_stop_usd + s.today.live;
   const dayUsed = Math.min(100, Math.max(0, (-s.today.live / (L.daily_stop_usd || 1)) * 100));
   const openPnl = s.open.reduce((a, t) => a + (t.unrealised_usd ?? 0), 0);
@@ -335,8 +362,31 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         )}
       </div>
 
+      {R && R.trades > 0 && (
+        <section className="ld-card ld-res" aria-label="Desk results, real money">
+          <div className="ld-res-head">
+            <b>Desk results, real money</b>
+            <span>{`${R.trades} closed trades since ${dateText(R.first_at)} · return % is net P&L ÷ the most margin the desk held at one time, ${usd(R.peak_margin_usd)} at ${L.leverage}x`}</span>
+          </div>
+          <dl className="ld-res-grid">
+            <div><dt>Trading days</dt><dd>{R.days}</dd><dd className="ld-res-s">{`of ${plural(span, "day")} since ${dateText(R.first_at)}`}</dd></div>
+            <div><dt>Net P&amp;L</dt><dd className={tone(R.net_usd)}>{usd(R.net_usd, true)}</dd><dd className="ld-res-s">{`closed trades · fees ${usd(R.fees_usd)}`}</dd></div>
+            <div><dt>Total return</dt><dd className={tone(R.return_pct)}>{spct(R.return_pct)}</dd><dd className="ld-res-s">{`on ${usd(R.peak_margin_usd)} of peak margin`}</dd></div>
+            <div><dt>Avg % / trading day</dt><dd className={tone(R.avg_day_pct)}>{spct(R.avg_day_pct)}</dd><dd className="ld-res-s">{`${usd(R.avg_day_usd, true)} a trading day`}</dd></div>
+            <div><dt>Avg % a trade</dt><dd className={tone(R.avg_trade_pct)}>{spct(R.avg_trade_pct, 3)}</dd><dd className="ld-res-s">{`${usd(R.avg_trade_usd, true)} a trade`}</dd></div>
+            <div><dt>Win rate</dt><dd>{R.win_pct === null ? "—" : `${R.win_pct.toFixed(1)}%`}</dd><dd className="ld-res-s">{`${R.wins} of ${R.trades} won`}</dd></div>
+            <div><dt>Profit factor</dt><dd>{R.pf === null ? "—" : num(R.pf)}</dd><dd className="ld-res-s">{R.pf === null ? "no losing trade yet" : `won ${usd(R.won_usd)} · lost ${usd(R.lost_usd)}`}</dd></div>
+            <div><dt>t-stat</dt><dd>{R.trades >= MIN_T && R.t !== null ? num(R.t) : "—"}</dd><dd className="ld-res-s">{R.trades >= MIN_T ? "2 or more would hint at a real edge" : `none under ${MIN_T} trades`}</dd></div>
+            <div><dt>Green days</dt><dd>{`${R.green_days} / ${R.days}`}</dd><dd className="ld-res-s">{best && worst ? `best ${usd(best.pnl_usd, true)} · worst ${usd(worst.pnl_usd, true)}` : "—"}</dd></div>
+            <div><dt>Max drawdown</dt><dd className={tone(R.max_dd_usd)}>{usd(R.max_dd_usd, true)}</dd><dd className="ld-res-s">worst fall from a high, closed trades</dd></div>
+            <div><dt>Best / worst trade</dt><dd>{`${usd(R.best_usd, true)} / ${usd(R.worst_usd, true)}`}</dd><dd className="ld-res-s">{`average hold ${holdText(R.avg_hold_s)}`}</dd></div>
+            <div><dt>Open now</dt><dd className={R.open ? tone(R.open_usd) : ""}>{R.open ? usd(R.open_usd, true) : "0"}</dd><dd className="ld-res-s">{R.open ? `${plural(R.open, "trade")}, not in the results yet` : "no trade open"}</dd></div>
+          </dl>
+        </section>
+      )}
+
       <h4 className="ld-h ld-h-row">
-        <span>{mixed ? `The ${s.picks.length} strategies (each record as of its own pick)` : `The ${s.picks.length} strategies (fixed ${ist(Date.parse(s.picked_at) / 1000)} IST)`}</span>
+        <span>{`The ${s.picks.length} strategies, real-money results`}</span>
         {hasPaper && (
           <span className="ld-filters" role="group" aria-label="Show strategies">
             {([["all", "All"], ["inTrade", "In a paper trade"], ["real", "With real trades"], ["waiting", "Waiting"]] as [PFilter, string][]).map(([k, label]) => (
@@ -349,13 +399,20 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
       <div className="ld-card ld-scroll">
         <table className="ld-table ld-strats">
           <thead>
-            <tr><th className="l">Strategy</th>{hasPaper && <><th className="l">Paper now</th><th className="l">Paper so far</th></>}
-              <th>Real money</th><th className="l">Record at the pick</th><th className="l">Its 2-year backtest</th></tr>
+            <tr><th className="l">Strategy</th>{hasPaper && <th className="l">Paper now</th>}
+              <th>Trades</th><th>Win %</th><th>PF</th><th>t‑stat</th><th>Net P&amp;L</th><th>Return %</th><th>Trading days</th>
+              <th>Avg % / trading day</th><th>Open now</th>{hasPaper && <th className="l">Paper so far</th>}</tr>
           </thead>
           <tbody>
             {picksShown.map((p) => {
               const o = p.paper?.open?.[0];
               const lv = p.live;
+              // the server's results (21 Nov); an older server gives only the live record
+              const r = p.results;
+              const n = r ? r.trades : lv?.trades ?? 0;
+              const wins = r ? r.wins : lv?.wins ?? 0;
+              const net = r ? r.net_usd : lv?.pnl_usd ?? 0;
+              const openN = r ? r.open : lv?.open ?? 0;
               return (
                 <tr key={`${p.acct}|${p.mkt}`} className={inTrade(p) ? "ld-row-on" : ""}>
                   <td className="l ld-strat">
@@ -380,35 +437,71 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
                           </>
                         )}
                       </td>
-                      <td className="l">
-                        {p.paper ? (
-                          <>
-                            <span className={`ld-num ${tone(p.paper.sum_r)}`}>{p.paper.trades ? rr(p.paper.sum_r) : "—"}</span>
-                            <div className="ld-sub">{p.paper.trades ? `${plural(p.paper.trades, "trade")} · ${pct(p.paper.wins, p.paper.trades)} won` : "no closed trade yet"}</div>
-                          </>
-                        ) : <span className="ld-dim">—</span>}
-                      </td>
                     </>
                   )}
-                  <td>
-                    <span className={`ld-num ${tone(lv?.pnl_usd)}`}>{lv && (lv.trades || lv.open) ? usd(lv.pnl_usd, true) : "—"}</span>
-                    <div className="ld-sub">{lv && lv.trades ? `${plural(lv.trades, "trade")} · ${pct(lv.wins, lv.trades)} won` : "no real trade yet"}</div>
-                    {lv?.open ? <span className="ld-badge open">{lv.open} open</span> : null}
-                  </td>
-                  <td className="l">{pickRecord(p)}
-                    {mixed ? <div className="ld-sub">{`picked ${ist(Date.parse(p.picked_at || s.picked_at) / 1000)}`}</div> : null}</td>
-                  <td className="l"><span className={`ld-badge ${btBadge(p.backtest)[0]}`}>
-                    {btBadge(p.backtest)[1]}</span><div className="ld-sub">{p.backtest}</div></td>
+                  <td>{n || openN ? n : "—"}</td>
+                  <td>{n ? `${(r?.win_pct ?? (100 * wins) / n).toFixed(1)}%` : "—"}</td>
+                  <td title={r && n && r.pf === null ? "no losing trade yet" : undefined}>{r && n && r.pf !== null ? num(r.pf) : "—"}</td>
+                  <td title={n && n < MIN_T ? `no t under ${MIN_T} trades` : undefined}>{r && n >= MIN_T && r.t !== null ? num(r.t) : "—"}</td>
+                  <td className={`ld-num ${n ? tone(net) : ""}`}>{n ? usd(net, true) : "—"}</td>
+                  <td className={`ld-num ${tone(r?.return_pct)}`} title={r && n ? `on ${usd(r.peak_margin_usd)} of peak margin` : undefined}>
+                    {r && n ? spct(r.return_pct) : "—"}</td>
+                  <td>{r && n ? r.days : "—"}</td>
+                  <td className={`ld-num ${tone(r?.avg_day_pct)}`}>{r && n ? spct(r.avg_day_pct, 3) : "—"}</td>
+                  <td className={`ld-num ${r && openN ? tone(r.open_usd) : ""}`} title={openN ? `${plural(openN, "real trade")} open` : undefined}>
+                    {openN ? (r ? usd(r.open_usd, true) : `${openN} open`) : "—"}</td>
+                  {hasPaper && (
+                    <td className="l">
+                      {p.paper ? (
+                        <>
+                          <span className={`ld-num ${tone(p.paper.sum_r)}`}>{p.paper.trades ? rr(p.paper.sum_r) : "—"}</span>
+                          <div className="ld-sub">{p.paper.trades ? `${plural(p.paper.trades, "trade")} · ${pct(p.paper.wins, p.paper.trades)} won` : "no closed trade yet"}</div>
+                        </>
+                      ) : <span className="ld-dim">—</span>}
+                    </td>
+                  )}
                 </tr>
               );
             })}
           </tbody>
         </table>
         {!picksShown.length && <p className="ld-dim ld-pad">None of these strategies is in this state right now.</p>}
+        <p className="ld-foot">
+          Real money only, closed trades, after Delta&apos;s fees. Return % = net P&amp;L ÷ the most margin the strategy held at
+          one time{oneMargin ? ` (one contract at ${L.leverage}x holds about ${usd(oneMargin)} now)` : ""}; avg % /
+          trading day = return % ÷ trading days, the IST days on which one of its real trades closed. No t-stat under {MIN_T} trades,
+          and no profit factor before a losing trade.
+        </p>
         {showShadow && (
           <p className="ld-foot">{`Shadow: ${s.picks.filter((p) => p.shadow).map((p) => `${p.acct} ${usd(p.shadow!.pnl_usd, true)} (${p.shadow!.trades})`).join(" · ") || "no shadow trade yet"}`}</p>
         )}
       </div>
+
+      {days.length > 0 && (
+        <>
+          <h4 className="ld-h">Day by day, real money (IST)</h4>
+          <div className="ld-card ld-scroll">
+            <table className="ld-table ld-days">
+              <thead>
+                <tr><th className="l">Day</th><th>Trades</th><th>Won</th><th>Win %</th><th>Net P&amp;L</th><th>Return %</th></tr>
+              </thead>
+              <tbody>
+                {[...days].reverse().map((d) => (
+                  <tr key={d.day}>
+                    <td className="l">{dayText(d.day)}</td>
+                    <td>{d.trades}</td>
+                    <td>{d.wins}</td>
+                    <td>{d.trades ? `${((100 * d.wins) / d.trades).toFixed(1)}%` : "—"}</td>
+                    <td className={`ld-num ${tone(d.pnl_usd)}`}>{usd(d.pnl_usd, true)}</td>
+                    <td className={`ld-num ${tone(d.return_pct)}`}>{spct(d.return_pct)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="ld-foot">{`A day's return % is its net P&L ÷ the desk's ${usd(R?.peak_margin_usd)} of peak margin.`}</p>
+          </div>
+        </>
+      )}
 
       {s.signals !== undefined && (
         <>
@@ -656,7 +749,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-seg-b:disabled { cursor: default; opacity: 0.6; }
         .ld .ld-seg-b:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
         .ld .ld-risk-s { flex: 1 1 260px; font-size: 12px; line-height: 1.45; color: var(--text-muted); }
-        .ld .ld-strats td.ld-strat { min-width: 220px; max-width: 320px; }
+        .ld .ld-strats td.ld-strat { min-width: 200px; max-width: 280px; }
         .ld .ld-strats td { vertical-align: top; }
         .ld .ld-strats td .ld-badge + .ld-side { margin-left: 4px; }
         .ld .ld-row-on td { background: var(--brand-dim); }
@@ -664,6 +757,24 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-table tbody tr.ld-row-on:hover td { background: var(--brand-dim); }
         .ld .ld-chip-src { background: var(--warn-dim); border-color: var(--warn-border); color: var(--text-secondary); }
         .ld .ld-pad { padding: 12px 14px; }
+        .ld .ld-res { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+        .ld .ld-res-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+        .ld .ld-res-head b { font-size: 14px; font-weight: 800; color: var(--text); }
+        .ld .ld-res-head span { font-size: 12px; color: var(--text-muted); }
+        .ld .ld-res-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px 16px; margin: 0; }
+        .ld .ld-res-grid > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-left: 10px;
+                                 border-left: 2px solid var(--panel-border); }
+        .ld .ld-res-grid dt { font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); }
+        .ld .ld-res-grid dd { margin: 0; font-family: var(--font-data); font-size: 17px; font-weight: 700; color: var(--text);
+                              font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+        .ld .ld-res-grid dd.gain { color: var(--gain); }
+        .ld .ld-res-grid dd.loss { color: var(--loss); }
+        .ld .ld-res-grid dd.ld-res-s { font-family: inherit; font-size: 11.5px; font-weight: 400; color: var(--text-muted); line-height: 1.4; }
+        .ld .ld-strats th { white-space: normal; line-height: 1.3; vertical-align: bottom; padding: 10px 9px; }
+        .ld .ld-strats th:not(.l) { max-width: 86px; }
+        .ld .ld-strats td { padding: 9px 9px; }
+        .ld .ld-strats td.ld-num { white-space: nowrap; }
+        .ld .ld-strats td.l { min-width: 118px; }
         .ld .ld-signals td:nth-child(4) { font-family: var(--font-data); }
         .ld .ld-table td.ld-num.gain { color: var(--gain); }      /* a result keeps its colour in a dimmed row */
         .ld .ld-table td.ld-num.loss { color: var(--loss); }
@@ -671,6 +782,8 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
           .ld .ld-v { font-size: 19px; } .ld .ld-ctl input { min-width: 140px; } .ld .ld-seg-b { padding: 7px 10px; }
           .ld .ld-status { padding: 14px; } .ld .ld-pos-dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .ld .ld-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .ld .ld-tile { padding: 12px; }
+          .ld .ld-res { padding: 12px; } .ld .ld-res-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+          .ld .ld-res-grid dd { font-size: 15px; }
         }
       `}</style>
     </div>

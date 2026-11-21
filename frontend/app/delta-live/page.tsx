@@ -9,11 +9,12 @@
 // real Delta orders, each with its stop and target held on Delta, at one contract a trade (or $1 to $5 of risk picked
 // on the page) and a $20 daily loss stop. Each desk has its own ON/OFF switch (one confirmation; no PIN since 15 Nov,
 // the owner's choice). The page shows both desks at a glance and one desk in full; the gold desk is also on Premium
-// Strategies. Every request that changes a desk is LiveDelta's (unchanged); the overview only reads.
+// Strategies. Every request that changes a desk is LiveDelta's (unchanged); the overview only reads. From 21 Nov each
+// desk card also shows its real-money trading days, total return, avg % a trading day, win rate, PF and drawdown.
 import { useCallback, useEffect, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import { apiFetch } from "../../lib/api";
-import LiveDelta, { MODE, ago, usd, tone, type LiveStatus } from "../premium-strategies/LiveDelta";
+import LiveDelta, { MODE, ago, usd, tone, spct, type LiveStatus } from "../premium-strategies/LiveDelta";
 
 type DeskKey = "crypto" | "gold";
 const DESKS: { key: DeskKey; label: string; product: string; path: string; intro: string }[] = [
@@ -132,6 +133,16 @@ export default function DeltaLiveTradingPage() {
                     <span>{s.totals.live.trades} closed</span>
                     <span>{s.open.length} open</span>
                   </span>
+                  {s.results && s.results.trades > 0 ? (
+                    <span className="dlx-desk-stats" title={`Real money, closed trades. Return = net P&L ÷ the most margin the desk held at one time (${usd(s.results.peak_margin_usd)}).`}>
+                      <span className="dlx-st"><span className="dlx-st-k">Trading days</span><b>{s.results.days}</b></span>
+                      <span className="dlx-st"><span className="dlx-st-k">Total return</span><b className={tone(s.results.return_pct)}>{spct(s.results.return_pct)}</b></span>
+                      <span className="dlx-st"><span className="dlx-st-k">Avg % / trading day</span><b className={tone(s.results.avg_day_pct)}>{spct(s.results.avg_day_pct)}</b></span>
+                      <span className="dlx-st"><span className="dlx-st-k">Win rate</span><b>{s.results.win_pct === null ? "—" : `${s.results.win_pct.toFixed(1)}%`}</b></span>
+                      <span className="dlx-st"><span className="dlx-st-k">Profit factor</span><b>{s.results.pf === null ? "—" : s.results.pf.toFixed(2)}</b></span>
+                      <span className="dlx-st"><span className="dlx-st-k">Max drawdown</span><b className={tone(s.results.max_dd_usd)}>{usd(s.results.max_dd_usd, true)}</b></span>
+                    </span>
+                  ) : null}
                   <span className="dlx-desk-foot">
                     {s.switched_off ? <span className="loss">Switched off: {s.switched_off}</span>
                       : `checked ${ago(s.last_cycle_at, now)}${s.errors_in_row ? ` · ${s.errors_in_row} venue error${s.errors_in_row === 1 ? "" : "s"} in a row` : ""}`}
@@ -205,6 +216,13 @@ export default function DeltaLiveTradingPage() {
         .dlx-desk-nums { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--text-muted); }
         .dlx-desk-nums b { font-family: var(--font-data); color: var(--text); }
         .dlx-desk-foot { font-size: 11.5px; color: var(--text-faint); }
+        .dlx-desk-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; padding: 10px 0 2px;
+          border-top: 1px solid var(--panel-border); }
+        .dlx-st { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+        .dlx-st-k { font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); }
+        .dlx-st b { font-family: var(--font-data); font-size: 15px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+        .dlx-st b.gain { color: var(--gain); }
+        .dlx-st b.loss { color: var(--loss); }
         .dlx-how { padding: 12px 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--panel-border); }
         .dlx-how summary { cursor: pointer; font-size: 13px; font-weight: 800; color: var(--text); }
         .dlx-how p { margin: 10px 0 0; font-size: 13px; line-height: 1.6; color: var(--text-secondary); }

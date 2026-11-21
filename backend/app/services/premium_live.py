@@ -1943,6 +1943,102 @@ def _clean(t: dict) -> dict:
     return t
 
 
+# Results (21 Nov 2026): what a desk and each of its strategies did with real money, counted from EVERY trade row (the
+# page's "recent" holds only the latest 150): trades, % won, profit factor, t, net P&L, return %, trading days and the
+# average a trading day. Return % = net P&L / the most margin the strategy (or the desk) had in use at one time: the
+# capital it actually tied up at 10x. (Summing each trade's return on its own margin would let one 4-contract win and
+# many 1-contract losses disagree in sign with the net.) A trading day = an IST day on which one of its trades closed.
+HELD = ("entering", "open", "closing")
+
+
+def _margin(t: dict, prods: dict) -> float:
+    """The margin a real trade holds: its contracts x contract value x fill / leverage, else what its plan said."""
+    p = (prods or {}).get(t.get("product")) or {}
+    try:
+        cv, lev = float(p.get("contract_value") or 0), float(p.get("leverage") or LEVERAGE)
+        n, fill = float(t.get("contracts") or 0), float(t.get("fill") or 0)
+        if cv > 0 and lev > 0 and n > 0 and fill > 0:
+            return n * cv * fill / lev
+        return float((t.get("plan") or {}).get("margin_usd") or 0.0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _peak_margin(trades: list, prods: dict, now: float) -> float:
+    """The most margin these trades held at one time (an open trade holds it until now)."""
+    ev = []
+    for t in trades:
+        m = _margin(t, prods)
+        if m <= 0:
+            continue
+        o = float(t.get("opened_at") or t.get("created_at") or now)
+        c = float(t.get("closed_at") or o) if t.get("status") == "closed" else now
+        ev += [(o, 1, m), (max(c, o), 0, -m)]       # at the same second a close frees its margin before an open takes it
+    cur = peak = 0.0
+    for _, _, m in sorted(ev):
+        cur += m
+        peak = max(peak, cur)
+    return peak
+
+
+def _record(trades: list, prods: dict, now: float, by_day: bool = False) -> dict:
+    """The real-money record of a set of live trades (one strategy's, or a whole desk's)."""
+    closed = sorted((t for t in trades if t.get("status") == "closed"), key=lambda t: float(t.get("closed_at") or 0))
+    held = [t for t in trades if t.get("status") in HELD]
+    pnl = [float(t.get("pnl_usd") or 0.0) for t in closed]
+    n, net = len(pnl), sum(pnl)
+    wins = sum(1 for x in pnl if x > 0)
+    won, lost = sum(x for x in pnl if x > 0), -sum(x for x in pnl if x < 0)
+    t_stat = None
+    if n >= 2:
+        sd = math.sqrt(sum((x - net / n) ** 2 for x in pnl) / (n - 1))
+        t_stat = round((net / n) / (sd / math.sqrt(n)), 2) if sd > 0 else None
+    peak = _peak_margin(closed + held, prods, now)
+    ret = 100.0 * net / peak if n and peak > 0 else None
+    days: dict[str, list] = {}
+    for t, x in zip(closed, pnl):
+        d = days.setdefault(t.get("day_closed") or _day(float(t.get("closed_at") or now)), [0, 0, 0.0])
+        d[0] += 1
+        d[1] += 1 if x > 0 else 0
+        d[2] += x
+    eq = top = dd = 0.0
+    for x in pnl:
+        eq += x
+        top = max(top, eq)
+        dd = min(dd, eq - top)
+    holds = [float(t["closed_at"]) - float(t["opened_at"]) for t in closed if t.get("closed_at") and t.get("opened_at")]
+    nd = len(days)
+    out = {
+        "trades": n, "wins": wins, "open": len(held), "win_pct": round(100.0 * wins / n, 1) if n else None,
+        "net_usd": round(net, 4), "fees_usd": round(sum(float(t.get("fees") or 0.0) for t in closed), 4),
+        "won_usd": round(won, 4), "lost_usd": round(lost, 4), "pf": round(won / lost, 2) if lost > 0 else None,
+        "t": t_stat, "peak_margin_usd": round(peak, 4), "return_pct": None if ret is None else round(ret, 2),
+        "days": nd, "avg_day_pct": round(ret / nd, 3) if ret is not None and nd else None,
+        "avg_day_usd": round(net / nd, 4) if nd else None, "avg_trade_usd": round(net / n, 4) if n else None,
+        "avg_trade_pct": round(ret / n, 3) if ret is not None else None,
+        "best_usd": round(max(pnl), 4) if pnl else None, "worst_usd": round(min(pnl), 4) if pnl else None,
+        "max_dd_usd": round(dd, 4), "avg_hold_s": round(sum(holds) / len(holds)) if holds else None,
+        "open_usd": round(sum(float(t.get("unrealised_usd") or 0.0) for t in held), 4),
+        "first_at": min((float(t.get("opened_at") or t.get("created_at") or now) for t in closed + held), default=None),
+        "last_at": (float(closed[-1].get("closed_at") or 0) or None) if closed else None,
+    }
+    if by_day:
+        out["by_day"] = [{"day": d, "trades": v[0], "wins": v[1], "pnl_usd": round(v[2], 4),
+                          "return_pct": round(100.0 * v[2] / peak, 2) if peak > 0 else None}
+                         for d, v in sorted(days.items())]
+        out["green_days"] = sum(1 for v in days.values() if v[2] > 0)
+    return out
+
+
+def _results(rows: list, prods: dict, now: float) -> dict:
+    """The desk's real-money record (with each IST day) and each strategy's, keyed "acct|mkt"."""
+    live = [t for t in rows if t.get("mode") == "live" and t.get("status") in ("closed",) + HELD]
+    per: dict[str, list] = {}
+    for t in live:
+        per.setdefault(f"{t.get('acct')}|{t.get('mkt')}", []).append(t)
+    return {"desk": _record(live, prods, now, by_day=True), "per": {k: _record(v, prods, now) for k, v in per.items()}}
+
+
 async def _status_one() -> dict:
     db = _db()
     if db is None:
@@ -1962,11 +2058,17 @@ async def _status_one() -> dict:
         else:
             x["open"] += 1
     view = await _paper_view(db, st)
+    try:
+        res = _results(rows, st.get("products") or {}, _now())
+    except Exception:                                  # extras for the page: never let them break what it reads
+        logger.exception("premium live %s: results not counted", _d().key)
+        res = None
     empty = {"trades": 0, "wins": 0, "sum_r": 0.0, "open": [], "last_t": None}
     picks = []
     for p in _d().picks:
         picks.append({**asdict(p), "live": per.get(f"live|{p.acct}|{p.mkt}"), "shadow": per.get(f"shadow|{p.acct}|{p.mkt}"),
-                      "paper": None if view is None else view["per"].get(f"{p.acct}|{p.mkt}", empty)})
+                      "paper": None if view is None else view["per"].get(f"{p.acct}|{p.mkt}", empty),
+                      "results": None if res is None else res["per"].get(f"{p.acct}|{p.mkt}")})
     today = {m: await _day_pnl(db, m, None) for m in ("live", "shadow")}
     totals = {}
     for m in ("live", "shadow"):
@@ -1989,6 +2091,7 @@ async def _status_one() -> dict:
                    "daily_stop_on": not _d().follow_all, "contract_cap_on": not _d().follow_all,
                    "waiting": len(_WAITING.get(_d().key, {}))},
         "today": today, "totals": totals, "picked_at": _d().picked_at, "picks": picks,
+        "results": None if res is None else res["desk"],
         "desk": _d().key, "title": _d().title, "desk_products": _d().products,
         "open": [_clean(t) for t in rows if t.get("status") in ("entering", "open", "closing")],
         "recent": [_clean(t) for t in rows[:150]], "notes": list(_d().notes),

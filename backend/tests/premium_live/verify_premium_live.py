@@ -1547,6 +1547,72 @@ async def main():
           and float(own_leg(t, "stop")["stop_price"]) == 93500.0 and not t.get("stop_capped"),
           t and (t.get("status"), t.get("reason")))
 
+    # ── 35. results (21 Nov) ──────────────────────────────────────────────────────
+    section("35. Results: trades, % won, PF, t, net, return % on the peak margin, trading days, the average a day")
+    pr = {"BTCUSD": {"contract_value": 0.001, "leverage": 10}}
+
+    def row(acct, status, contracts, fill, opened, closed=None, pnl=None, day=None, mode="live", **kw):
+        return {"_id": f"{acct}|{opened}", "acct": acct, "mkt": "BTCUSD", "product": "BTCUSD", "mode": mode,
+                "status": status, "contracts": contracts, "fill": fill, "opened_at": opened, "created_at": opened,
+                **({"closed_at": closed, "pnl_usd": pnl, "day_closed": day, "fees": 0.1} if status == "closed" else {}), **kw}
+    rows = [row("X", "closed", 4, 60000.0, 1000.0, 2000.0, 6.0, "2026-11-15"),     # $24 of margin
+            row("Y", "closed", 1, 50000.0, 1500.0, 2500.0, -2.0, "2026-11-15"),    # $5, held while X's $24 is
+            row("X", "closed", 1, 50000.0, 3000.0, 4000.0, -1.0, "2026-11-16"),    # $5
+            row("Y", "open", 1, 50000.0, 5000.0, unrealised_usd=0.5),             # $5, held until now
+            row("X", "skipped", 1, 50000.0, 6000.0), row("X", "closed", 9, 50000.0, 500.0, 900.0, 99.0, "2026-11-14",
+                                                           mode="shadow")]
+    r = M._results(rows, pr, 9000.0)
+    k, x, y = r["desk"], r["per"]["X|BTCUSD"], r["per"]["Y|BTCUSD"]
+    check("the desk: 3 closed (skipped and shadow rows left out), 1 won, 1 open, net +$3, PF 6/3 = 2.0",
+          (k["trades"], k["wins"], k["open"], k["net_usd"], k["pf"], k["win_pct"]) == (3, 1, 1, 3.0, 2.0, 33.3), k)
+    check("the desk's peak margin is the $29 held at once (X's 4 contracts + Y's 1), so +$3 is +10.34%",
+          k["peak_margin_usd"] == 29.0 and k["return_pct"] == 10.34, (k["peak_margin_usd"], k["return_pct"]))
+    check("2 trading days (IST days a trade closed): +5.172% and +$1.50 a trading day; 1 green day",
+          (k["days"], k["avg_day_pct"], k["avg_day_usd"], k["green_days"]) == (2, 5.172, 1.5, 1), k)
+    check("by day: 15 Nov 2 trades 1 won +$4 (+13.79%), 16 Nov 1 trade -$1 (-3.45%)",
+          k["by_day"] == [{"day": "2026-11-15", "trades": 2, "wins": 1, "pnl_usd": 4.0, "return_pct": 13.79},
+                          {"day": "2026-11-16", "trades": 1, "wins": 0, "pnl_usd": -1.0, "return_pct": -3.45}], k["by_day"])
+    check("the desk's worst run from a peak is -$3 (+6, then -2, -1); fees summed; the open trade's +$0.50",
+          (k["max_dd_usd"], k["fees_usd"], k["open_usd"], k["best_usd"], k["worst_usd"]) == (-3.0, 0.3, 0.5, 6.0, -2.0), k)
+    check("strategy X: 2 trades, net +$5 on its $24 peak (one trade at a time) = +20.83%, 2 days, PF 6.0, t 0.71",
+          (x["trades"], x["net_usd"], x["peak_margin_usd"], x["return_pct"], x["days"], x["avg_day_pct"], x["pf"], x["t"])
+          == (2, 5.0, 24.0, 20.83, 2, 10.417, 6.0, 0.71), x)
+    check("strategy Y: 1 trade -$2 and one open: -40% of its $5, PF 0, no t from one trade",
+          (y["trades"], y["open"], y["return_pct"], y["pf"], y["t"], y["win_pct"]) == (1, 1, -40.0, 0.0, None, 0.0), y)
+    same = M._results([row("A", "closed", 1, 50000.0, 1000.0, 2000.0, 1.0, "2026-11-15"),
+                       row("B", "closed", 1, 50000.0, 2000.0, 3000.0, 1.0, "2026-11-15")], pr, 9000.0)["desk"]
+    check("a close and an open in the same second never count both margins", same["peak_margin_usd"] == 5.0, same)
+    none = M._results([], pr, 9000.0)["desk"]
+    check("no trade at all: zeros and blanks, never a division by zero",
+          none["trades"] == 0 and none["return_pct"] is None and none["avg_day_pct"] is None and none["by_day"] == [], none)
+    plan = M._results([{**row("P", "closed", 1, None, 1000.0, 2000.0, 0.5, "2026-11-15"), "plan": {"margin_usd": 2.5}}],
+                      {}, 9000.0)["desk"]
+    check("no product read yet: the plan's margin is used", plan["peak_margin_usd"] == 2.5 and plan["return_pct"] == 20.0, plan)
+
+    db = fresh()
+    tid = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None, ago=20)
+    await cyc(db)
+    advance(120)
+    M.D.mid.update(BTCUSD=69300.0)
+    close_paper(db, tid, "signal", 69300.0)
+    await cyc(db)
+    c = await M.status("crypto")
+    t = trade(db, tid)
+    kr, pk = c.get("results") or {}, next(p for p in c["picks"] if p["acct"] == "TH-01").get("results") or {}
+    check("status: the closed real trade is in the desk's results and TH-01's, its return % = net / its margin",
+          t and t["status"] == "closed" and kr.get("trades") == 1 and pk.get("trades") == 1 and kr.get("days") == 1
+          and abs(pk["return_pct"] - round(100 * t["pnl_usd"] / pk["peak_margin_usd"], 2)) < 0.01
+          and pk["peak_margin_usd"] > 0 and len(kr.get("by_day") or []) == 1, (t and t.get("status"), kr, pk))
+    check("... strategies without a real trade read null, and the gold desk has none",
+          next(p for p in c["picks"] if p["acct"] == "TH-05")["results"] is None
+          and (await M.status("gold"))["results"]["trades"] == 0)
+    real = M._results
+    M._results = lambda *a: 1 / 0
+    c = await M.status("crypto")
+    M._results = real
+    check("results that fail to count never break the page: they read null, the rest is there",
+          c.get("results") is None and all(p["results"] is None for p in c["picks"]) and c["totals"]["live"]["trades"] == 1)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
