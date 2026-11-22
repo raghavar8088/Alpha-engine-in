@@ -3,11 +3,13 @@
 DESKS. Each desk has its own picks, products, switch (off / shadow / live), daily loss stop, state and trade records;
 they share the Delta account, its keys and the owner's PIN, and never trade the same product.
 - gold (Premium Strategies > "Real money · Delta gold"): the five gold picks of 13 Nov, CP-06 (15 Nov), TL-04's gold
-  book (16 Nov), and from 18 Nov thirteen more Premium gold books and six Gold Desk H1 templates, on XAUTUSD.
+  book (16 Nov), and from 18 Nov thirteen more Premium gold books and six Gold Desk H1 templates, on XAUTUSD; the
+  Gold Desk Strategy Factory's top 20 on 19 Nov; 49 more on 22 Nov (99 in all).
   Its records are the original ones (live_delta_state / live_delta_trades).
 - crypto (the "Delta Exchange Live Trading" module, 14 Nov): the bitcoin strategies the owner picked from the Crypto
   tab - TH-05, TL-04 and TH-01 on 14 Nov, TD-02 on 15 Nov, five more on 18 Nov - on BTCUSD, a $20 daily stop
-  (live_crypto_state / live_crypto_trades). From 15 Nov both desks trade one contract a trade (the owner can pick $1
+  (live_crypto_state / live_crypto_trades); seven more bitcoin books and two ether books (ETHUSD) on 22 Nov (24 in
+  all). From 15 Nov both desks trade one contract a trade (the owner can pick $1
   to $5 of risk instead) and copy a signal seen up to 10 minutes late.
   On 14 Nov the owner moved bitcoin here from the gold desk; the gold desk's earlier bitcoin picks (TH-01, TH-05, RU-04,
   TD-02, TD-03) left it, and any bitcoin trade it still had open would be managed by it to its close.
@@ -108,6 +110,19 @@ the id "SF|<position_id>" (_paper_sf), exactly as the H1 positions: its stop and
 exit (stop, target or the tab's hold limit). Liveness = the tab's own cycle (factory_desk_state "cycle:gold" at); an
 unreadable store leaves its trades waiting, never closed. Records frozen at NEW_PICKED_AT_3 (21:29 IST, the owner's
 screenshot), in R; they match the board.
+
+22 NOV 2026: THE OWNER'S THIRD LIST, AND ETHER. The owner sent the Premium Crypto and Gold tabs, the Gold Desk's H1
+"Strategy records" and its Strategy Factory board, and asked for every strategy on them on real money ("if it is
+already there, skip it"; the live rules unchanged). The screenshots held the boards' winning rows; a row already on
+its desk was skipped. New:
+- bitcoin desk: DT-05, TL-03, RU-04, KA-01, DD-01, TD-04, TC-04 (BTCUSD), and the ether books of DD-04 and BX-02 on
+  Delta's ETHUSD perpetual (0.01 ETH a contract), the first time a desk trades a second product;
+- gold desk: ten Premium gold books (CP-21, YT-18, TF-01, CP-01, FL-02, MH-01, DT-02, BG-08, RU-06, JR-03), the H1
+  test's Prior Session High/Low Break, and 38 more of the Factory board's top 56 (ranks 17 and 34, hidden under the
+  board's sticky header in the screenshots, are inside the 56 the owner scrolled through).
+Records at NEW_PICKED_AT_4 (14:30 IST, the screenshots), by the methods above (each re-proven on a frozen record).
+A product that joins a desk already live never went through going live, where leverage is set (_set_mode_one): its
+leverage is confirmed at LEVERAGE before its first entry (_confirm_leverage), and its signals wait until it is.
 """
 
 from __future__ import annotations
@@ -168,6 +183,7 @@ H1_ID = "H1|"                                  # a Gold Desk H1 position, as a p
 GOLD_SF = "gold_sf"                            # ... or the Gold Desk's Strategy Factory tab (19 Nov)
 SF_ID = "SF|"                                  # a Strategy Factory tab position, as a paper trade id: "SF|<position_id>"
 NEW_PICKED_AT_3 = "2026-11-19T21:29:00+05:30"  # the Factory board's top 20 the owner sent: their records as of this time
+NEW_PICKED_AT_4 = "2026-11-22T14:30:00+05:30"  # the owner's 22 Nov screenshots (both desks): their records as of this time
 CONFIRM = "REAL MONEY"
 D = Delta()
 
@@ -193,22 +209,23 @@ _H1_BACKTEST = ("pooled only: the nine H1 templates together earned +12.2 bp a t
                 "(1,045 trades), the data they were found in; no single template survives the luck correction")
 
 
-def _h1(code: str, template: str, name: str, trades: int, sum_r: float, t: float, win: int) -> Pick:
-    """A Gold Desk H1 template on the gold desk (18 Nov 2026). Record = its closed H1 positions at NEW_PICKED_AT, in R
-    (realised P&L over |entry - stop| x quantity)."""
+def _h1(code: str, template: str, name: str, trades: int, sum_r: float, t: float, win: int,
+        at: str = NEW_PICKED_AT) -> Pick:
+    """A Gold Desk H1 template on the gold desk (18 Nov 2026). Record = its closed H1 positions at its pick time `at`,
+    in R (realised P&L over |entry - stop| x quantity)."""
     return Pick(code, "XAUTUSD", "XAUTUSD", f"Gold Desk H1: {name}", trades, sum_r, t, win, _H1_BACKTEST,
-                NEW_PICKED_AT, GOLD_H1, template)
+                at, GOLD_H1, template)
 
 
 _SF_BACKTEST = ("factory only: graded by the Strategy Factory's own backtest, whose replay reads future 4-hour bars; "
                 "none of the 546 is validated, and its forward paper record on the Gold Desk picked it")
 
 
-def _sf(sid: str, name: str, trades: int, sum_r: float, t: float, win: int) -> Pick:
+def _sf(sid: str, name: str, trades: int, sum_r: float, t: float, win: int, at: str = NEW_PICKED_AT_3) -> Pick:
     """A strategy of the Gold Desk's "Strategy Factory · 546" tab on the gold desk (19 Nov 2026). Record = its closed
-    tab positions at NEW_PICKED_AT_3, in R (realised P&L over what its sleeve loses at its stop)."""
+    tab positions at its pick time `at`, in R (realised P&L over what its sleeve loses at its stop)."""
     return Pick(sid, "XAUTUSD", "XAUTUSD", f"Gold Desk Strategy Factory: {name}", trades, sum_r, t, win, _SF_BACKTEST,
-                NEW_PICKED_AT_3, GOLD_SF, sid)
+                at, GOLD_SF, sid)
 
 
 GOLD_PICKS: tuple[Pick, ...] = (
@@ -294,6 +311,68 @@ GOLD_PICKS: tuple[Pick, ...] = (
     _sf("SF0228", "Keltner Breakout · 30m", 33, 5.95, 0.59, 36),
     _sf("SF0426", "Parabolic SAR Flip · 30m", 24, 14.14, 1.77, 54),
     _sf("SF0243", "Prior Session High/Low Break · 15m", 78, 17.38, 1.14, 41),
+    # the owner's 22 Nov screenshots (records at NEW_PICKED_AT_4, 14:30 IST): ten more gold books from the Premium Gold
+    # tab (backtests: each one's own 2-year gold book where it has one; YT-18's is its hold-out, as YT-14's) ...
+    Pick("CP-21", "XAUUSD", "XAUTUSD", "Breaker block", 15, 1.68, 0.30, 40, "never backtested", NEW_PICKED_AT_4),
+    Pick("YT-18", "XAUUSD", "XAUTUSD", "Heikin-Ashi colour change + RSI 50", 16, 6.37, 0.79, 50,
+         "loses: -0.14R a trade over 1,960 hold-out trades (t -3.5)", NEW_PICKED_AT_4),
+    Pick("TF-01", "XAUTUSD", "XAUTUSD", "Fibonacci confluence continuation, -0.272 target (15-minute)", 29, 4.39, 0.41, 34,
+         "loses: -0.21R a trade over 1,374 trades (t -4.7)", NEW_PICKED_AT_4),
+    Pick("CP-01", "XAUUSD", "XAUTUSD", "Trend pullback at the 5th point", 16, 3.30, 0.60, 38, "never backtested",
+         NEW_PICKED_AT_4),
+    Pick("FL-02", "XAUTUSD", "XAUTUSD", "Williams Alligator: the 5-minute candle clear of all three lines and engulfing, "
+         "with the 1-hour EMA 50, 1R", 11, 4.12, 1.33, 73, "never backtested", NEW_PICKED_AT_4),
+    Pick("MH-01", "XAUTUSD", "XAUTUSD", "Gold 8 PM New York hourly candle: reversal or continuation", 6, 2.37, 0.57, 50,
+         "earns: +0.087R a trade over 451 trades (t 1.3), not significant", NEW_PICKED_AT_4),
+    Pick("DT-02", "XAUTUSD", "XAUTUSD", "MACD + Parabolic SAR + EMA 200, stop at the dot, 1:1 (30-minute)", 12, 2.20, 0.58,
+         58, "earns: +0.015R a trade over 680 trades (t 0.4), not significant", NEW_PICKED_AT_4),
+    Pick("BG-08", "XAUUSD", "XAUTUSD", "Candle range theory on 15 minutes", 110, 13.01, 0.47, 31, "never backtested",
+         NEW_PICKED_AT_4),
+    Pick("RU-06", "XAUTUSD", "XAUTUSD", "Zero-lag MACD cross below/above zero in the 200 EMA trend, pullback stop, 1.5R", 10,
+         1.00, 0.27, 50, "never backtested", NEW_PICKED_AT_4),
+    Pick("JR-03", "XAUTUSD", "XAUTUSD", "9:30-9:35 range, 1-minute FVG break, market entry, 2R", 8, 2.24, 0.49, 50,
+         "loses: -0.13R a trade over 499 trades (t -2.1)", NEW_PICKED_AT_4),
+    # ... the H1 test's Prior Session High/Low Break (its ranks 7 and 8, both losing, were not in the screenshots) ...
+    _h1("H1-PSB", "prior_session_break", "Prior Session High/Low Break · 4h", 26, 0.68, 0.09, 35, NEW_PICKED_AT_4),
+    # ... and the Factory board's top 56 not already here (38; the 18 others of the 56 are above), in board order
+    _sf("SF0345", "Rectangle / Trading Range Break · 15m", 49, 10.45, 1.64, 65, NEW_PICKED_AT_4),
+    _sf("SF0298", "Break of Structure · 15m", 28, 14.43, 1.53, 50, NEW_PICKED_AT_4),
+    _sf("SF0541", "Rectangle + Volume + ATR · 15m", 38, 7.65, 1.35, 66, NEW_PICKED_AT_4),
+    _sf("SF0315", "Support / Resistance Flip · 30m", 30, 9.10, 0.84, 40, NEW_PICKED_AT_4),
+    _sf("SF0347", "Rectangle / Trading Range Break · 45m", 19, 8.27, 2.50, 79, NEW_PICKED_AT_4),
+    _sf("SF0337", "Previous Week High/Low Break · 15m", 20, 10.66, 1.89, 65, NEW_PICKED_AT_4),
+    _sf("SF0220", "Donchian Breakout (slow) · 30m", 25, 20.53, 1.78, 44, NEW_PICKED_AT_4),
+    _sf("SF0466", "Breakout + Volume + HTF Trend · 30m", 28, 13.73, 1.24, 39, NEW_PICKED_AT_4),
+    _sf("SF0221", "Donchian Breakout (slow) · 45m", 20, 15.46, 1.61, 45, NEW_PICKED_AT_4),
+    _sf("SF0332", "Trend Pullback to EMA · 1h", 21, 19.29, 2.05, 48, NEW_PICKED_AT_4),
+    _sf("SF0244", "Prior Session High/Low Break · 30m", 47, 21.84, 1.61, 43, NEW_PICKED_AT_4),
+    _sf("SF0325", "Opening Range Breakout · 1h", 38, 9.67, 1.06, 45, NEW_PICKED_AT_4),
+    _sf("SF0449", "CCI Breakout · 15m", 43, 2.49, 0.27, 42, NEW_PICKED_AT_4),
+    _sf("SF0488", "Structure Break + Volume + HTF · 15m", 20, 12.98, 1.47, 50, NEW_PICKED_AT_4),
+    _sf("SF0465", "Breakout + Volume + HTF Trend · 15m", 59, 13.34, 0.90, 36, NEW_PICKED_AT_4),
+    _sf("SF0230", "Keltner Breakout · 1h", 24, 6.53, 0.82, 42, NEW_PICKED_AT_4),
+    _sf("SF0467", "Breakout + Volume + HTF Trend · 45m", 16, 16.74, 2.01, 56, NEW_PICKED_AT_4),
+    _sf("SF0474", "Pullback + EMA + RSI + VWAP · 30m", 51, 18.29, 1.38, 41, NEW_PICKED_AT_4),
+    _sf("SF0246", "Prior Session High/Low Break · 1h", 28, 13.22, 1.39, 46, NEW_PICKED_AT_4),
+    _sf("SF0498", "S/R Flip Retest + Volume · 45m", 20, 14.65, 1.52, 45, NEW_PICKED_AT_4),
+    _sf("SF0476", "Pullback + EMA + RSI + VWAP · 1h", 20, 15.65, 1.74, 45, NEW_PICKED_AT_4),
+    _sf("SF0314", "Support / Resistance Flip · 15m", 72, 22.72, 1.38, 40, NEW_PICKED_AT_4),
+    _sf("SF0402", "MACD Histogram Turn · 30m", 33, 9.83, 1.15, 48, NEW_PICKED_AT_4),
+    _sf("SF0487", "Structure Break + Volume + HTF · 5m", 51, 4.47, 0.36, 33, NEW_PICKED_AT_4),
+    _sf("SF0229", "Keltner Breakout · 45m", 26, 10.09, 1.12, 42, NEW_PICKED_AT_4),
+    _sf("SF0090", "Diamond · 5m", 42, 2.50, 0.16, 38, NEW_PICKED_AT_4),
+    _sf("SF0316", "Support / Resistance Flip · 45m", 22, 14.85, 1.65, 45, NEW_PICKED_AT_4),
+    _sf("SF0212", "Donchian Breakout (fast) · 30m", 52, 9.00, 0.67, 35, NEW_PICKED_AT_4),
+    _sf("SF0014", "Double Top / Bottom · 1h", 32, 9.25, 0.99, 44, NEW_PICKED_AT_4),
+    _sf("SF0543", "Rectangle + Volume + ATR · 45m", 15, 6.51, 2.07, 80, NEW_PICKED_AT_4),
+    _sf("SF0004", "Head & Shoulders · 30m", 13, 12.88, 1.71, 54, NEW_PICKED_AT_4),
+    _sf("SF0222", "Donchian Breakout (slow) · 1h", 12, 12.67, 1.60, 50, NEW_PICKED_AT_4),
+    _sf("SF0344", "Rectangle / Trading Range Break · 5m", 154, -4.11, -0.37, 56, NEW_PICKED_AT_4),
+    _sf("SF0451", "CCI Breakout · 45m", 15, 9.29, 1.38, 53, NEW_PICKED_AT_4),
+    _sf("SF0119", "Hammer / Shooting Star · 4h", 10, 10.04, 2.14, 70, NEW_PICKED_AT_4),
+    _sf("SF0395", "MACD Signal Cross · 45m", 13, 8.86, 1.48, 54, NEW_PICKED_AT_4),
+    _sf("SF0268", "TTM Squeeze · 45m", 10, 18.45, 3.31, 80, NEW_PICKED_AT_4),
+    _sf("SF0475", "Pullback + EMA + RSI + VWAP · 45m", 35, 16.57, 1.38, 37, NEW_PICKED_AT_4),
 )
 # picked by the owner on 14 Nov 2026 from the Crypto tab; records = their bitcoin paper trades at 09:44 IST
 CRYPTO_PICKS: tuple[Pick, ...] = (
@@ -331,19 +410,40 @@ CRYPTO_PICKS: tuple[Pick, ...] = (
          "loses: -0.20R a trade over 270 trades (t -2.3)", NEW_PICKED_AT_2),
     Pick("SB-04", "BTCUSD", "BTCUSD", "200 EMA retest with a confirmation candle", 1, 1.80, 0.0, 100, "never backtested",
          NEW_PICKED_AT_2),
+    # the owner's 22 Nov screenshots of the Crypto tab (records at NEW_PICKED_AT_4, 14:30 IST): seven bitcoin books ...
+    Pick("DT-05", "BTCUSD", "BTCUSD", "15-minute Chaikin Money Flow side + MACD cross, 1.5R", 24, 4.44, 0.76, 54,
+         "loses: -0.26R a trade over 1,540 trades (t -9.2)", NEW_PICKED_AT_4),
+    Pick("TL-03", "BTCUSD", "BTCUSD", "DEMA 200 + Supertrend (12, 3), exit on the opposite signal", 10, 6.51, 0.91, 50,
+         "loses: -0.22R a trade over 1,313 trades (t -5.2)", NEW_PICKED_AT_4),
+    Pick("RU-04", "BTCUSD", "BTCUSD", "Williams fractal breakout in the 200 MA trend, 1.5R", 21, 1.58, 0.32, 43,
+         "loses: -0.16R a trade over 1,178 trades (t -5.3)", NEW_PICKED_AT_4),
+    Pick("KA-01", "BTCUSD", "BTCUSD", "Break of the previous hour/day high or low after a staircase approach, two closes, "
+         "swing stop, 1R", 5, 1.19, 0.74, 60, "never backtested", NEW_PICKED_AT_4),
+    Pick("DD-01", "BTCUSD", "BTCUSD", "Over-extended RSI: RSI (14) crossing above 70 with the SSL trend and the TDFI, 1% "
+         "stop, half at 1%, rest at 2%", 10, 4.23, 1.23, 60, "never backtested", NEW_PICKED_AT_4),
+    Pick("TD-04", "BTCUSD", "BTCUSD", "UT Bot + linear-regression candles trend ride (1-hour)", 16, 0.86, 0.35, 38,
+         "loses: -0.12R a trade over 929 trades (t -5.8)", NEW_PICKED_AT_4),
+    Pick("TC-04", "BTCUSD", "BTCUSD", "5-minute EMA 100 trend, a close outside the opposite Bollinger Band (20, 1) back "
+         "inside within 3 bars, 3R", 10, 1.65, 0.27, 40, "never backtested", NEW_PICKED_AT_4),
+    # ... and two ether books, on Delta's ETHUSD perpetual (their bitcoin books are not picks)
+    Pick("DD-04", "ETHUSD", "ETHUSD", "Bollinger 1-2-3: above the upper band, under the lower, rejected at the middle, "
+         "break of the 1-3 line, 1.5R", 9, 4.38, 1.31, 56, "never backtested", NEW_PICKED_AT_4),
+    Pick("BX-02", "ETHUSD", "ETHUSD", "TradingView Pivot Reversal (4, 2) on 1-hour bars: stop orders at the latest pivots, "
+         "stop and reverse", 10, 2.04, 0.35, 30, "never backtested", NEW_PICKED_AT_4),
 )
 GOLD_NOTES = (
-    "Real money on 50 unproven gold strategies: five picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, "
-    "on 18 Nov seventeen more Premium gold books and six templates of the Gold Desk's H1 test, and on 19 Nov the Gold "
-    "Desk Strategy Factory board's top 20, at the owner's chosen size: one contract a trade, the smallest order Delta "
-    "allows (or $1 to $5 of risk picked on this page).",
-    "Eleven lose in their own 2-year backtests, three earn too little there to mean anything (t under 2), ten were never "
-    "backtested, the six H1 templates were tested only as a family and the 20 Factory strategies only by the Factory's "
-    "own backtest (whose replay reads future 4-hour bars); a few good paper trades picked them.",
+    "Real money on 99 unproven gold strategies: five picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, "
+    "on 18 Nov seventeen more Premium gold books and six templates of the Gold Desk's H1 test, on 19 Nov the Gold "
+    "Desk Strategy Factory board's top 20, and on 22 Nov ten more Premium gold books, a seventh H1 template and 38 more "
+    "of the Factory board's top 56, at the owner's chosen size: one contract a trade, the smallest order Delta allows "
+    "(or $1 to $5 of risk picked on this page).",
+    "Fourteen lose in their own 2-year backtests, five earn too little there to mean anything (t under 2), fifteen were "
+    "never backtested, the seven H1 templates were tested only as a family and the 58 Factory strategies only by the "
+    "Factory's own backtest (whose replay reads future 4-hour bars); a few good paper trades picked them.",
     "Every one of them trades on Delta's own live data: the paper desk reads gold from Delta's XAUTUSD one-minute "
     "candles (not from COMEX or Yahoo), the Gold Desk's H1 test and its Strategy Factory tab trade Delta's XAUTUSD, and "
     "the real orders go to Delta's XAUTUSD perpetual.",
-    "EVERY signal becomes a real position (the owner's ask, 19 Nov): an open paper trade of any of the 50 is copied, "
+    "EVERY signal becomes a real position (the owner's ask, 19 Nov): an open paper trade of any of the 99 is copied, "
     "however late this desk sees it and however far the price has moved from the paper entry, including trades already "
     "open when the desk was switched on, with the paper's own stop and target. There is no daily loss stop and no cap on "
     "what one contract may lose: the only rule is the size, one contract.",
@@ -354,11 +454,11 @@ GOLD_NOTES = (
     "A paper trade with no stop at all (PR-12's Supertrend ladder) gets a protective stop on Delta 3% from its fill, so no "
     "real trade is ever without a stop; it otherwise closes when its paper trade does. A stop farther than 7% from the "
     "price is pulled in to 7%: at 10x leverage Delta liquidates a position about 9.5% against it.",
-    "The six H1 templates' trades are the Gold Desk's own H1 positions (4-hour bars, held up to ten days), and the 20 "
+    "The seven H1 templates' trades are the Gold Desk's own H1 positions (4-hour bars, held up to ten days), and the 58 "
     "Factory strategies' are the positions of the Gold Desk's Strategy Factory tab ($1,111 paper sleeves on closed bars "
-    "of 15 minutes to 1 hour); both are copied the same way, and this desk only reads them.",
+    "of 5 minutes to 4 hours); both are copied the same way, and this desk only reads them.",
     "One gold contract is 0.001 XAUT (about $4 of gold), so a trade of one contract loses cents at its stop.",
-    "All 50 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
+    "All 99 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
     "target on Delta, and Delta shows their sum as one gold position.",
     "This desk trades gold (XAUTUSD) only; the bitcoin desk is beside it on the Delta Exchange Live Trading page. Each "
     "has its own switch.",
@@ -367,28 +467,32 @@ GOLD_NOTES = (
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
 )
 CRYPTO_NOTES = (
-    "Real money on 15 bitcoin strategies the owner picked (TH-05, TL-04, TH-01 on 14 Nov 2026 and TD-02 on 15 Nov "
-    "from the Crypto tab; TH-06, DT-02, RU-06, NJ-47, RU-03, TH-04, DT-01, TH-07, NJ-27, PT-04 and SB-04 on 18 Nov from "
-    "the Premium leaderboard), at the owner's chosen size: one contract a trade, the smallest order Delta allows (or $1 "
-    "to $5 of risk picked on this page).",
-    "None is proven: six lose in their own 2-year bitcoin backtests (TL-04 -0.31R a trade over 2,134 trades, TD-02 "
-    "-0.37R over 998, DT-02 -0.18R over 1,170, RU-03 -0.081R over 417, DT-01 -0.11R over 281, PT-04 -0.20R over 270) "
-    "and nine were never backtested; 0 to 15 paper trades picked them.",
+    "Real money on 24 strategies the owner picked: 22 on bitcoin (TH-05, TL-04, TH-01 on 14 Nov 2026 and TD-02 on 15 "
+    "Nov from the Crypto tab; TH-06, DT-02, RU-06, NJ-47, RU-03, TH-04, DT-01, TH-07, NJ-27, PT-04 and SB-04 on 18 Nov "
+    "from the Premium leaderboard; DT-05, TL-03, RU-04, KA-01, DD-01, TD-04 and TC-04 on 22 Nov from the Crypto tab) "
+    "and, from 22 Nov, the ether books of DD-04 and BX-02 on Delta's ETHUSD, at the owner's chosen size: one contract "
+    "a trade, the smallest order Delta allows (or $1 to $5 of risk picked on this page).",
+    "None is proven: ten lose in their own 2-year bitcoin backtests (TL-04 -0.31R a trade over 2,134 trades, TD-02 "
+    "-0.37R over 998, DT-02 -0.18R over 1,170, RU-03 -0.081R over 417, DT-01 -0.11R over 281, PT-04 -0.20R over 270, "
+    "DT-05 -0.26R over 1,540, TL-03 -0.22R over 1,313, RU-04 -0.16R over 1,178, TD-04 -0.12R over 929) and fourteen, "
+    "the two ether books among them, were never backtested; 0 to 24 paper trades picked them.",
     "EVERY signal becomes a real position (the owner's ask, 19 Nov): each real trade is the paper desk's trade on "
-    "Delta's live BTCUSD candles, its entry, stop, target and exit, copied however late this desk sees it and however "
-    "far the price has moved, including trades already open when the desk was switched on. There is no daily loss stop "
-    "and no cap on what one contract may lose: the only rule is the size, one contract (0.001 BTC).",
+    "Delta's live BTCUSD (or ETHUSD) candles, its entry, stop, target and exit, copied however late this desk sees it "
+    "and however far the price has moved, including trades already open when the desk was switched on. There is no "
+    "daily loss stop and no cap on what one contract may lose: the only rule is the size, one contract (0.001 BTC, or "
+    "0.01 ETH).",
     "A copy waits, and is tried again every cycle, while the price is not at least a little inside the paper's stop and "
     "target, while the paper desk is silent, while Delta gives no quote, or while the wallet has too little free margin: "
-    "each open bitcoin contract holds about a tenth of its notional (about $6) as margin. A paper trade that closes "
-    "before it is copied is not copied.",
+    "each open bitcoin contract holds about a tenth of its notional (about $6) as margin, an ether contract about $2. "
+    "A paper trade that closes before it is copied is not copied.",
     "A stop farther than 7% from the price is pulled in to 7% on Delta (TH-04's paper stops have been 15-30% away): at "
     "10x leverage Delta liquidates a position about 9.5% against it, so a farther stop could never be reached. A paper "
     "trade with no stop gets one 3% away.",
-    "All 15 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
-    "target on Delta, and Delta shows their sum as one bitcoin position.",
+    "All 24 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
+    "target on Delta, and Delta shows their sum as one position a product (one bitcoin, one ether).",
     "Each trade's stop and target live on Delta itself, so it stays protected if this server goes down.",
-    "Leverage is set to 10x on BTCUSD before going live; positions are capped at $2,500 of notional.",
+    "Leverage is set to 10x on BTCUSD before going live, and confirmed at 10x on ETHUSD before its first trade; "
+    "positions are capped at $2,500 of notional.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
     "This desk and the gold desk (beside it on this page, and on Premium Strategies > Real money · Delta gold) share the "
     "Delta account and its keys; each has its own switch.",
@@ -1378,6 +1482,49 @@ async def _check_books(db, st: dict, products: dict, positions: dict) -> dict[st
     return out
 
 
+def _is_lev(v) -> bool:
+    try:
+        return int(round(float(v))) == LEVERAGE
+    except (TypeError, ValueError):
+        return False
+
+
+async def _confirm_leverage(db, st: dict, products: dict) -> dict[str, bool]:
+    """Is each of this desk's products at LEVERAGE on Delta? Going live sets it on every product the desk has then
+    (_set_mode_one) and the state keeps it; a product that joins a desk already live (22 Nov 2026: ether on the bitcoin
+    desk) never went through that, so it is read here before its first entry and, if Delta does not already say
+    LEVERAGE, set and read back, once. A product not confirmed takes no new entry this pass (its signals wait); a
+    failed call counts as a venue error, and the next pass tries again."""
+    cached = st.get("products") or {}
+    out: dict[str, bool] = {}
+    for sym in _d().products:
+        p = products.get(sym)
+        if p is None:
+            continue
+        if _is_lev((cached.get(sym) or {}).get("leverage")):
+            out[sym] = True
+            continue
+        try:
+            got = await D.leverage(p.id)
+            if not _is_lev(got):
+                await D.set_leverage(p.id, LEVERAGE)
+                got = await D.leverage(p.id)
+        except DeltaError as exc:
+            await _venue_error(db, st, f"{sym}: its leverage could not be confirmed at {LEVERAGE}x ({exc})")
+            out[sym] = False
+            continue
+        out[sym] = _is_lev(got)
+        if out[sym]:
+            cached.setdefault(sym, {})["leverage"] = LEVERAGE
+            st["products"] = cached
+            await _set_state(db, products=cached)
+            logger.info("[premium live %s] %s leverage confirmed at %sx before its first entry", _d().key, sym, LEVERAGE)
+        else:
+            await _set_state(db, last_error=f"{sym}: leverage reads {got}x, not {LEVERAGE}x: its signals wait",
+                             last_error_at=_now())
+    return out
+
+
 def _near(px: float, level: float, entry: float) -> bool:
     return abs(px - level) <= max(abs(entry - level) * 0.35, 1e-9)
 
@@ -1689,6 +1836,7 @@ async def _cycle_one() -> dict:
             return out
         decided = {t["_id"] async for t in _tc(db).find({"_id": {"$in": list(paper)}}, {"_id": 1})}
         books: dict[str, bool] = {}
+        lev: dict[str, bool] = {}
         busy: set = set()
         if st["mode"] == "live":
             try:
@@ -1698,6 +1846,9 @@ async def _cycle_one() -> dict:
                 return out
             books = await _check_books(db, st, products, positions)
             if st["mode"] != "live":                        # the books check switched the desk off
+                return out
+            lev = await _confirm_leverage(db, st, products)  # a product that joined after going live (22 Nov)
+            if st["mode"] != "live":
                 return out
             busy = await _legacy_products(db)
         day_pnl = await _day_pnl(db, st["mode"], positions)
@@ -1717,6 +1868,10 @@ async def _cycle_one() -> dict:
                 continue
             if st["mode"] == "live" and not books.get(pk.product, False):
                 continue                        # the account does not match the trades yet: wait, undecided
+            if st["mode"] == "live" and not lev.get(pk.product, False):
+                if follow:                      # its leverage is not confirmed yet: wait, undecided (the page says why)
+                    waits[tid] = {"why": f"{pk.product}'s leverage is not yet confirmed at {LEVERAGE}x", "at": _now()}
+                continue
             res = await _enter(db, st, pk, p, products, busy, day_pnl, age_of(tid, p.get("src")), cache)
             if res.startswith("waiting:"):
                 out["waiting"] = out.get("waiting", 0) + 1     # counted, not listed: the loop logs only real decisions

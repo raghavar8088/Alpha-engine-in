@@ -28,6 +28,13 @@ gold desk, read from the Gold Desk's own positions (faked here as an in-memory c
 naive UTC times). Pinned: what is copied and what is not; a Gold Desk that cannot be read leaves its trades waiting,
 never closed; each source's own clock (a silent Gold Desk stops H1 entries only, a silent paper desk Premium ones);
 a voided or closed position closes the real trade; the paper desk is told only its own books.
+
+22 Nov 2026 (section 36): the owner's third list, 49 more gold picks (Premium, H1, Factory) and 9 on the bitcoin desk,
+two of them ether books on ETHUSD, the first second product on a desk. Pinned: the lists and their records; ether
+copied, closed and checked against the account like bitcoin; a product that joins a desk already live has its
+leverage confirmed at 10x (read, set only if needed, read back) before its first entry, its signals waiting meanwhile
+and never sent at another leverage; shadow sends nothing. The harness's desks start as going live leaves them: every
+product's leverage confirmed in their state.
 """
 
 import asyncio
@@ -70,14 +77,17 @@ def advance(s):
 # ── the fake exchange ─────────────────────────────────────────────────────────────────────────────
 
 SPECS = {"BTCUSD": {"id": 27, "cv": "0.001", "tick": "0.5", "mm": "0.25", "taker": "0.0005", "spread": 0.5, "lev": 200},
-         "XAUTUSD": {"id": 131253, "cv": "0.001", "tick": "0.01", "mm": "0.5", "taker": "0.0001", "spread": 0.03, "lev": 100}}
+         "XAUTUSD": {"id": 131253, "cv": "0.001", "tick": "0.01", "mm": "0.5", "taker": "0.0001", "spread": 0.03, "lev": 100},
+         # Delta India's ETHUSD as read on 22 Nov 2026 (the bitcoin desk's second product); its default leverage here is
+         # one nobody set, so section 36 can show the desk setting it
+         "ETHUSD": {"id": 3136, "cv": "0.01", "tick": "0.05", "mm": "0.25", "taker": "0.0005", "spread": 0.1, "lev": 100}}
 BY_ID = {v["id"]: k for k, v in SPECS.items()}
 
 
 class FakeDelta(Delta):
     def __init__(self):
         super().__init__()
-        self.mid = {"BTCUSD": 69000.0, "XAUTUSD": 3885.0}
+        self.mid = {"BTCUSD": 69000.0, "XAUTUSD": 3885.0, "ETHUSD": 1690.0}
         self.pos = {}                 # product id -> {"size": signed int, "entry": float}
         self.legs = {}                # product id -> {"stop": (trigger, limit) | None, "tp": (trigger, limit) | None}
         self.fills_ = []
@@ -313,9 +323,12 @@ def fresh(mode="live", btc=69000.0, gold=3885.0, follow=True):
     M.D = FakeDelta()
     M.D.mid.update(BTCUSD=btc, XAUTUSD=gold)
     if mode != "off":
+        # a desk already on, as going live leaves it: its products' leverage confirmed at 10x in its state (going live
+        # sets it; section 36 takes ETHUSD's away to show a product that joins a live desk being confirmed first)
         for coll in (db.live_delta_state, db.live_crypto_state):
             coll.docs.append({"_id": "state", "mode": mode, "since": CLOCK[0] - 3600, "errors_in_row": 0,
-                              "pin_fails": [], "products": {}, "sizing": "risk"})   # dollar sizing; 22 tests one contract
+                              "pin_fails": [], "products": {s: {"leverage": 10} for s in SPECS},
+                              "sizing": "risk"})   # dollar sizing; 22 tests one contract
     return db
 
 
@@ -607,8 +620,10 @@ async def main():
     check("a position the desk does not own blocks going live", not r["ok"] and "already holds BTCUSD" in r["why"], r["why"])
     M.D.pos.pop(BTC)
     r = await M.set_mode("live", PIN, "REAL MONEY", desk="crypto")
-    check("then it goes live, with leverage at 10x on BTCUSD only (gold keeps Delta's default until its own desk arms)",
-          r["ok"] and M.D.lev[BTC] == 10 and M.D.lev[GOLD] == 100 and st_of(db, "crypto")["mode"] == "live"
+    check("then it goes live, with leverage at 10x on its own products, BTCUSD and ETHUSD (gold keeps Delta's default "
+          "until its own desk arms)",
+          r["ok"] and M.D.lev[BTC] == 10 and M.D.lev[SPECS["ETHUSD"]["id"]] == 10 and M.D.lev[GOLD] == 100
+          and r["leverage"] == {"BTCUSD": 10, "ETHUSD": 10} and st_of(db, "crypto")["mode"] == "live"
           and not db.live_delta_state.docs, r)
     for _ in range(5):
         await M.set_mode("live", "0000", "REAL MONEY", desk="crypto")
@@ -654,16 +669,20 @@ async def main():
     # ── 15. the read model ──────────────────────────────────────────────────────────────────────────
     section("15. What the page reads")
     s = await M.status()
-    check("status (gold, the original routes): mode, keys, PIN, limits, its 50 gold picks (18-19 Nov), notes", s["keys"] and s["pin_set"]
-          and s["desk"] == "gold" and len(s["picks"]) == 50 and {p["product"] for p in s["picks"]} == {"XAUTUSD"}
+    check("status (gold, the original routes): mode, keys, PIN, limits, its 99 gold picks (18-22 Nov), notes", s["keys"] and s["pin_set"]
+          and s["desk"] == "gold" and len(s["picks"]) == 99 and {p["product"] for p in s["picks"]} == {"XAUTUSD"}
           and s["limits"]["risk_usd"] == 5 and s["limits"]["daily_stop_usd"] == 20 and s["limits"]["leverage"] == 10
           and len(s["notes"]) >= 5)
     c = await M.status("crypto")
-    check("status (crypto): TH-05, TL-04, TH-01, TD-02 and the eleven of 18 Nov on BTCUSD, $5 a trade, a $20 daily stop",
+    check("status (crypto): TH-05, TL-04, TH-01, TD-02, the eleven of 18 Nov and the seven of 22 Nov on BTCUSD, two "
+          "ether books on ETHUSD, $5 a trade, a $20 daily stop",
           c["desk"] == "crypto" and [p["acct"] for p in c["picks"]] == ["TH-05", "TL-04", "TH-01", "TD-02", "TH-06", "DT-02",
                                                                         "RU-06", "NJ-47", "RU-03", "TH-04", "DT-01", "TH-07",
-                                                                        "NJ-27", "PT-04", "SB-04"]
-          and {p["product"] for p in c["picks"]} == {"BTCUSD"} and c["limits"]["risk_usd"] == 5
+                                                                        "NJ-27", "PT-04", "SB-04", "DT-05", "TL-03", "RU-04",
+                                                                        "KA-01", "DD-01", "TD-04", "TC-04", "DD-04", "BX-02"]
+          and {p["product"] for p in c["picks"]} == {"BTCUSD", "ETHUSD"} and c["desk_products"] == ["BTCUSD", "ETHUSD"]
+          and [p["acct"] for p in c["picks"] if p["product"] == "ETHUSD"] == ["DD-04", "BX-02"]
+          and all(p["mkt"] == p["product"] for p in c["picks"]) and c["limits"]["risk_usd"] == 5
           and c["limits"]["daily_stop_usd"] == 20 and c["picked_at"].startswith("2026-11-14"), [p["acct"] for p in c["picks"]])
     check("an unknown desk is refused", "error" in await M.status("nope") and not (await M.set_mode("off", desk="nope"))["ok"])
     check("the secrets never appear in what the page reads", "s\n" not in str(s) and SALT not in str(s) and "DELTA_API_SECRET" not in str(s))
@@ -672,22 +691,23 @@ async def main():
     db = fresh()
     b16 = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
     g16 = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0)
-    old = paper(db, "RU-04", "BTCUSD", 1, 69000.0, 68650.0, None, ago=20)     # a former gold-desk bitcoin pick
+    old = paper(db, "TD-03", "BTCUSD", 1, 69000.0, 68650.0, None, ago=20)     # a former gold-desk bitcoin pick (RU-04,
+    #                                                                           the other, is a bitcoin pick from 22 Nov)
     tlg = paper(db, "CP-24", "XAUUSD", 1, 3885.0, 3880.0, 3895.0, ago=20)     # a gold book that is not a pick (TL-04's
                                                                               # gold book became one on 16 Nov)
     await cyc(db)
     check("the bitcoin trade is the crypto desk's, the gold trade the gold desk's",
           [d["_id"] for d in db.live_crypto_trades.docs] == [b16] and [d["_id"] for d in db.live_delta_trades.docs] == [g16],
           ([d["_id"] for d in db.live_crypto_trades.docs], [d["_id"] for d in db.live_delta_trades.docs]))
-    check("a former bitcoin pick (RU-04) and a gold book that is not a pick are ignored by both desks: no record, no order",
+    check("a former bitcoin pick (TD-03) and a gold book that is not a pick are ignored by both desks: no record, no order",
           trade(db, old) is None and trade(db, tlg) is None and len(M.D.orders) == 2)
     check("one position on each product", M.D.pos[BTC]["size"] > 0 and M.D.pos[GOLD]["size"] > 0)
     # ── 17. a bitcoin trade from before the split ───────────────────────────────────────
     section("17. A live bitcoin trade the gold desk opened before the split is managed by it to its close [without follow_all]")
     db = fresh(follow=False)
-    leg = paper(db, "RU-04", "BTCUSD", 1, 69000.0, 68300.0, 70400.0, ago=600)
+    leg = paper(db, "TD-03", "BTCUSD", 1, 69000.0, 68300.0, 70400.0, ago=600)   # a book neither desk picks now
     M.D.pos[BTC] = {"size": 7, "entry": 69000.0}
-    db.live_delta_trades.docs.append({"_id": leg, "acct": "RU-04", "mkt": "BTCUSD", "product": "BTCUSD", "name": "earlier pick",
+    db.live_delta_trades.docs.append({"_id": leg, "acct": "TD-03", "mkt": "BTCUSD", "product": "BTCUSD", "name": "earlier pick",
                                       "mode": "live", "side": 1, "status": "open", "contracts": 7, "fill": 69000.0,
                                       "stop": 68300.0, "target": 70400.0, "entry_fee": 0.2, "opened_at": CLOCK[0] - 600,
                                       "created_at": CLOCK[0] - 600, "day": "2026-11-16", "legs": {"stop": "68300"}})
@@ -832,12 +852,13 @@ async def main():
           and c3["sizing"] == "risk" and c3["risk_usd"] == 3 and r3["ok"] and c4["sizing"] == "min", (r1, r2, c3, r3, c4))
     c, g = await M.status("crypto"), await M.status()
     late = {("TD-02", "BTCUSD"): "2026-11-15", ("CP-06", "XAUUSD"): "2026-11-15", ("TL-04", "XAUTUSD"): "2026-11-16"}
-    late.update({(p["acct"], p["mkt"]): "2026-11-18" for p in c["picks"][4:] + g["picks"][7:30]})   # section 31
-    late.update({(p["acct"], p["mkt"]): "2026-11-19" for p in g["picks"][30:]})                    # section 34
+    late.update({(p["acct"], p["mkt"]): "2026-11-18" for p in c["picks"][4:15] + g["picks"][7:30]})   # section 31
+    late.update({(p["acct"], p["mkt"]): "2026-11-19" for p in g["picks"][30:50]})                    # section 34
+    late.update({(p["acct"], p["mkt"]): "2026-11-22" for p in c["picks"][15:] + g["picks"][50:]})    # section 36
     check("the picks: TD-02 joins TH-05, TL-04 and TH-01; CP-06 then TL-04's gold book join the five gold; each new one "
           "carries its own pick time",
           [p["acct"] for p in c["picks"]][:4] == ["TH-05", "TL-04", "TH-01", "TD-02"]
-          and [p["acct"] for p in g["picks"]][5:7] == ["CP-06", "TL-04"] and len(g["picks"]) == 50
+          and [p["acct"] for p in g["picks"]][5:7] == ["CP-06", "TL-04"] and len(g["picks"]) == 99
           and all((p.get("picked_at") or "").startswith(late[(p["acct"], p["mkt"])])
                   for p in c["picks"] + g["picks"] if (p["acct"], p["mkt"]) in late)
           and all(p.get("picked_at") is None for p in c["picks"] + g["picks"] if (p["acct"], p["mkt"]) not in late),
@@ -1101,13 +1122,13 @@ async def main():
     section("31. 18 Nov: more Premium picks on both desks; six Gold Desk H1 templates on the gold desk")
     gp, cp = M.DESKS["gold"].picks, M.DESKS["crypto"].picks
     gk, ck = {(p.acct, p.mkt) for p in gp}, {(p.acct, p.mkt) for p in cp}
-    check("the gold desk: the 7 before, 13 + 4 Premium gold books, 6 H1 templates and the Factory top 20 (50); the "
-          "bitcoin desk: 4 + 5 + 6 (15)",
-          len(gp) == len(gk) == 50 and len(cp) == len(ck) == 15
-          and [p.acct for p in gp if p.src == M.GOLD_SF] == ["SF0181", "SF0020", "SF0245", "SF0013", "SF0182", "SF0331",
-                                                             "SF0346", "SF0213", "SF0324", "SF0022", "SF0219", "SF0497",
-                                                             "SF0021", "SF0251", "SF0370", "SF0542", "SF0205", "SF0228",
-                                                             "SF0426", "SF0243"]
+    check("the gold desk: the 7 before, 13 + 4 Premium gold books, 6 H1 templates and the Factory top 20 (50, then 49 "
+          "more on 22 Nov: section 36); the bitcoin desk: 4 + 5 + 6 (15, then 9 more)",
+          len(gp) == len(gk) == 99 and len(cp) == len(ck) == 24
+          and [p.acct for p in gp if p.src == M.GOLD_SF][:20] == ["SF0181", "SF0020", "SF0245", "SF0013", "SF0182", "SF0331",
+                                                                  "SF0346", "SF0213", "SF0324", "SF0022", "SF0219", "SF0497",
+                                                                  "SF0021", "SF0251", "SF0370", "SF0542", "SF0205", "SF0228",
+                                                                  "SF0426", "SF0243"]
           and {("BB-11", "XAUUSD"), ("PT-04", "XAUTUSD"), ("RU-03", "XAUTUSD"), ("SB-06", "XAUUSD"), ("RU-04", "XAUTUSD"),
                ("PR-12", "XAUTUSD"), ("TP-05", "XAUTUSD"), ("DT-01", "XAUTUSD"), ("DT-03", "XAUTUSD"), ("CD-02", "XAUTUSD"),
                ("CP-02", "XAUUSD"), ("RU-05", "XAUTUSD"), ("FZ-02", "XAUTUSD"), ("BG-01", "XAUUSD"), ("JR-04", "XAUTUSD"),
@@ -1115,14 +1136,15 @@ async def main():
           and {("TH-06", "BTCUSD"), ("DT-02", "BTCUSD"), ("RU-06", "BTCUSD"), ("NJ-47", "BTCUSD"), ("RU-03", "BTCUSD"),
                ("TH-04", "BTCUSD"), ("DT-01", "BTCUSD"), ("TH-07", "BTCUSD"), ("NJ-27", "BTCUSD"), ("PT-04", "BTCUSD"),
                ("SB-04", "BTCUSD")} <= ck
-          and sorted(p.template for p in gp if p.src == M.GOLD_H1) == sorted(
+          and sorted(p.template for p in gp[:50] if p.src == M.GOLD_H1) == sorted(
               ["ema_ribbon", "round_number_break", "donchian_fast", "pivot_break", "donchian_slow", "keltner_break"])
-          and not any(p.src == M.GOLD_H1 for p in cp) and not any(p.acct in ("DD-03", "DD-04") for p in gp + cp),
+          and not any(p.src == M.GOLD_H1 for p in cp) and not any(p.acct == "DD-03" for p in gp + cp)
+          and [(p.acct, p.mkt) for p in gp + cp if p.acct == "DD-04"] == [("DD-04", "ETHUSD")],   # its ether book, 22 Nov
           (len(gp), len(cp)))
     check("every 18 Nov pick's record is as of its batch (22:00 or 23:50 IST); the earlier picks keep theirs, untouched",
           all(p.picked_at == M.NEW_PICKED_AT for p in gp[7:20] + gp[24:30] + cp[4:9])
-          and all(p.picked_at == M.NEW_PICKED_AT_3 and p.template == p.acct for p in gp[30:])
-          and all(p.picked_at == M.NEW_PICKED_AT_2 for p in gp[20:24] + cp[9:])
+          and all(p.picked_at == M.NEW_PICKED_AT_3 and p.template == p.acct for p in gp[30:50])
+          and all(p.picked_at == M.NEW_PICKED_AT_2 for p in gp[20:24] + cp[9:15])
           and [p.acct for p in gp[20:24]] == ["BG-01", "JR-04", "TD-04", "TC-11"]
           and [p.picked_at for p in cp[:4]] == [None, None, None, "2026-11-15T13:40:00+05:30"]
           and gp[6].picked_at == "2026-11-16T23:33:00+05:30" and (gp[0].trades, gp[0].sum_r) == (5, 2.73)
@@ -1243,7 +1265,7 @@ async def main():
     pr = next(p for p in g["picks"] if p["acct"] == "H1-RIB")
     check("the page lists the H1 template with its source, its own record and its real trades",
           pr["src"] == "gold_h1" and pr["template"] == "ema_ribbon" and pr["trades"] == 12 and pr["live"]["trades"] == 1
-          and pr["backtest"].startswith("pooled only") and len(g["picks"]) == 50, pr)
+          and pr["backtest"].startswith("pooled only") and len(g["picks"]) == 99, pr)
 
     # ── 32. the page's paper view: each strategy's own paper trades beside what the desk did with them ─────
     section("32. The paper view: each strategy's paper record and open trade now, its latest signals and the desk's decision")
@@ -1317,7 +1339,7 @@ async def main():
     advance(31)
     g = await M.status()
     check("the paper side unreadable: the page still gets the desk, its picks without a paper record, no signals",
-          g.get("mode") == "live" and len(g["picks"]) == 50 and all(p["paper"] is None for p in g["picks"])
+          g.get("mode") == "live" and len(g["picks"]) == 99 and all(p["paper"] is None for p in g["picks"])
           and g["signals"] is None and g["paper_view"] is None)
     db.premium_trades = good
     db2 = fresh(mode="off")
@@ -1612,6 +1634,232 @@ async def main():
     M._results = real
     check("results that fail to count never break the page: they read null, the rest is there",
           c.get("results") is None and all(p["results"] is None for p in c["picks"]) and c["totals"]["live"]["trades"] == 1)
+
+    # ── 36. 22 Nov: the owner's third list; ether on the bitcoin desk; a new product's leverage confirmed first ─────
+    section("36. 22 Nov: 49 gold and 9 bitcoin-desk picks (two on ETHUSD); a product new to a live desk is confirmed at 10x first")
+    from collections import Counter
+    ETH = SPECS["ETHUSD"]["id"]
+    LEV = lambda pid: f"/v2/products/{pid}/orders/leverage"   # noqa: E731
+    gp, cp = M.DESKS["gold"].picks, M.DESKS["crypto"].picks
+    g22 = [p for p in gp if p.picked_at == M.NEW_PICKED_AT_4]
+    c22 = [p for p in cp if p.picked_at == M.NEW_PICKED_AT_4]
+    sf22 = ["SF0345", "SF0298", "SF0541", "SF0315", "SF0347", "SF0337", "SF0220", "SF0466", "SF0221", "SF0332", "SF0244",
+            "SF0325", "SF0449", "SF0488", "SF0465", "SF0230", "SF0467", "SF0474", "SF0246", "SF0498", "SF0476", "SF0314",
+            "SF0402", "SF0487", "SF0229", "SF0090", "SF0316", "SF0212", "SF0014", "SF0543", "SF0004", "SF0222", "SF0344",
+            "SF0451", "SF0119", "SF0395", "SF0268", "SF0475"]
+    check("the gold desk's 49, after its 50: ten Premium gold books, the H1 Prior Session High/Low Break and 38 of the "
+          "Factory board's top 56 in board order (the other 18 of the 56 were already here)",
+          tuple(gp[50:]) == tuple(g22) and len(g22) == 49
+          and [(p.acct, p.mkt) for p in g22[:10]] == [("CP-21", "XAUUSD"), ("YT-18", "XAUUSD"), ("TF-01", "XAUTUSD"),
+                                                      ("CP-01", "XAUUSD"), ("FL-02", "XAUTUSD"), ("MH-01", "XAUTUSD"),
+                                                      ("DT-02", "XAUTUSD"), ("BG-08", "XAUUSD"), ("RU-06", "XAUTUSD"),
+                                                      ("JR-03", "XAUTUSD")]
+          and all(p.src == M.PREMIUM and p.product == "XAUTUSD" for p in g22[:10])
+          and (g22[10].acct, g22[10].src, g22[10].template) == ("H1-PSB", M.GOLD_H1, "prior_session_break")
+          and [p.acct for p in g22[11:]] == sf22 and all(p.src == M.GOLD_SF and p.template == p.acct for p in g22[11:])
+          and len({p.acct for p in gp if p.src == M.GOLD_SF}) == 58, [p.acct for p in g22])
+    check("the bitcoin desk's 9, after its 15: seven bitcoin books and the ether books of DD-04 and BX-02 (their bitcoin "
+          "books are not picks)",
+          tuple(cp[15:]) == tuple(c22) and [(p.acct, p.mkt, p.product) for p in c22] == [
+              ("DT-05", "BTCUSD", "BTCUSD"), ("TL-03", "BTCUSD", "BTCUSD"), ("RU-04", "BTCUSD", "BTCUSD"),
+              ("KA-01", "BTCUSD", "BTCUSD"), ("DD-01", "BTCUSD", "BTCUSD"), ("TD-04", "BTCUSD", "BTCUSD"),
+              ("TC-04", "BTCUSD", "BTCUSD"), ("DD-04", "ETHUSD", "ETHUSD"), ("BX-02", "ETHUSD", "ETHUSD")]
+          and ("DD-04", "BTCUSD") not in M.DESKS["crypto"].pick and ("BX-02", "BTCUSD") not in M.DESKS["crypto"].pick,
+          [(p.acct, p.mkt) for p in c22])
+    both = {p.acct for p in gp} & {p.acct for p in cp}
+    check("a strategy on both desks has a different book on each (RU-04, TD-04, DT-02, RU-06 from 22 Nov); no product "
+          "is on both desks",
+          {"RU-04", "TD-04", "DT-02", "RU-06", "TL-04", "PT-04", "RU-03", "DT-01"} <= both
+          and all({p.product for p in gp if p.acct == a} == {"XAUTUSD"} and {p.product for p in cp if p.acct == a} == {"BTCUSD"}
+                  for a in both)
+          and not set(M.DESKS["gold"].products) & set(M.DESKS["crypto"].products)
+          and M.DESKS["crypto"].products == ["BTCUSD", "ETHUSD"] and M.DESKS["gold"].products == ["XAUTUSD"], sorted(both))
+    by = {p.acct: p for p in g22 + c22}
+    rec = lambda a: (by[a].trades, by[a].sum_r, by[a].t, by[a].win)   # noqa: E731
+    check("records as of 14:30 IST 22 Nov, by each source's own method (re-proven on frozen records before they were read)",
+          rec("DT-05") == (24, 4.44, 0.76, 54) and rec("BX-02") == (10, 2.04, 0.35, 30) and rec("BG-08")[:2] == (110, 13.01)
+          and rec("H1-PSB") == (26, 0.68, 0.09, 35) and rec("SF0315") == (30, 9.10, 0.84, 40)
+          and rec("SF0474")[0] == 51 and rec("SF0344")[:2] == (154, -4.11))
+    verdict = lambda ps: Counter(p.backtest.split(":")[0].split(" ")[0] for p in ps)   # noqa: E731 - as the page counts
+    check("what each one's own backtest said, counted the way the page counts it, is what the desks' notes say",
+          verdict(gp) == {"loses": 14, "earns": 5, "never": 15, "pooled": 7, "factory": 58}
+          and verdict(cp) == {"loses": 10, "never": 14}
+          and "99 unproven gold strategies" in M.GOLD_NOTES[0] and M.GOLD_NOTES[1].startswith("Fourteen lose")
+          and "five earn" in M.GOLD_NOTES[1] and "fifteen were" in M.GOLD_NOTES[1] and "the 58 Factory" in M.GOLD_NOTES[1]
+          and "24 strategies" in M.CRYPTO_NOTES[0] and "ten lose" in M.CRYPTO_NOTES[1] and "fourteen" in M.CRYPTO_NOTES[1],
+          (verdict(gp), verdict(cp)))
+
+    # ether trades on the bitcoin desk
+    db = fresh(btc=69000.0)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)                       # one contract a trade
+        coll.docs[0]["wallet_at"] = CLOCK[0]
+    M.D.mid.update(ETHUSD=1689.0)
+    e1 = paper(db, "BX-02", "ETHUSD", -1, 1675.0, 1715.8, None, ago=6 * 3600)   # open since before the switch-on;
+    #                                                                             it stops and reverses: no target
+    nb = paper(db, "BX-02", "BTCUSD", -1, 69000.0, 69500.0, None, ago=20)        # its bitcoin book: not a pick
+    ne = paper(db, "DD-01", "ETHUSD", 1, 1689.0, 1670.0, 1720.0, ago=20)         # DD-01's ether book: not a pick
+    n0 = len(M.D.calls)
+    await cyc(db)
+    t = trade(db, e1)
+    check("BX-02's ether paper trade, open since before the switch-on, is one real ETHUSD contract on the bitcoin desk: "
+          "short, its stop on Delta on ETHUSD's tick, no target (it stops and reverses)",
+          t is not None and t["status"] == "open" and t["product"] == "ETHUSD" and t["contracts"] == 1 and t["side"] == -1
+          and any(d["_id"] == e1 for d in db.live_crypto_trades.docs) and M.D.pos[ETH]["size"] == -1
+          and float(own_leg(t, "stop")["stop_price"]) == 1715.8 and own_leg(t, "target") is None
+          and t["plan"]["margin_usd"] == round(0.01 * M.D.bid("ETHUSD") / 10, 2) and t["plan"]["risk_usd"] < 0.5,
+          t and (t.get("status"), t.get("reason"), t.get("plan")))
+    check("not copied: BX-02's bitcoin book and DD-01's ether book (a pick is one book: strategy and market)",
+          trade(db, nb) is None and trade(db, ne) is None and BTC not in M.D.pos)
+    check("ETHUSD confirmed at 10x already (as going live leaves a desk): no leverage call",
+          not any(c[1].endswith("/orders/leverage") for c in M.D.calls[n0:]))
+    advance(300)
+    M.D.set_price("ETHUSD", 1680.0)
+    close_paper(db, e1, "exit_signal", 1680.0)
+    await cyc(db)
+    t = trade(db, e1)
+    check("its paper exit closes it at the market, its stop cancelled first; the account's ether is flat, the trade won",
+          t["status"] == "closed" and t["close_reason"] == "paper exit: exit_signal" and ETH not in M.D.pos
+          and own_leg(t, "stop")["state"] == "cancelled" and t["pnl_usd"] > 0, (t["status"], t.get("close_reason"), t.get("pnl_usd")))
+    M.D.pos[ETH] = {"size": 2, "entry": 1680.0}                 # an ether position no trade accounts for
+    e2 = paper(db, "DD-04", "ETHUSD", 1, 1680.0, 1660.0, 1710.0, ago=10)
+    b2 = paper(db, "DT-05", "BTCUSD", 1, 69000.0, 68700.0, 69450.0, ago=10)
+    advance(30)
+    await cyc(db)
+    check("the books check covers ETHUSD: an ether position no trade accounts for makes the ether copy wait, while a "
+          "bitcoin one (DT-05, new on 22 Nov) goes in",
+          trade(db, e2) is None and (trade(db, b2) or {}).get("status") == "open"
+          and "ETHUSD" in (st_of(db, "crypto").get("mismatch") or ""),
+          (st_of(db, "crypto").get("mismatch"), (trade(db, b2) or {}).get("reason")))
+    M.D.pos.pop(ETH)
+    advance(30)
+    await cyc(db)
+    check("... and goes in once the account matches", (trade(db, e2) or {}).get("status") == "open"
+          and M.D.pos[ETH]["size"] == 1 and not st_of(db, "crypto").get("mismatch"))
+
+    # a product that joins a desk already live (the 22 Nov deploy): its leverage is confirmed before its first entry
+    db = fresh(btc=69000.0)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)
+        coll.docs[0]["wallet_at"] = CLOCK[0]
+    db.live_crypto_state.docs[0]["products"].pop("ETHUSD")      # never armed with the desk: no confirmed leverage
+    M.D.mid.update(ETHUSD=1689.0)
+    M.D.fail["leverage"] = "definite"                            # Delta refuses the change at first
+    e3 = paper(db, "DD-04", "ETHUSD", 1, 1689.0, 1670.0, 1720.0, ago=20)
+    b3 = paper(db, "KA-01", "BTCUSD", 1, 69000.0, 68700.0, 69300.0, ago=20)
+    n0 = len(M.D.calls)
+    await cyc(db)
+    lev_calls = [c for c in M.D.calls[n0:] if c[1].endswith("/orders/leverage")]
+    sc = st_of(db, "crypto")
+    check("leverage on the new product refused: its signal waits (no ether order), the bitcoin one goes in, the desk stays "
+          "live and says why; bitcoin's leverage is never asked",
+          trade(db, e3) is None and ETH not in M.D.pos and "leverage" in M._WAITING["crypto"][e3]["why"]
+          and (trade(db, b3) or {}).get("status") == "open" and sc["mode"] == "live"
+          and "ETHUSD: its leverage could not be confirmed" in (sc.get("last_error") or "")
+          and lev_calls == [("GET", LEV(ETH)), ("POST", LEV(ETH))] and M.D.lev[ETH] == 100,
+          (M._WAITING["crypto"].get(e3), sc.get("last_error"), lev_calls))
+    M.D.fail.pop("leverage")
+    advance(30)
+    n1 = len(M.D.calls)
+    await cyc(db)
+    lev_calls = [c for c in M.D.calls[n1:] if c[1].endswith("/orders/leverage")]
+    t = trade(db, e3)
+    check("the next pass: read (100x), set to 10x, read back and kept in the desk's state; then the ether copy goes in",
+          lev_calls == [("GET", LEV(ETH)), ("POST", LEV(ETH)), ("GET", LEV(ETH))] and M.D.lev[ETH] == 10
+          and st_of(db, "crypto")["products"]["ETHUSD"]["leverage"] == 10
+          and t is not None and t["status"] == "open" and t["product"] == "ETHUSD" and M.D.pos[ETH]["size"] == 1,
+          (lev_calls, t and (t.get("status"), t.get("reason"))))
+    advance(30)
+    n2 = len(M.D.calls)
+    await cyc(db)
+    check("confirmed once: later passes make no leverage call; bitcoin's own leverage was never touched",
+          not any(c[1].endswith("/orders/leverage") for c in M.D.calls[n2:]) and M.D.lev[BTC] == 200
+          and st_of(db, "crypto")["mode"] == "live")
+    db = fresh(btc=69000.0)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)
+        coll.docs[0]["wallet_at"] = CLOCK[0]
+    db.live_crypto_state.docs[0]["products"].pop("ETHUSD")
+    M.D.mid.update(ETHUSD=1689.0)
+    M.D.lev[ETH] = 10                                            # as the real account read on 22 Nov
+    e4 = paper(db, "BX-02", "ETHUSD", -1, 1689.0, 1715.8, None, ago=20)
+    n0 = len(M.D.calls)
+    await cyc(db)
+    lev_calls = [c for c in M.D.calls[n0:] if c[1].endswith("/orders/leverage")]
+    check("Delta already says 10x (the real account on 22 Nov): one read, no change sent, and the copy goes in",
+          lev_calls == [("GET", LEV(ETH))] and (trade(db, e4) or {}).get("status") == "open"
+          and st_of(db, "crypto")["products"]["ETHUSD"]["leverage"] == 10, lev_calls)
+    db = fresh(btc=69000.0)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)
+        coll.docs[0]["wallet_at"] = CLOCK[0]
+    db.live_crypto_state.docs[0]["products"].pop("ETHUSD")
+    M.D.mid.update(ETHUSD=1689.0)
+
+    async def _kept(pid, lev):                                   # Delta answers but keeps its old leverage
+        return 100.0
+    M.D.set_leverage = _kept
+    e5 = paper(db, "DD-04", "ETHUSD", 1, 1689.0, 1670.0, 1720.0, ago=20)
+    await cyc(db)
+    del M.D.set_leverage
+    check("a change that does not take (it still reads 100x): no ether order, the signal waits, the desk says why",
+          trade(db, e5) is None and ETH not in M.D.pos and "not yet confirmed" in M._WAITING["crypto"][e5]["why"]
+          and "reads 100.0x, not 10x" in (st_of(db, "crypto").get("last_error") or "")
+          and "ETHUSD" not in {k for k, v in (st_of(db, "crypto").get("products") or {}).items() if v.get("leverage")},
+          (M._WAITING["crypto"].get(e5), st_of(db, "crypto").get("last_error")))
+    db = fresh(mode="shadow")
+    db.live_crypto_state.docs[0]["products"].pop("ETHUSD")
+    M.D.mid.update(ETHUSD=1689.0)
+    e6 = paper(db, "BX-02", "ETHUSD", -1, 1689.0, 1715.8, None, ago=20)
+    n0 = len(M.D.calls)
+    await cyc(db)
+    check("shadow sends nothing, leverage included: the ether trade is simulated",
+          not any(c[1].endswith("/orders/leverage") for c in M.D.calls[n0:]) and not M.D.orders
+          and (trade(db, e6) or {}).get("status") == "open" and trade(db, e6)["mode"] == "shadow")
+
+    # the gold desk's new books, from all three sources
+    db = fresh(gold=3885.0)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)
+        coll.docs[0]["wallet_at"] = CLOCK[0]
+    M._h1_coll().docs.append({"position_id": "q1", "venue": "delta", "h1": True, "symbol": "XAUTUSD",
+                              "strategy_template": "prior_session_break", "side": "BUY", "entry_price": 3885.0,
+                              "stoploss": 3870.0, "target": 3915.0, "qty": 0.296, "status": "OPEN",
+                              "opened_at": utc_naive(CLOCK[0] - 30), "exit_price": None, "exit_reason": None})
+
+    def sf36(pid, sid, side, entry, stop, target):
+        M._sf_coll().docs.append({"position_id": pid, "desk": "gold", "strategy_id": sid, "strategy_name": f"{sid} name",
+                                  "symbol": "XAUTUSD", "signal_side": side, "side": side, "kind": "perp",
+                                  "entry_px": entry, "under_entry": entry, "stop": stop, "target": target,
+                                  "capital_deployed": 1111.11, "status": "OPEN", "opened_at": utc_naive(CLOCK[0] - 30),
+                                  "closed_at": None, "exit_px": None, "exit_reason": None, "realized_pnl": None,
+                                  "under_ltp": entry, "pattern": "p"})
+        return "SF|" + pid
+    s315 = sf36("z1", "SF0315", "SELL", 3885.0, 3892.0, 3871.0)          # rank 17, under the board's header
+    s520 = sf36("z2", "SF0520", "BUY", 3885.0, 3878.0, 3899.0)           # rank 57: outside the 56
+    cp21 = paper(db, "CP-21", "XAUUSD", 1, 3885.0, 3880.0, 3895.0, ago=20)
+    tf01 = paper(db, "TF-01", "XAUTUSD", -1, 3885.0, 3890.0, 3875.0, ago=20)
+    tfb = paper(db, "TF-01", "BTCUSD", -1, 69000.0, 69500.0, 68000.0, ago=20)   # TF-01's bitcoin book: not a pick
+    M._PRIORITY_SENT = None
+    await cyc(db)
+    got = {k: trade(db, k) for k in ("H1|q1", s315, cp21, tf01)}
+    check("the gold desk copies its new books from all three sources, one XAUTUSD contract each: CP-21's and TF-01's "
+          "paper trades, the H1 Prior Session Break position, SF0315's Factory position",
+          all(t is not None and t["status"] == "open" and t["product"] == "XAUTUSD" and t["contracts"] == 1
+              and any(d["_id"] == t["_id"] for d in db.live_delta_trades.docs) for t in got.values())
+          and got["H1|q1"]["acct"] == "H1-PSB" and got[s315]["acct"] == "SF0315" and got[tf01]["side"] == -1,
+          {k: v and (v.get("status"), v.get("reason")) for k, v in got.items()})
+    check("not copied: a Factory strategy outside the 56 (SF0520) and TF-01's bitcoin book",
+          trade(db, s520) is None and trade(db, tfb) is None and BTC not in M.D.pos)
+    doc = next((d for d in db.premium_meta.docs if d["_id"] == "live_priority"), None)
+    check("the paper desk is told the new Premium books (bitcoin, gold, ether), never the H1 or Factory ones",
+          doc is not None and {"DT-05|BTCUSD", "TC-04|BTCUSD", "CP-21|XAUUSD", "TF-01|XAUTUSD", "JR-03|XAUTUSD",
+                               "DD-04|ETHUSD", "BX-02|ETHUSD"} <= set(doc["books"])
+          and not any(b.startswith(("H1-", "SF")) for b in doc["books"]) and len(doc["books"]) == 58, doc)
+    g = await M.status()
+    check("the page: 99 gold picks, each new one with its pick time; the notes name 99",
+          len(g["picks"]) == 99 and sum(1 for p in g["picks"] if p["picked_at"] == M.NEW_PICKED_AT_4) == 49
+          and "99" in g["notes"][0], len(g["picks"]))
 
 
 if __name__ == "__main__":

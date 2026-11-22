@@ -11,6 +11,8 @@
 // the owner's choice). The page shows both desks at a glance and one desk in full; the gold desk is also on Premium
 // Strategies. Every request that changes a desk is LiveDelta's (unchanged); the overview only reads. From 21 Nov each
 // desk card also shows its real-money trading days, total return, avg % a trading day, win rate, PF and drawdown.
+// 22 Nov: the owner's third list - the bitcoin desk 24 (seven more bitcoin books and DD-04's and BX-02's ether books on
+// ETHUSD, its second product), the gold desk 99 (ten Premium gold books, a seventh H1 template, 38 more Factory ones).
 import { useCallback, useEffect, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import { apiFetch } from "../../lib/api";
@@ -18,10 +20,10 @@ import LiveDelta, { MODE, ago, usd, tone, spct, type LiveStatus } from "../premi
 
 type DeskKey = "crypto" | "gold";
 const DESKS: { key: DeskKey; label: string; product: string; path: string; intro: string }[] = [
-  { key: "crypto", label: "Bitcoin desk", product: "BTCUSD", path: "/api/premium-paper/live/desk/crypto",
-    intro: "TH-05, TL-04 and TH-01 were picked on 14 Nov, TD-02 on 15 Nov, and eleven more on 18 Nov from the Premium leaderboard (TH-06, DT-02, RU-06, NJ-47, RU-03, TH-04, DT-01, TH-07, NJ-27, PT-04, SB-04), each after 0 to 15 paper trades. From 19 Nov every signal of the 15 is copied to Delta at one contract, however late it is seen and however far the price has moved." },
+  { key: "crypto", label: "Bitcoin desk", product: "BTCUSD · ETHUSD", path: "/api/premium-paper/live/desk/crypto",
+    intro: "TH-05, TL-04 and TH-01 were picked on 14 Nov, TD-02 on 15 Nov, eleven more on 18 Nov from the Premium leaderboard (TH-06, DT-02, RU-06, NJ-47, RU-03, TH-04, DT-01, TH-07, NJ-27, PT-04, SB-04), and nine on 22 Nov from its Crypto tab: seven on bitcoin (DT-05, TL-03, RU-04, KA-01, DD-01, TD-04, TC-04) and the ether books of DD-04 and BX-02, which trade Delta's ETHUSD; each after 0 to 24 paper trades. Every signal of the 24 is copied to Delta at one contract, however late it is seen and however far the price has moved." },
   { key: "gold", label: "Gold desk", product: "XAUTUSD", path: "/api/premium-paper/live",
-    intro: "RU-02, CP-23, YT-14, DR-01 and CP-05 were picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, and on 18 Nov seventeen more gold books from the Premium leaderboard and six templates of the Gold Desk's H1 test (EMA Ribbon, Round Number, Donchian fast and slow, Pivot R1/S1, Keltner), each after 0 to 20 paper trades, and on 19 Nov the Gold Desk Strategy Factory board's top 20 (SF0181, SF0020, SF0245 and on). Every gold signal comes from Delta's own XAUTUSD data. From 19 Nov every open paper trade of the 50 is copied to Delta at one contract, however late it is seen and however far the price has moved." },
+    intro: "RU-02, CP-23, YT-14, DR-01 and CP-05 were picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, and on 18 Nov seventeen more gold books from the Premium leaderboard and six templates of the Gold Desk's H1 test (EMA Ribbon, Round Number, Donchian fast and slow, Pivot R1/S1, Keltner), each after 0 to 20 paper trades, and on 19 Nov the Gold Desk Strategy Factory board's top 20 (SF0181, SF0020, SF0245 and on). On 22 Nov ten more gold books from the Premium Gold tab (CP-21, YT-18, TF-01, CP-01, FL-02, MH-01, DT-02, BG-08, RU-06, JR-03), the H1 test's Prior Session High/Low Break and 38 more of the Factory board's top 56 joined. Every gold signal comes from Delta's own XAUTUSD data. Every open paper trade of the 99 is copied to Delta at one contract, however late it is seen and however far the price has moved." },
 ];
 const POLL_MS = 15000;
 
@@ -82,7 +84,7 @@ export default function DeltaLiveTradingPage() {
       <PageHeader
         crumb="Delta Exchange Live Trading"
         title="Delta Exchange Live Trading"
-        subtitle="Real money on Delta Exchange India for the bitcoin and gold Premium strategies you picked, traded on Delta's live BTCUSD and XAUTUSD data."
+        subtitle="Real money on Delta Exchange India for the bitcoin, ether and gold strategies you picked, traded on Delta's live BTCUSD, ETHUSD and XAUTUSD data."
       />
 
       <section className="dlx-account" aria-label="Delta account">
@@ -164,14 +166,15 @@ export default function DeltaLiveTradingPage() {
         <summary>How these desks trade</summary>
         <p>
           Each strategy runs on the Premium paper desk on Delta&apos;s live one-minute candles (BTCUSD for bitcoin,
-          XAUTUSD for gold). When one of them enters, its desk sends the same trade to your Delta account as a real
+          ETHUSD for ether, XAUTUSD for gold). When one of them enters, its desk sends the same trade to your Delta account as a real
           order: a market entry of 1 contract, the smallest order Delta allows (or sized to a risk of $1 to $5 if you
           pick one), with that strategy&apos;s own stop and target placed on Delta. When the strategy exits, the real
           trade is closed. A desk never adds trades of its own, and every strategy can be in a trade at the same time:
           each is its own order with its own stop and target, and Delta shows their sum as one position per product.
         </p>
         <p>
-          Each desk has its own <b>Live trading</b> switch and its own $20 daily loss stop. <b>ON</b> starts real orders
+          Each desk has its own <b>Live trading</b> switch; since 19 Nov neither has a daily loss stop (every signal is
+          taken at one contract). <b>ON</b> starts real orders
           after one confirmation; <b>OFF</b> stops new trades at once, and a position already open still closes at its
           stop, its target or its strategy&apos;s exit. <b>Test without orders</b> logs every decision without sending
           anything. The two desks share one Delta account and its keys.
