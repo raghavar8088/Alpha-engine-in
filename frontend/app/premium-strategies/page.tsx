@@ -23,6 +23,7 @@ import WebSources from "./WebSources";
 import LiveDelta from "./LiveDelta";
 import YtChannels from "./YtChannels";
 import TradeRoom from "./TradeRoom";
+import GoldYt from "./GoldYt";
 
 type Tab = "indian" | "crypto" | "gold" | "global" | "paper" | "strategies" | "results" | "november" | "daily" | "method" | "channels20" | "intraday4" | "shortlist" | "live" | "websources" | "ytchannels" | "traderoom";
 const TABS: { id: Tab; label: string }[] = [
@@ -141,9 +142,12 @@ export default function PremiumStrategiesPage() {
   const [tab, setTab] = useState<Tab>("indian");
   // A link on the 20-channel tab opens a market tab on the right sub-tab with that study's strategies shown.
   const [focus, setFocus] = useState<SegFocus | null>(null);
+  // The Gold tab opens on the gold channels 21-40 strategies (v2); all gold paper accounts are its other view.
+  const [goldView, setGoldView] = useState<"v2" | "accounts">("v2");
   const tabsRef = useRef<HTMLDivElement>(null);
   const openSeg = (f: Omit<SegFocus, "at">) => {
     setFocus({ ...f, at: Date.now() });
+    if (SEG_PLACE[f.seg].tab === "gold") setGoldView("accounts");
     setTab(SEG_PLACE[f.seg].tab);
     tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -193,7 +197,18 @@ export default function PremiumStrategiesPage() {
       </div>
 
       {tab === "paper" && <PaperDesk summary={summary} error={error} />}
-      {(tab === "indian" || tab === "crypto" || tab === "gold" || tab === "global") && (
+      {tab === "gold" && (
+        <div className="ps-chips" role="tablist" aria-label="Gold views">
+          <button role="tab" aria-selected={goldView === "v2"} className={`ps-chip${goldView === "v2" ? " on" : ""}`} onClick={() => setGoldView("v2")}>
+            Gold strategies v2 · 20 channels (new)
+          </button>
+          <button role="tab" aria-selected={goldView === "accounts"} className={`ps-chip${goldView === "accounts" ? " on" : ""}`} onClick={() => setGoldView("accounts")}>
+            All gold paper accounts
+          </button>
+        </div>
+      )}
+      {tab === "gold" && goldView === "v2" && <GoldYt summary={summary} error={error} onOpen={openSeg} />}
+      {(tab === "indian" || tab === "crypto" || (tab === "gold" && goldView === "accounts") || tab === "global") && (
         <Segments key={`${tab}-${focus?.at ?? 0}`} market={tab} summary={summary} error={error} focus={focus} />
       )}
 

@@ -33,6 +33,7 @@ const US_HOLIDAYS = new Set([
   "2026-11-26", "2026-12-25",
 ]);
 const YC_START = "2026-11-09T10:00:00Z";      // settings.PREMIUM_YC_START: the 11 YouTube channels
+const GY_START = "2026-11-22T22:00:00Z";      // settings.PREMIUM_YC5_START: the gold channels 21-40
 const SL_START = new Map(SL.map((s) => [s.id, s.paperStart]));
 
 export type Cal = "nse" | "us" | "weekdays" | "crypto";
@@ -62,6 +63,7 @@ export function startOf(source: string, id: string, market: string, status: Star
   if (source === "youtube_channels11") return YC_START;
   if (source === "youtube_channels20") return status?.yc2_start ?? null;
   if (source === "youtube_shortlist") return SL_START.get(id) ?? null;
+  if (source === "youtube_gold") return GY_START;
   if (calendarOf(market) === "crypto") return (source === "sniper_headshot" ? status?.sh_start : status?.btc_start) ?? null;
   return status?.paper_start ?? null;
 }

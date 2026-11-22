@@ -32,6 +32,8 @@ sys.path.insert(0, str(RESEARCH / "youtube_shortlist_2026_11"))
 import ze_strategies as ZES  # noqa: E402,F401  (adds the channel-shortlist strategies to YCS.STRATEGIES)
 sys.path.insert(0, str(RESEARCH / "youtube_traderoom_2026_11"))
 import zt_strategies as ZTS  # noqa: E402,F401  (adds The Trade Room strategies to YCS.STRATEGIES)
+sys.path.insert(0, str(RESEARCH / "youtube_gold_2026_11"))
+import zg_strategies as ZGS  # noqa: E402,F401  (adds the gold channels 21-40 strategies to YCS.STRATEGIES)
 YM.SPLITS.setdefault("ETHUSD", YM.SPLITS["BTCUSD"])      # DR-04 trades ether (Delta ETHUSD) through the same engine
 YM.COSTS.setdefault("ETHUSD", CPM.BTC_COST)                # as bitcoin: the same Delta fee and slippage model
 

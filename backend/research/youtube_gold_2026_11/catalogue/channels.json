@@ -1,0 +1,375 @@
+{
+ "axiafutures": {
+  "key": "axiafutures",
+  "name": "Axia Futures",
+  "pos": 21,
+  "earlier": "shortlist A43",
+  "pick": "UCzFA5mCxXHSCCGxsDBSuRRw",
+  "pick_title": "Axia Futures",
+  "pick_followers": 78000
+ },
+ "bikotrading": {
+  "key": "bikotrading",
+  "name": "BikoTrading - Futures Trading",
+  "query": "BikoTrading",
+  "pos": 22,
+  "earlier": "",
+  "candidates": [],
+  "pick": "UCc07T7LZ-6kkitPGuuJmXwg",
+  "pick_title": "BikoTrading | Futures Trading",
+  "pick_followers": 38800,
+  "override": "search pick fixed by hand from a second search (BikoTrading)"
+ },
+ "tradingorbit": {
+  "key": "tradingorbit",
+  "name": "Trading Orbit",
+  "query": "Trading Orbit",
+  "pos": 23,
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCZ8yXCviV759LtwAmCPsqEA",
+    "title": "JEMMZ CRYPTO ",
+    "followers": 520000,
+    "about": "Welcome to JEMMZ CRYPTO\u2014 Discover What's Next. I explore the world of Web3, AI, and next-generation gaming platforms ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCk_4QF2mL06QhEtbU74F_hQ",
+  "pick_title": "Trading Orbit",
+  "pick_followers": 5900,
+  "override": "search pick fixed by hand from a second search (Trading Orbit)"
+ },
+ "propfirmtrader": {
+  "key": "propfirmtrader",
+  "name": "PropFirmTrader",
+  "query": "PropFirmTrader",
+  "pos": 24,
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UC1rLYUaIXsKROTqAJ-k882Q",
+    "title": "PropFirmTrader",
+    "followers": 40300,
+    "about": "The Global HOME Of Prop Firm Trading. Each interview features the World's Best Funded Traders sharing their EXACT rules, ...",
+    "score": 1
+   },
+   {
+    "id": "UC7ec7vbW1CcESNCEZbIGd-g",
+    "title": "PropFirmTrader",
+    "followers": 1870,
+    "about": "Welcome to PropFirmTrader! Join me on my journey through futures trading as I share experiences and insights as a novice trader ...",
+    "score": 1
+   },
+   {
+    "id": "UCjSOGuONSpi_t0rDQB10IGw",
+    "title": "PropfirmTrader",
+    "followers": 2,
+    "about": "Welcome to PropFirmTrader Hey everyone! I'm , a normal trader just like you \u2014 learning, improving, and sharing my live trading ...",
+    "score": 1
+   },
+   {
+    "id": "UC_NGuy-V1fh4Ymo0h1KnRNw",
+    "title": "Propfirmtrader",
+    "followers": 20,
+    "about": "Welcome to PropFirmTrader! I'm a passionate trader documenting my journey in the world of prop firm trading \u2014 sharing real ...",
+    "score": 1
+   },
+   {
+    "id": "UCuu9DMvsr4tVBC8psTRfahw",
+    "title": "The Propfirm Trader",
+    "followers": 15,
+    "about": "A Propfirm Trader I trade Gold (XAUUSD) with a systematic approach focused on discipline, risk management and execution.",
+    "score": 0
+   }
+  ],
+  "pick": "UC1rLYUaIXsKROTqAJ-k882Q",
+  "pick_title": "PropFirmTrader",
+  "pick_followers": 40300
+ },
+ "themovingaverage": {
+  "key": "themovingaverage",
+  "name": "The Moving Average",
+  "pos": 25,
+  "earlier": "shortlist A35",
+  "pick": "UCYFQzaZyTUzY-Tiytyv3HhA",
+  "pick_title": "The Moving Average",
+  "pick_followers": 1140000
+ },
+ "atas": {
+  "key": "atas",
+  "name": "ATAS - English",
+  "pos": 26,
+  "earlier": "shortlist B77",
+  "pick": "UCblJh019D_VZVnkpvpOgcWA",
+  "pick_title": "ATAS - Platform for volume analysis for traders",
+  "pick_followers": 35500
+ },
+ "fractalflow": {
+  "key": "fractalflow",
+  "name": "Fractal Flow - Pro Trading Strategies",
+  "query": "Fractal Flow Pro trading strategies",
+  "pos": 27,
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UC8ue0lXRPv8cqyI9W26BtBg",
+    "title": "Fractal Flow - Pro Trading Strategies",
+    "followers": 527000,
+    "about": "Fractal Flow provides high quality low cost trading education. We focus on a realistic view of smart money concepts (SMC), order ...",
+    "score": 1
+   },
+   {
+    "id": "UCLFstZh_p5SNROhdkOBlPgg",
+    "title": "Fractal Flow - Pro Trading Strategies",
+    "followers": 41,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UCHWqaSfR_AhKnHVf0oiuh7g",
+    "title": "The Fractal Trader",
+    "followers": 190,
+    "about": "Hi! I am Flerovium, a Fractal Flow Pro practitioner. and I'd like to share my knowledge with you! I use a strategy founded in math, ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCY-W4FvxaNRoZ8N5b-KzSZg",
+    "title": "Fractal MathPro",
+    "followers": 2870,
+    "about": "",
+    "score": 0.5
+   },
+   {
+    "id": "UCsmKefZP178Ax-NQncMdp8Q",
+    "title": "FXVerse Global",
+    "followers": 77,
+    "about": "FXVerse Global is a global trading community focused on Forex education, strategies, and market insights.",
+    "score": 0
+   }
+  ],
+  "pick": "UC8ue0lXRPv8cqyI9W26BtBg",
+  "pick_title": "Fractal Flow - Pro Trading Strategies",
+  "pick_followers": 527000
+ },
+ "ttrades": {
+  "key": "ttrades",
+  "name": "TTrades",
+  "query": "TTrades",
+  "pos": 28,
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCQwUEVakiYDmNGe7UBza4sQ",
+    "title": "TTrades",
+    "followers": 551000,
+    "about": "Student. Not Financial Advice. Entertainment Purposes Only.",
+    "score": 1
+   },
+   {
+    "id": "UCsxPk8iDK52u9y51jKjLYoA",
+    "title": "TTrades Brother",
+    "followers": 6290,
+    "about": "My journey to becoming a self sufficient trader.",
+    "score": 0.5
+   },
+   {
+    "id": "UCpiV7xfPK9RKZTUGp-fUOfQ",
+    "title": "Hot Trades",
+    "followers": 67000,
+    "about": "Crypto and Stock markets analysis #hottrades please always have your own plan, I'm not a financial advisor.",
+    "score": 0
+   },
+   {
+    "id": "UCq5uGxe_EkZNqj9le3OXnKQ",
+    "title": "Mehak Trades",
+    "followers": 110000,
+    "about": "Legal Disclaimer & Channel Policy 1. Educational Purpose Only All content provided on Trade with Mehak, including live streams, ...",
+    "score": 0
+   },
+   {
+    "id": "UCqu5395g0YML70trJTcZkVA",
+    "title": "Trade Se Sikho",
+    "followers": 72500,
+    "about": "Trade Se Sikho me aapko milega Stock Market aur Trading ka Real Knowledge \u2013 simple aur easy Hindi me! Yaha hum cover ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCQwUEVakiYDmNGe7UBza4sQ",
+  "pick_title": "TTrades",
+  "pick_followers": 551000
+ },
+ "cammycapital": {
+  "key": "cammycapital",
+  "name": "Cammy Capital",
+  "query": "Cammy Capital",
+  "pos": 29,
+  "earlier": "",
+  "candidates": [],
+  "pick": "UC1i43Ci6otBCnv_hlKddQ0Q",
+  "pick_title": "Cammy Capital",
+  "pick_followers": 69400,
+  "override": "search pick fixed by hand from a second search (Cammy Capital)"
+ },
+ "hannahforex": {
+  "key": "hannahforex",
+  "name": "HANNAH FOREX",
+  "query": "HANNAH FOREX",
+  "pos": 30,
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCqTeFwC8riZWFgXqpDluutg",
+    "title": "HANNAH FOREX",
+    "followers": 234000,
+    "about": "What's up! Join me as I document my forex trading journey through film, sharing the ups and the downs and all the real sh*t there ...",
+    "score": 1
+   },
+   {
+    "id": "UClEnzPle0DDEGSMPJpzr_WA",
+    "title": "Hannah Ros ",
+    "followers": 2820,
+    "about": "Hey Everyone, My name is Hannah. I've been trading for 5+ years and I am a full time forex trader. Join me on this cinematic ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCo0X0qtUcTP0Y4j_dIP10Mg",
+    "title": "HCNFXACADEMY",
+    "followers": 229000,
+    "about": "Helping you Become a Profitable Forex Trader.",
+    "score": 0
+   },
+   {
+    "id": "UCm5loVmt6ELQpgUmntEdJaw",
+    "title": "Hannah Forex",
+    "followers": 3,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UCP0WiozhVIXx8u4IcymbHJQ",
+    "title": "Hannah Forex",
+    "followers": 1,
+    "about": "What's up! I'm Hannah Forex and I'm living in UK and I'm learning how to trade forex stock marketing. Possibly join me here as I ...",
+    "score": 1
+   }
+  ],
+  "pick": "UCqTeFwC8riZWFgXqpDluutg",
+  "pick_title": "HANNAH FOREX",
+  "pick_followers": 234000
+ },
+ "tradingrush": {
+  "key": "tradingrush",
+  "name": "Trading Rush",
+  "pos": 31,
+  "earlier": "shortlist A36 D81",
+  "pick": "UCgY_eHY4NCTcRnU6CCZXWng",
+  "pick_title": "TRADING RUSH",
+  "pick_followers": 352000
+ },
+ "tradepro": {
+  "key": "tradepro",
+  "name": "Trade Pro",
+  "pos": 32,
+  "earlier": "shortlist D61",
+  "pick": "UCrXjzUN6EtlyhaaAerbPfkQ",
+  "pick_title": "Trade Pro",
+  "pick_followers": 220000
+ },
+ "orderflows": {
+  "key": "orderflows",
+  "name": "Orderflows - Michael Valtos",
+  "query": "Orderflows Michael Valtos",
+  "pos": 33,
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCI37HXPO1f4o9j4SA83-Iog",
+    "title": "Orderflows",
+    "followers": 53200,
+    "about": "Orderflows is a Futures day trading channel explaining how to use order flow analysis. Learn the order flow trading methods that ...",
+    "score": 1
+   }
+  ],
+  "pick": "UCI37HXPO1f4o9j4SA83-Iog",
+  "pick_title": "Orderflows",
+  "pick_followers": 53200
+ },
+ "jigsawtrading": {
+  "key": "jigsawtrading",
+  "name": "Jigsaw Trading",
+  "pos": 34,
+  "earlier": "shortlist B76",
+  "pick": "UCEHjJdrOFvgPbmKLECrTqiw",
+  "pick_title": "Jigsaw Trading",
+  "pick_followers": 27200
+ },
+ "optimusfutures": {
+  "key": "optimusfutures",
+  "name": "Optimus Futures",
+  "pos": 35,
+  "earlier": "shortlist A45",
+  "pick": "UCvcSMynnOgjPrhk4GY5dFzw",
+  "pick_title": "Optimus Futures",
+  "pick_followers": 23400
+ },
+ "ninjatrader": {
+  "key": "ninjatrader",
+  "name": "NinjaTrader",
+  "pos": 36,
+  "earlier": "shortlist A46",
+  "pick": "UCUXNA8JJOiMrqhB8NVNgClA",
+  "pick_title": "NinjaTrader",
+  "pick_followers": 267000
+ },
+ "karenfoo": {
+  "key": "karenfoo",
+  "name": "Karen Foo",
+  "query": "Karen Foo",
+  "pos": 37,
+  "earlier": "",
+  "candidates": [],
+  "pick": "UCcUOqJd-eRI3iVOBnPFpNdw",
+  "pick_title": "Karen Foo (Britney)",
+  "pick_followers": 555000,
+  "override": "search pick fixed by hand from a second search (Karen Foo)"
+ },
+ "sahasra": {
+  "key": "sahasra",
+  "name": "Sahasra - A Trading Community",
+  "query": "Sahasra A Trading Community",
+  "pos": 38,
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCLGo5qU14grMVt-dHN4sTBQ",
+    "title": "Finance with NK",
+    "followers": 56800,
+    "about": "Disclaimer We are not SEBI registered and not financial advisers. This content is for education and general information only.",
+    "score": 0
+   }
+  ],
+  "pick": "UCLGo5qU14grMVt-dHN4sTBQ",
+  "pick_title": "Finance with NK",
+  "pick_followers": 56800,
+  "override": "search pick fixed by hand from a second search (Sahasra A Trading Community)"
+ },
+ "ukspreadbetting": {
+  "key": "ukspreadbetting",
+  "name": "UKspreadbetting",
+  "pos": 39,
+  "earlier": "shortlist A33 D44",
+  "pick": "UCnKPQUoCRb1Vu-qWwWituGQ",
+  "pick_title": "UKspreadbetting",
+  "pick_followers": 425000
+ },
+ "pepperstone": {
+  "key": "pepperstone",
+  "name": "Pepperstone",
+  "pos": 40,
+  "earlier": "shortlist D30",
+  "pick": "UCrNLfyB-wvPotj4RHR_dcSA",
+  "pick_title": "Pepperstone Australia",
+  "pick_followers": 420000
+ }
+}

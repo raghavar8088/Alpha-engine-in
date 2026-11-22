@@ -675,6 +675,33 @@ YC4_STRATEGIES = (
 )
 for _sid, _name, _ch, _mkts in YC4_STRATEGIES:
     ACCOUNTS.append(_a(_sid, YC4, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
+# The gold channels 21-40 study (backend/research/youtube_gold_2026_11, 22 Nov 2026): the owner's list of 20 YouTube
+# channels for gold strategies; their gold videos read in full, each clearly defined method written as exact rules
+# (zg_spec.py: E stated, I inferred, A assumed, each stated rule with its video time), checked for look-ahead and
+# fills, version v1, not backtested. They trade from settings.YC5_START_T, flat at the start, Rs 10 lakh each, on Delta
+# Exchange's XAUTUSD candles with simulated orders only.
+YC5 = "youtube_gold"
+YC_SOURCES = YC_SOURCES + (YC5,)
+YC5_STRATEGIES = (
+    ('AF-03', 'Gold inside-day break: the first 15-minute close beyond the inside day\'s high (low), stop beyond that candle, target the mother day\'s high (low) or 2R', 'Axia Futures', ('XAUUSD',)),
+    ('AF-04', 'COMEX-hours break of a prior-day high (low) tested at least twice: a fresh 5-minute close beyond it, stop under the last 30 minutes, target last week\'s high (low) or 2R', 'Axia Futures', ('XAUUSD',)),
+    ('BO-01', 'Anchored VWAP from the last 4-hour swing in a 4-hour trend: a 15-minute candle that retests it against the trend and closes back, target the last swing or 2R', 'BikoTrading | Futures Trading', ('XAUUSD',)),
+    ('BO-02', 'False breakout of a daily key level (previous day\'s high / low, last daily swing): back inside within an hour, entry at the level, stop 2 pips beyond the tail, 4R', 'BikoTrading | Futures Trading', ('XAUUSD',)),
+    ('TO-01', 'Daily 9-period MA side; a 1-hour Bollinger Band (20, 2) touch at the previous swing, a $15 stop beyond it, 1:5 (Delta XAUUSD)', 'Trading Orbit', ('XAUUSD',)),
+    ('PF-01', 'Claudia\'s 30-minute engulfing zone: a 5-minute pull back into the candle\'s body, then two highs (lows) broken; stop beyond the pull back, target the previous high (low) or 2R', 'PropFirmTrader', ('XAUUSD',)),
+    ('MA-02', 'Daily Heikin Ashi direction; a 1-hour Heikin Ashi candle with no wick against it and a bigger body, beyond the previous day\'s extreme; held until an opposite-colour candle (swing)', 'The Moving Average', ('XAUUSD',)),
+    ('MA-03', '5-minute scalp: smoothed MAs 21/50/200 fanned out, RSI on the trend\'s side, a three-line strike; stop twice the engulfing candle, out on an RSI divergence or after six candles', 'The Moving Average', ('XAUUSD',)),
+    ('MA-04', 'RSI (14) leaves 70 / 30 and closes back inside on 15 minutes: trade toward the middle, stop beyond the swing it made, 2R', 'The Moving Average', ('XAUUSD',)),
+    ('TU-01', 'After 8:30 New York an hour sweeps the previous day\'s high (low) and closes back inside; a 5-minute fair value gap in the premium (discount); stop on the intermediate high, 2R', 'TTrades', ('XAUUSD',)),
+    ('TU-02', 'Fractal model: an hour sweeps the previous hour\'s high (low) and closes back inside; in the next two hours a 5-minute close through the run that made the extreme; stop there, 2R (London and New York morning)', 'TTrades', ('XAUUSD',)),
+    ('CA-01', 'New York open: the overnight volume profile against the session\'s at 10:00; when value has moved, a limit at the overnight point of control, target the session value area\'s far edge', 'Cammy Capital', ('XAUUSD',)),
+    ('CA-02', 'Yesterday\'s premium is today\'s discount: the session value area low reaches the previous regular session\'s value area high (mirror); a limit there, stop at yesterday\'s point of control', 'Cammy Capital', ('XAUUSD',)),
+    ('HF-01', 'Sweep, break, retest in the 1-hour trend: a 5-minute sweep of the last swing, a close through the swing on the other side, a limit at half of that leg; target the last 1-hour swing or 2R (kill zones)', 'HANNAH FOREX', ('XAUUSD',)),
+    ('RU-10', 'Donchian Channel (20) with the 200 EMA on 30 minutes: the upper band\'s new high after the lower band\'s new low (mirror), stop just beyond the other band, 1.5R', 'TRADING RUSH', ('XAUUSD',)),
+    ('TQ-05', 'Triple Supertrend (12/3, 11/2, 10/1) with the Stochastic RSI and the 200 EMA on 1 hour: a cross out of 20 (80) with two Supertrends agreeing, stop at the second line, 1.5R', 'Trade Pro', ('XAUUSD',)),
+)
+for _sid, _name, _ch, _mkts in YC5_STRATEGIES:
+    ACCOUNTS.append(_a(_sid, YC5, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
 BY_ID = {a.id: a for a in ACCOUNTS}
 
 

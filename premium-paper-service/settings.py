@@ -67,6 +67,11 @@ YC3J_START_DATE = min(datetime.fromtimestamp(YC3J_START_T, IST).date(), datetime
 # activation, flat at the start, entering only on fresh bars like the channel-shortlist books.
 YC4_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC4_START", "2026-11-15T19:30:00+00:00")).timestamp())
 YC4_START_DATE = min(datetime.fromtimestamp(YC4_START_T, IST).date(), datetime.fromtimestamp(YC4_START_T, timezone.utc).date())
+# The gold channels 21-40 books (catalog.YC5_STRATEGIES; backend/research/youtube_gold_2026_11) trade forward from their
+# activation, flat at the start, entering only on fresh bars like the channel-shortlist books: from the gold week that
+# opens on Sunday 22 Nov 2026 at 17:00 New York. Nothing before it is back-filled.
+YC5_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC5_START", "2026-11-22T22:00:00+00:00")).timestamp())
+YC5_START_DATE = min(datetime.fromtimestamp(YC5_START_T, IST).date(), datetime.fromtimestamp(YC5_START_T, timezone.utc).date())
 
 MONGO_URL = os.getenv("FACTORY_MONGO_URL", "").strip()
 MONGO_DB = os.getenv("PREMIUM_MONGO_DB", "alpha_engine_premium")
