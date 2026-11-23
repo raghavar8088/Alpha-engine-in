@@ -22,7 +22,9 @@
 // controls: Trading ON/OFF (default ON) and Lots, the contracts a new trade takes (default 1, − and + then Save). OFF and
 // lowering are instant; switching ON and raising ask once (the server needs the words REAL MONEY, which the page sends).
 // An older server without them shows the values read-only.
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+// 23 Nov 2026 (later): a second sideways scrollbar ABOVE the strategies table (ScrollX), moving with the one under it; it stays at
+// the top of the screen while the table is in view, so the 99-row gold table scrolls sideways from any row.
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { apiFetch } from "../../lib/api";
 
 type Rec = { trades: number; wins: number; pnl_usd: number; open: number };
@@ -226,6 +228,45 @@ const DESK_STATE: Record<string, { label: string; cls: string }> = {
   // closed first, unseen by this desk, was missed
   waiting: { label: "Waiting to copy", cls: "open" }, missed: { label: "Not copied", cls: "skipped" },
 };
+/** A card that scrolls sideways, with a second scrollbar above it as well as the one under it (23 Nov 2026, the owner's
+ *  ask for the strategies table). The two move together; the top one takes the content's width, hides when nothing
+ *  overflows, and sticks to the top of the screen while the card is in view. It is a mirror, so it is kept out of the
+ *  tab order and from screen readers: the card itself still scrolls as before. */
+function ScrollX({ className, children }: { className: string; children: ReactNode }) {
+  const top = useRef<HTMLDivElement>(null);
+  const box = useRef<HTMLDivElement>(null);
+  const [w, setW] = useState(0);                       // the content's width when it overflows; 0 = no top bar
+  useEffect(() => {
+    const b = box.current;
+    if (!b) return;
+    const measure = () => setW(b.scrollWidth > b.clientWidth + 1 ? b.scrollWidth : 0);
+    measure();
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", measure);
+      return () => window.removeEventListener("resize", measure);
+    }
+    const ro = new ResizeObserver(measure);
+    ro.observe(b);                                     // the card (the window's width) ...
+    for (const el of Array.from(b.children)) ro.observe(el);   // ... and the table (its columns and rows)
+    return () => ro.disconnect();
+  }, []);
+  useEffect(() => {                                    // a bar that just appeared starts where the card is
+    if (top.current && box.current) top.current.scrollLeft = box.current.scrollLeft;
+  }, [w]);
+  const follow = (from: HTMLDivElement | null, to: HTMLDivElement | null) => {
+    if (from && to && Math.abs(to.scrollLeft - from.scrollLeft) > 0.5) to.scrollLeft = from.scrollLeft;
+  };
+  return (
+    <div className="ld-xwrap">
+      <div ref={top} className="ld-xtop" hidden={!w} aria-hidden="true" tabIndex={-1}
+        onScroll={() => follow(top.current, box.current)}>
+        <div style={{ width: w }} />
+      </div>
+      <div ref={box} className={className} onScroll={() => follow(box.current, top.current)}>{children}</div>
+    </div>
+  );
+}
+
 type SFilter = "all" | "copied" | "skipped" | "not";
 const copied = (x: Signal) => ["open", "entering", "closing", "closed"].includes(x.desk.status);
 const notCopied = (x: Signal) => ["before", "off", "missed"].includes(x.desk.status);
@@ -477,7 +518,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         )}
       </h4>
       {pickMsg && <div className="ld-note ld-pickmsg" role="status">{pickMsg}</div>}
-      <div className="ld-card ld-scroll">
+      <ScrollX className="ld-card ld-scroll">
         <table className="ld-table ld-strats">
           <thead>
             <tr>{hasRank && <th title="1 = most likely to make money from here (see the note under the table)">Rank</th>}
@@ -602,7 +643,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         {showShadow && (
           <p className="ld-foot">{`Shadow: ${s.picks.filter((p) => p.shadow).map((p) => `${p.acct} ${usd(p.shadow!.pnl_usd, true)} (${p.shadow!.trades})`).join(" · ") || "no shadow trade yet"}`}</p>
         )}
-      </div>
+      </ScrollX>
 
       {days.length > 0 && (
         <>
@@ -940,6 +981,10 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-lot-save:disabled { opacity: 0.5; cursor: not-allowed; }
         .ld .ld-row-off td:not(.ld-onoff):not(.ld-lots-c):not(.ld-rk) { opacity: 0.55; }
         .ld .ld-pickmsg { margin: 0 0 8px; }
+        .ld .ld-xtop { position: sticky; top: 0; z-index: 3; overflow-x: auto; overflow-y: hidden; margin: 0 1px;
+                       padding-top: 3px; background: var(--canvas); }
+        .ld .ld-xtop[hidden] { display: none; }
+        .ld .ld-xtop > div { height: 1px; }
         @media (max-width: 640px) {
           .ld .ld-v { font-size: 19px; } .ld .ld-ctl input { min-width: 140px; } .ld .ld-seg-b { padding: 7px 10px; }
           .ld .ld-status { padding: 14px; } .ld .ld-pos-dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
