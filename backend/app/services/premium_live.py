@@ -4,11 +4,12 @@ DESKS. Each desk has its own picks, products, switch (off / shadow / live), dail
 they share the Delta account, its keys and the owner's PIN, and never trade the same product.
 - gold (Premium Strategies > "Real money · Delta gold"): the five gold picks of 13 Nov, CP-06 (15 Nov), TL-04's gold
   book (16 Nov), and from 18 Nov thirteen more Premium gold books and six Gold Desk H1 templates, on XAUTUSD; the
-  Gold Desk Strategy Factory's top 20 on 19 Nov; 49 more on 22 Nov (99 in all).
+  Gold Desk Strategy Factory's top 20 on 19 Nov; 49 more on 22 Nov; three more on 24 Nov (102 in all).
   Its records are the original ones (live_delta_state / live_delta_trades).
 - crypto (the "Delta Exchange Live Trading" module, 14 Nov): the bitcoin strategies the owner picked from the Crypto
   tab - TH-05, TL-04 and TH-01 on 14 Nov, TD-02 on 15 Nov, five more on 18 Nov - on BTCUSD, a $20 daily stop
-  (live_crypto_state / live_crypto_trades); seven more bitcoin books and two ether books (ETHUSD) on 22 Nov (24 in
+  (live_crypto_state / live_crypto_trades); seven more bitcoin books and two ether books (ETHUSD) on 22 Nov, six
+  more bitcoin books and two more ether books on 24 Nov (32 in
   all). From 15 Nov both desks trade one contract a trade (the owner can pick $1
   to $5 of risk instead) and copy a signal seen up to 10 minutes late.
   On 14 Nov the owner moved bitcoin here from the gold desk; the gold desk's earlier bitcoin picks (TH-01, TH-05, RU-04,
@@ -141,6 +142,17 @@ own backtest (the prior: its R a trade, trusted by its number of trades plus RAN
 starts at its desk's typical backtest), its whole paper record (trades closed before its pick count RANK_PRE_W: a good
 record is what got it picked, so they are partly luck), and how its real Delta copies did against their own paper
 twins (the gap, pulled toward the desk's). Shown with how likely the edge is above zero. Read only: it trades nothing.
+
+24 NOV 2026: THE OWNER'S FOURTH LIST. The owner sent the Premium Crypto and Gold tabs again (28 bitcoin and ether rows,
+31 gold rows) and asked for those strategies on real money, skipping any already here, with the desks' configuration
+unchanged (every signal copied; each new strategy one contract and ON, the pick_cfg default). New:
+- bitcoin desk: NJ-43, TD-03, NJ-28, SC-02, NJ-37 and DD-04's BITCOIN book (BTCUSD; its ether book has been here
+  since 22 Nov - a pick is (account, market), so one strategy may hold a book on each product), and the ether books
+  of DD-03 and BX-01 on ETHUSD (BX-02's is a different strategy);
+- gold desk: JR-05, BG-05 and JR-01.
+Records at NEW_PICKED_AT_5 (00:30 IST 24 Nov), by the Premium method above (re-proven on five frozen records first).
+Backtests: TD-03, JR-05 and JR-01 have their own 2-year books (results/backtest.json of youtube_channels20, gold
+on its XAUUSD book as JR-03's); the channels-11 and shortlist strategies were never backtested.
 """
 
 from __future__ import annotations
@@ -218,6 +230,7 @@ GOLD_SF = "gold_sf"                            # ... or the Gold Desk's Strategy
 SF_ID = "SF|"                                  # a Strategy Factory tab position, as a paper trade id: "SF|<position_id>"
 NEW_PICKED_AT_3 = "2026-11-19T21:29:00+05:30"  # the Factory board's top 20 the owner sent: their records as of this time
 NEW_PICKED_AT_4 = "2026-11-22T14:30:00+05:30"  # the owner's 22 Nov screenshots (both desks): their records as of this time
+NEW_PICKED_AT_5 = "2026-11-24T00:30:00+05:30"  # the owner's 24 Nov screenshots (both desks): their records as of this time
 CONFIRM = "REAL MONEY"
 D = Delta()
 
@@ -407,6 +420,14 @@ GOLD_PICKS: tuple[Pick, ...] = (
     _sf("SF0395", "MACD Signal Cross · 45m", 13, 8.86, 1.48, 54, NEW_PICKED_AT_4),
     _sf("SF0268", "TTM Squeeze · 45m", 10, 18.45, 3.31, 80, NEW_PICKED_AT_4),
     _sf("SF0475", "Pullback + EMA + RSI + VWAP · 45m", 35, 16.57, 1.38, 37, NEW_PICKED_AT_4),
+    # the owner's 24 Nov screenshots of the Gold tab (records at NEW_PICKED_AT_5, 00:30 IST): three more gold books; the
+    # screenshots' other 28 were already here. Backtests: each one's own 2-year gold book (XAUUSD) where it has one.
+    Pick("JR-05", "XAUTUSD", "XAUTUSD", "9:30-9:35 range, 1-minute FVG pullback + engulfing, 3R", 8, 1.98, 0.33, 38,
+         "loses: -0.30R a trade over 197 trades (t -2.7)", NEW_PICKED_AT_5),
+    Pick("BG-05", "XAUUSD", "XAUTUSD", "Gold supply/demand zone with an EMA 8 cross and an engulfing", 1, 0.79, 0.0, 100,
+         "never backtested", NEW_PICKED_AT_5),
+    Pick("JR-01", "XAUTUSD", "XAUTUSD", "First Candle Rule: 9:30-9:45 range, FVG limit, candle-1 stop, 2R", 5, 0.44, 0.12,
+         40, "loses: -0.15R a trade over 341 trades (t -2.2)", NEW_PICKED_AT_5),
 )
 # picked by the owner on 14 Nov 2026 from the Crypto tab; records = their bitcoin paper trades at 09:44 IST
 CRYPTO_PICKS: tuple[Pick, ...] = (
@@ -464,20 +485,40 @@ CRYPTO_PICKS: tuple[Pick, ...] = (
          "break of the 1-3 line, 1.5R", 9, 4.38, 1.31, 56, "never backtested", NEW_PICKED_AT_4),
     Pick("BX-02", "ETHUSD", "ETHUSD", "TradingView Pivot Reversal (4, 2) on 1-hour bars: stop orders at the latest pivots, "
          "stop and reverse", 10, 2.04, 0.35, 30, "never backtested", NEW_PICKED_AT_4),
+    # the owner's 24 Nov screenshots of the Crypto tab (records at NEW_PICKED_AT_5, 00:30 IST): six more bitcoin books,
+    # DD-04's among them (its ether book is above; a pick is (account, market)) ...
+    Pick("NJ-43", "BTCUSD", "BTCUSD", "Williams Alligator pullback to the teeth", 11, 2.69, 0.58, 55, "never backtested",
+         NEW_PICKED_AT_5),
+    Pick("TD-03", "BTCUSD", "BTCUSD", "UT Bot pair + Schaff Trend Cycle, 2R (15-minute)", 21, 1.38, 0.24, 48,
+         "loses: -0.20R a trade over 1,092 trades (t -5.5)", NEW_PICKED_AT_5),
+    Pick("NJ-28", "BTCUSD", "BTCUSD", "Fibonacci OTE: a 0.618 tap with an FVG", 8, 0.57, 0.13, 50, "never backtested",
+         NEW_PICKED_AT_5),
+    Pick("SC-02", "BTCUSD", "BTCUSD", "Cumulative delta divergence: a higher high (lower low) with a lower (higher) "
+         "session CVD, close through, 2R", 3, 4.01, 3.76, 100, "never backtested", NEW_PICKED_AT_5),
+    Pick("NJ-37", "BTCUSD", "BTCUSD", "The New York open fair value gap", 3, 2.49, 0.85, 67, "never backtested",
+         NEW_PICKED_AT_5),
+    Pick("DD-04", "BTCUSD", "BTCUSD", "Bollinger 1-2-3: above the upper band, under the lower, rejected at the middle, "
+         "break of the 1-3 line, 1.5R", 8, 1.03, 0.31, 50, "never backtested", NEW_PICKED_AT_5),
+    # ... and two more ether books on ETHUSD (their bitcoin books are not picks)
+    Pick("DD-03", "ETHUSD", "ETHUSD", "Hull MA cross with the Awesome Oscillator and CMF above zero, T3 (300) and TDFI "
+         "filters, 3 ATR stop, 1.3R", 27, 1.04, 0.26, 37, "never backtested", NEW_PICKED_AT_5),
+    Pick("BX-01", "ETHUSD", "ETHUSD", "First green Heikin Ashi candle with MFI (14) at 20 or below, out on the first red "
+         "one after MFI 80 (long only)", 5, 3.97, 0.83, 60, "never backtested", NEW_PICKED_AT_5),
 )
 GOLD_NOTES = (
-    "Real money on 99 unproven gold strategies: five picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, "
+    "Real money on 102 unproven gold strategies: five picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, "
     "on 18 Nov seventeen more Premium gold books and six templates of the Gold Desk's H1 test, on 19 Nov the Gold "
     "Desk Strategy Factory board's top 20, and on 22 Nov ten more Premium gold books, a seventh H1 template and 38 more "
-    "of the Factory board's top 56, at the owner's chosen size: one contract a trade, the smallest order Delta allows "
+    "of the Factory board's top 56, and on 24 Nov three more Premium gold books (JR-05, BG-05, JR-01), at the owner's "
+    "chosen size: one contract a trade, the smallest order Delta allows "
     "(or $1 to $5 of risk picked on this page).",
-    "Fourteen lose in their own 2-year backtests, five earn too little there to mean anything (t under 2), fifteen were "
+    "Sixteen lose in their own 2-year backtests, five earn too little there to mean anything (t under 2), sixteen were "
     "never backtested, the seven H1 templates were tested only as a family and the 58 Factory strategies only by the "
     "Factory's own backtest (whose replay reads future 4-hour bars); a few good paper trades picked them.",
     "Every one of them trades on Delta's own live data: the paper desk reads gold from Delta's XAUTUSD one-minute "
     "candles (not from COMEX or Yahoo), the Gold Desk's H1 test and its Strategy Factory tab trade Delta's XAUTUSD, and "
     "the real orders go to Delta's XAUTUSD perpetual.",
-    "EVERY signal becomes a real position (the owner's ask, 19 Nov): an open paper trade of any of the 99 is copied, "
+    "EVERY signal becomes a real position (the owner's ask, 19 Nov): an open paper trade of any of the 102 is copied, "
     "however late this desk sees it and however far the price has moved from the paper entry, including trades already "
     "open when the desk was switched on, with the paper's own stop and target. There is no daily loss stop and no cap on "
     "what one contract may lose: the only rule is the size, one contract.",
@@ -492,7 +533,7 @@ GOLD_NOTES = (
     "Factory strategies' are the positions of the Gold Desk's Strategy Factory tab ($1,111 paper sleeves on closed bars "
     "of 5 minutes to 4 hours); both are copied the same way, and this desk only reads them.",
     "One gold contract is 0.001 XAUT (about $4 of gold), so a trade of one contract loses cents at its stop.",
-    "All 99 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
+    "All 102 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
     "target on Delta, and Delta shows their sum as one gold position.",
     "This desk trades gold (XAUTUSD) only; the bitcoin desk is beside it on the Delta Exchange Live Trading page. Each "
     "has its own switch.",
@@ -501,15 +542,17 @@ GOLD_NOTES = (
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
 )
 CRYPTO_NOTES = (
-    "Real money on 24 strategies the owner picked: 22 on bitcoin (TH-05, TL-04, TH-01 on 14 Nov 2026 and TD-02 on 15 "
+    "Real money on 32 strategies the owner picked: 28 on bitcoin (TH-05, TL-04, TH-01 on 14 Nov 2026 and TD-02 on 15 "
     "Nov from the Crypto tab; TH-06, DT-02, RU-06, NJ-47, RU-03, TH-04, DT-01, TH-07, NJ-27, PT-04 and SB-04 on 18 Nov "
-    "from the Premium leaderboard; DT-05, TL-03, RU-04, KA-01, DD-01, TD-04 and TC-04 on 22 Nov from the Crypto tab) "
-    "and, from 22 Nov, the ether books of DD-04 and BX-02 on Delta's ETHUSD, at the owner's chosen size: one contract "
-    "a trade, the smallest order Delta allows (or $1 to $5 of risk picked on this page).",
-    "None is proven: ten lose in their own 2-year bitcoin backtests (TL-04 -0.31R a trade over 2,134 trades, TD-02 "
+    "from the Premium leaderboard; DT-05, TL-03, RU-04, KA-01, DD-01, TD-04 and TC-04 on 22 Nov and NJ-43, TD-03, "
+    "NJ-28, SC-02, NJ-37 and DD-04's bitcoin book on 24 Nov from the Crypto tab) and four ether books on Delta's "
+    "ETHUSD (DD-04 and BX-02 from 22 Nov, DD-03 and BX-01 from 24 Nov), at the owner's chosen size: one contract a "
+    "trade, the smallest order Delta allows (or $1 to $5 of risk picked on this page).",
+    "None is proven: eleven lose in their own 2-year bitcoin backtests (TL-04 -0.31R a trade over 2,134 trades, TD-02 "
     "-0.37R over 998, DT-02 -0.18R over 1,170, RU-03 -0.081R over 417, DT-01 -0.11R over 281, PT-04 -0.20R over 270, "
-    "DT-05 -0.26R over 1,540, TL-03 -0.22R over 1,313, RU-04 -0.16R over 1,178, TD-04 -0.12R over 929) and fourteen, "
-    "the two ether books among them, were never backtested; 0 to 24 paper trades picked them.",
+    "DT-05 -0.26R over 1,540, TL-03 -0.22R over 1,313, RU-04 -0.16R over 1,178, TD-04 -0.12R over 929, TD-03 -0.20R "
+    "over 1,092) and twenty-one, the four ether books among them, were never backtested; 0 to 27 paper trades picked "
+    "them.",
     "EVERY signal becomes a real position (the owner's ask, 19 Nov): each real trade is the paper desk's trade on "
     "Delta's live BTCUSD (or ETHUSD) candles, its entry, stop, target and exit, copied however late this desk sees it "
     "and however far the price has moved, including trades already open when the desk was switched on. There is no "
@@ -522,7 +565,7 @@ CRYPTO_NOTES = (
     "A stop farther than 7% from the price is pulled in to 7% on Delta (TH-04's paper stops have been 15-30% away): at "
     "10x leverage Delta liquidates a position about 9.5% against it, so a farther stop could never be reached. A paper "
     "trade with no stop gets one 3% away.",
-    "All 24 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
+    "All 32 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
     "target on Delta, and Delta shows their sum as one position a product (one bitcoin, one ether).",
     "Each trade's stop and target live on Delta itself, so it stays protected if this server goes down.",
     "Leverage is set to 10x on BTCUSD before going live, and confirmed at 10x on ETHUSD before its first trade; "

@@ -13,6 +13,8 @@
 // desk card also shows its real-money trading days, total return, avg % a trading day, win rate, PF and drawdown.
 // 22 Nov: the owner's third list - the bitcoin desk 24 (seven more bitcoin books and DD-04's and BX-02's ether books on
 // ETHUSD, its second product), the gold desk 99 (ten Premium gold books, a seventh H1 template, 38 more Factory ones).
+// 24 Nov: the owner's fourth list - the bitcoin desk 32 (NJ-43, TD-03, NJ-28, SC-02, NJ-37 and DD-04's bitcoin book;
+// the ether books of DD-03 and BX-01), the gold desk 102 (JR-05, BG-05, JR-01).
 import { useCallback, useEffect, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import { apiFetch } from "../../lib/api";
@@ -21,9 +23,9 @@ import LiveDelta, { MODE, ago, usd, tone, spct, type LiveStatus } from "../premi
 type DeskKey = "crypto" | "gold";
 const DESKS: { key: DeskKey; label: string; product: string; path: string; intro: string }[] = [
   { key: "crypto", label: "Bitcoin desk", product: "BTCUSD · ETHUSD", path: "/api/premium-paper/live/desk/crypto",
-    intro: "TH-05, TL-04 and TH-01 were picked on 14 Nov, TD-02 on 15 Nov, eleven more on 18 Nov from the Premium leaderboard (TH-06, DT-02, RU-06, NJ-47, RU-03, TH-04, DT-01, TH-07, NJ-27, PT-04, SB-04), and nine on 22 Nov from its Crypto tab: seven on bitcoin (DT-05, TL-03, RU-04, KA-01, DD-01, TD-04, TC-04) and the ether books of DD-04 and BX-02, which trade Delta's ETHUSD; each after 0 to 24 paper trades. Every signal of the 24 is copied to Delta at one contract, however late it is seen and however far the price has moved." },
+    intro: "TH-05, TL-04 and TH-01 were picked on 14 Nov, TD-02 on 15 Nov, eleven more on 18 Nov from the Premium leaderboard (TH-06, DT-02, RU-06, NJ-47, RU-03, TH-04, DT-01, TH-07, NJ-27, PT-04, SB-04), and nine on 22 Nov from its Crypto tab: seven on bitcoin (DT-05, TL-03, RU-04, KA-01, DD-01, TD-04, TC-04) and the ether books of DD-04 and BX-02, which trade Delta's ETHUSD, and eight on 24 Nov from the same tab: six on bitcoin (NJ-43, TD-03, NJ-28, SC-02, NJ-37 and DD-04's bitcoin book) and the ether books of DD-03 and BX-01; each after 0 to 27 paper trades. Every signal of the 32 is copied to Delta at one contract, however late it is seen and however far the price has moved." },
   { key: "gold", label: "Gold desk", product: "XAUTUSD", path: "/api/premium-paper/live",
-    intro: "RU-02, CP-23, YT-14, DR-01 and CP-05 were picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, and on 18 Nov seventeen more gold books from the Premium leaderboard and six templates of the Gold Desk's H1 test (EMA Ribbon, Round Number, Donchian fast and slow, Pivot R1/S1, Keltner), each after 0 to 20 paper trades, and on 19 Nov the Gold Desk Strategy Factory board's top 20 (SF0181, SF0020, SF0245 and on). On 22 Nov ten more gold books from the Premium Gold tab (CP-21, YT-18, TF-01, CP-01, FL-02, MH-01, DT-02, BG-08, RU-06, JR-03), the H1 test's Prior Session High/Low Break and 38 more of the Factory board's top 56 joined. Every gold signal comes from Delta's own XAUTUSD data. Every open paper trade of the 99 is copied to Delta at one contract, however late it is seen and however far the price has moved." },
+    intro: "RU-02, CP-23, YT-14, DR-01 and CP-05 were picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, and on 18 Nov seventeen more gold books from the Premium leaderboard and six templates of the Gold Desk's H1 test (EMA Ribbon, Round Number, Donchian fast and slow, Pivot R1/S1, Keltner), each after 0 to 20 paper trades, and on 19 Nov the Gold Desk Strategy Factory board's top 20 (SF0181, SF0020, SF0245 and on). On 22 Nov ten more gold books from the Premium Gold tab (CP-21, YT-18, TF-01, CP-01, FL-02, MH-01, DT-02, BG-08, RU-06, JR-03), the H1 test's Prior Session High/Low Break and 38 more of the Factory board's top 56 joined, and on 24 Nov three more Premium gold books (JR-05, BG-05, JR-01). Every gold signal comes from Delta's own XAUTUSD data. Every open paper trade of the 102 is copied to Delta at one contract, however late it is seen and however far the price has moved." },
 ];
 const POLL_MS = 15000;
 
