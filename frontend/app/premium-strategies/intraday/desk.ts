@@ -79,10 +79,20 @@ export const LEVEL: Record<string, string> = {
   L0: "rule alone", L1: "+ sector confirmation", L2: "+ 09:40 checkpoint", L3: "+ news",
 };
 
+/** A time from the server as epoch milliseconds. The desk's times come out of MongoDB as UTC WITHOUT a zone
+ *  ("2026-11-23T18:56:13.660000"), which Date.parse reads as the browser's local time - 5.5 h off in India, so a worker
+ *  seen 2 minutes ago read "6 h ago" (24 Nov 2026). A date-time with no zone is therefore read as UTC. */
+export function serverMs(t: any): number {
+  if (typeof t === "number") return t * 1000;
+  const s = String(t).trim();
+  const naive = /^\d{4}-\d\d-\d\d[T ]\d\d:\d\d(:\d\d(\.\d+)?)?$/.test(s);
+  return Date.parse(naive ? `${s.replace(" ", "T").replace(/(\.\d{3})\d+$/, "$1")}Z` : s);
+}
+
 /** "3 min ago" from an ISO string or epoch seconds. */
 export function ago(t: any): string {
   if (!t) return "never";
-  const ms = typeof t === "number" ? t * 1000 : Date.parse(t);
+  const ms = serverMs(t);
   if (!Number.isFinite(ms)) return "—";
   const s = Math.max(0, Math.round((Date.now() - ms) / 1000));
   if (s < 90) return `${s}s ago`;
