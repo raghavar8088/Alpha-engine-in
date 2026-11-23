@@ -130,10 +130,17 @@ def _month_file(name: str, ym: str) -> Path:
     return DATA / "min1" / name / f"{ym}.npz"
 
 
+def _month_files(folder: Path) -> list[Path]:
+    """A store's month files, oldest first. Never a "*.tmp.npz": that is a write still in progress or one that
+    failed before its rename. On 22 Nov 2026 a full disk left three empty ones (BTCUSD, ETHUSD, XAUTUSD), and
+    because "*.npz" matched them every read of those stores raised EOFError for 18 hours."""
+    return sorted(f for f in folder.glob("*.npz") if not f.name.endswith(".tmp.npz")) if folder.exists() else []
+
+
 def _read_months(name: str, first_ym: str = "") -> tuple[np.ndarray, ...]:
     parts = []
     folder = DATA / "min1" / name
-    for f in sorted(folder.glob("*.npz")) if folder.exists() else []:
+    for f in _month_files(folder):
         if f.stem >= first_ym:
             with np.load(f) as z:
                 parts.append(tuple(z[k] for k in ("t", "o", "h", "l", "c", "v")))
@@ -549,7 +556,7 @@ YM.COSTS.setdefault("XAGUSD", YM.Cost(0.01, 0.01, 0.0))
 def _read_cols(name: str, first_ym: str, cols: tuple) -> tuple:
     parts = []
     folder = DATA / "min1" / name
-    for f in sorted(folder.glob("*.npz")) if folder.exists() else []:
+    for f in _month_files(folder):
         if f.stem >= first_ym:
             with np.load(f) as z:
                 parts.append(tuple(z[k] for k in cols))
@@ -685,7 +692,7 @@ def backfill_delta_candles(symbol: str, days: int, now_ts: int | None = None) ->
     folder = DATA / "min1" / store
     now_ts = now_ts or int(time.time())
     want = (now_ts - days * 86400) // 60 * 60
-    files = sorted(folder.glob("*.npz")) if folder.exists() else []
+    files = _month_files(folder)
     marker = folder / "backfill.json"
     if not files:
         return {"new": 0, "why": "empty store"}
