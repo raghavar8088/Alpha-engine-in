@@ -10,6 +10,8 @@
   POST /api/premium-paper/live/flatten           {"pin"}: close its open positions now and switch it off
   GET  /api/premium-paper/live/desk/{desk}       any desk: gold, or crypto (the Delta Exchange Live Trading module)
   POST /api/premium-paper/live/desk/{desk}/mode, /live/desk/{desk}/flatten   the same controls, per desk
+  POST /api/premium-paper/live/pick, /live/desk/{desk}/pick   {"key": "acct|mkt", "contracts", "on", "confirm"}: one
+       strategy's own lot size and ON/OFF (raising or switching on needs confirm "REAL MONEY")
 
 The desk itself runs in its own container (premium-paper-service), because this process sits at its memory cap; its
 records are in the box's second MongoDB (FACTORY_MONGO_URL), never on the near-quota Atlas cluster. Everything above
@@ -162,6 +164,14 @@ async def live_risk(payload: dict = Body(...), _user: dict = Depends(get_current
     return {**r, "status": await premium_live.status()}
 
 
+@router.post("/live/pick")
+async def live_pick(payload: dict = Body(...), _user: dict = Depends(get_current_user)):
+    from app.services import premium_live
+    r = await premium_live.set_pick(payload.get("key"), payload.get("contracts"), payload.get("on"), payload.get("pin"),
+                                    payload.get("confirm"))
+    return {**r, "status": await premium_live.status()}
+
+
 def _desk_or_404(desk: str) -> None:
     from app.services import premium_live
     if desk not in premium_live.DESKS:
@@ -196,4 +206,13 @@ async def live_desk_risk(desk: str, payload: dict = Body(...), _user: dict = Dep
     from app.services import premium_live
     _desk_or_404(desk)
     r = await premium_live.set_risk(payload.get("risk_usd"), payload.get("pin"), desk=desk)
+    return {**r, "status": await premium_live.status(desk)}
+
+
+@router.post("/live/desk/{desk}/pick")
+async def live_desk_pick(desk: str, payload: dict = Body(...), _user: dict = Depends(get_current_user)):
+    from app.services import premium_live
+    _desk_or_404(desk)
+    r = await premium_live.set_pick(payload.get("key"), payload.get("contracts"), payload.get("on"), payload.get("pin"),
+                                    payload.get("confirm"), desk=desk)
     return {**r, "status": await premium_live.status(desk)}

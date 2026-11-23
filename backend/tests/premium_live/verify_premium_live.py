@@ -1861,6 +1861,206 @@ async def main():
           len(g["picks"]) == 99 and sum(1 for p in g["picks"] if p["picked_at"] == M.NEW_PICKED_AT_4) == 49
           and "99" in g["notes"][0], len(g["picks"]))
 
+    # ── 37. 23 Nov: each strategy's own lot size and ON/OFF ────────────────────────────────────────────
+    section("37. Each strategy's own lots (default one contract) and ON/OFF (default ON), set from the page")
+    M.REQUIRE_PIN = False                                    # the owner's choice (15 Nov); the PIN case is at the end
+    db = fresh(btc=69000.0, gold=3885.0)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)                     # contract sizing, as both desks trade now
+        coll.docs[0]["wallet_at"] = CLOCK[0]
+    c = await M.status("crypto")
+    th5 = next(p for p in c["picks"] if p["acct"] == "TH-05")
+    check("defaults: every strategy 1 contract and ON, with its product's cap; the server says it takes the settings",
+          all(p["cfg"]["contracts"] == 1 and p["cfg"]["on"] for p in c["picks"]) and th5["cfg"]["max"] == 10
+          and c["limits"]["pick_cfg"] is True and c["limits"]["lots_max"] == {"BTCUSD": 10, "ETHUSD": 30, "XAUTUSD": 250}
+          and c["limits"]["lots_default"] == 1, th5["cfg"])
+    bad = [await M.set_pick("XX-99|BTCUSD", contracts=2, confirm="REAL MONEY", desk="crypto"),
+           await M.set_pick("TH-05|BTCUSD", contracts=0, desk="crypto"),
+           await M.set_pick("TH-05|BTCUSD", contracts=11, confirm="REAL MONEY", desk="crypto"),
+           await M.set_pick("TH-05|BTCUSD", contracts=2.5, confirm="REAL MONEY", desk="crypto"),
+           await M.set_pick("TH-05|BTCUSD", contracts="two", confirm="REAL MONEY", desk="crypto"),
+           await M.set_pick("TH-05|BTCUSD", on="maybe", desk="crypto"),
+           await M.set_pick("RU-02|XAUTUSD", contracts=2, confirm="REAL MONEY", desk="crypto"),
+           await M.set_pick("TH-05|BTCUSD", contracts=2, confirm="REAL MONEY", desk="nope")]
+    check("refused: an unknown strategy, 0 or 11 bitcoin contracts (1-10), 2.5 or 'two' contracts, on='maybe', the gold "
+          "desk's strategy asked of the bitcoin desk, an unknown desk; nothing stored",
+          all(not r["ok"] for r in bad) and not st_of(db, "crypto").get("pick_cfg"), [r.get("why") for r in bad])
+    r = await M.set_pick("TH-05|BTCUSD", contracts=3, desk="crypto")
+    check("raising the lots without the words REAL MONEY is refused, nothing stored",
+          not r["ok"] and "REAL MONEY" in r["why"] and not st_of(db, "crypto").get("pick_cfg"), r)
+    r = await M.set_pick("TH-05|BTCUSD", contracts=3, confirm="REAL MONEY", desk="crypto")
+    r2 = await M.set_pick("TH-05|BTCUSD", contracts=2, desk="crypto")
+    s = st_of(db, "crypto")
+    check("raised to 3 with REAL MONEY, then lowered to 2 with no confirmation: stored, both changes logged",
+          r["ok"] and r2["ok"] and s["pick_cfg"]["TH-05|BTCUSD"]["contracts"] == 2 and s["pick_cfg"]["TH-05|BTCUSD"]["on"]
+          and [x["to"]["contracts"] for x in s["pick_log"]] == [3, 2] and s["pick_log"][1]["from"]["contracts"] == 3,
+          (r, r2, s.get("pick_cfg"), s.get("pick_log")))
+    r3 = await M.set_pick("TH-05|BTCUSD", contracts=2, desk="crypto")
+    check("the same size again changes nothing and logs nothing",
+          r3["ok"] and r3["changed"] is False and len(st_of(db, "crypto")["pick_log"]) == 2, r3)
+    check("the gold desk's own cap: 250 XAUTUSD contracts allowed, 251 refused",
+          (await M.set_pick("RU-02|XAUTUSD", contracts=250, confirm="REAL MONEY"))["ok"]
+          and not (await M.set_pick("RU-02|XAUTUSD", contracts=251, confirm="REAL MONEY"))["ok"]
+          and (await M.set_pick("RU-02|XAUTUSD", contracts=1))["ok"])
+    a = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68700.0, 69600.0, ago=20)
+    b = paper(db, "TL-04", "BTCUSD", -1, 69000.0, 69300.0, 68400.0, ago=20)
+    await cyc(db)
+    ta, tb = trade(db, a), trade(db, b)
+    check("a new TH-05 signal goes in at its own 2 contracts, its stop and target orders 2 as well; TL-04 at the default 1",
+          ta is not None and ta["status"] == "open" and ta["contracts"] == 2 and ta["plan"]["lots"] == 2
+          and int(own_leg(ta, "stop")["size"]) == 2 and int(own_leg(ta, "target")["size"]) == 2
+          and tb is not None and tb["status"] == "open" and tb["contracts"] == 1,
+          (ta and (ta.get("status"), ta.get("contracts"), ta.get("reason")), tb and (tb.get("status"), tb.get("contracts"))))
+    check("... its plan's risk is the two contracts' (its R counts against it); the account nets +2 - 1 = +1 and the "
+          "books check agrees",
+          abs(ta["plan"]["risk_usd"] - 2 * abs(ta["plan"]["price"] - 68700.0) * 0.001) < 1e-6
+          and M.D.pos[BTC]["size"] == 1 and not st_of(db, "crypto").get("mismatch"), (ta["plan"], M.D.pos.get(BTC)))
+    r = await M.set_pick("TH-05|BTCUSD", on=False, desk="crypto")
+    c2 = paper(db, "TH-05", "BTCUSD", -1, 69000.0, 69300.0, 68400.0, ago=15)
+    shut = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68700.0, 69600.0, ago=10)
+    n_orders = len(M.D.orders)
+    await cyc(db)
+    w = M._WAITING.get("crypto", {})
+    check("switched OFF with no confirmation: TH-05's new signals take no real trade and wait, saying why",
+          r["ok"] and trade(db, c2) is None and trade(db, shut) is None and len(M.D.orders) == n_orders
+          and "switched off" in w.get(c2, {}).get("why", ""), (r, w.get(c2)))
+    close_paper(db, a, "exit_signal", 69050.0)
+    close_paper(db, shut, "stop", 68700.0)
+    await cyc(db)
+    check("... its real trade from before stays managed: its paper exit closes it on Delta, at its 2 contracts",
+          trade(db, a)["status"] == "closed" and M.D.pos[BTC]["size"] == -1, (trade(db, a).get("status"), M.D.pos.get(BTC)))
+    check("... a paper trade that closed while it was off is recorded as skipped, saying so",
+          (trade(db, shut) or {}).get("status") == "skipped" and "switched off" in (trade(db, shut) or {}).get("reason", ""),
+          trade(db, shut))
+    M._PAPER_CACHE.clear()                                   # the page's paper view is cached 30 s; the clock stood still
+    g = await M.status("crypto")
+    pc = next(p for p in g["picks"] if p["acct"] == "TH-05")["cfg"]
+    sig = next((x for x in g["signals"] if x["id"] == c2), {})
+    check("the page: TH-05 shows OFF at 2 lots, and its waiting signal says why",
+          pc["contracts"] == 2 and pc["on"] is False and pc["max"] == 10 and sig.get("desk", {}).get("status") == "waiting"
+          and "switched off" in sig.get("desk", {}).get("why", ""), (pc, sig.get("desk")))
+    r = await M.set_pick("TH-05|BTCUSD", on=True, desk="crypto")
+    r2 = await M.set_pick("TH-05|BTCUSD", on=True, confirm="REAL MONEY", desk="crypto")
+    await cyc(db)
+    t2 = trade(db, c2)
+    check("switching it back ON needs REAL MONEY; then its paper trade still open is copied, at its 2 contracts",
+          not r["ok"] and r2["ok"] and t2 is not None and t2["status"] == "open" and t2["contracts"] == 2
+          and M.D.pos[BTC]["size"] == -3, (r, t2 and (t2.get("status"), t2.get("contracts")), M.D.pos.get(BTC)))
+    # a dollar risk picked for the desk sizes by risk: the lots are not used
+    db = fresh(btc=69000.0)                                  # dollar sizing, $5 a trade
+    await M.set_pick("TH-05|BTCUSD", contracts=7, confirm="REAL MONEY", desk="crypto")
+    a = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68700.0, 69600.0, ago=20)
+    await cyc(db)
+    t = trade(db, a)
+    want = math.floor(5.0 / (abs(t["plan"]["price"] - 68700.0) * 0.001)) if t else None
+    check("with a dollar risk chosen for the desk, the risk sizes the trade and the strategy's 7 lots are not used",
+          t is not None and t["contracts"] == want and t["plan"]["lots"] is None and t["contracts"] != 7,
+          t and (t.get("contracts"), want, t["plan"]))
+    # shadow: the lots size the simulated trade
+    db = fresh(mode="shadow", btc=69000.0)
+    db.live_crypto_state.docs[0].pop("sizing", None)
+    await M.set_pick("TH-05|BTCUSD", contracts=3, confirm="REAL MONEY", desk="crypto")
+    a = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68700.0, 69600.0, ago=20)
+    await cyc(db)
+    t = trade(db, a)
+    check("shadow: the simulated trade takes the strategy's 3 contracts, and no order is sent",
+          t is not None and t["mode"] == "shadow" and t["contracts"] == 3 and not M.D.orders, t and t.get("contracts"))
+    # the PIN, when the server requires one (PREMIUM_LIVE_REQUIRE_PIN=1): asked only for more risk, as going live
+    M.REQUIRE_PIN = True
+    db = fresh()
+    no = await M.set_pick("TH-05|BTCUSD", contracts=2, confirm="REAL MONEY", desk="crypto")
+    yes = await M.set_pick("TH-05|BTCUSD", contracts=2, confirm="REAL MONEY", pin=PIN, desk="crypto")
+    down = await M.set_pick("TH-05|BTCUSD", contracts=1, desk="crypto")
+    off = await M.set_pick("TH-05|BTCUSD", on=False, desk="crypto")
+    on_no = await M.set_pick("TH-05|BTCUSD", on=True, confirm="REAL MONEY", desk="crypto")
+    on_yes = await M.set_pick("TH-05|BTCUSD", on=True, confirm=" real money ", pin=PIN, desk="crypto")
+    M.REQUIRE_PIN = False
+    pc = st_of(db, "crypto")["pick_cfg"]["TH-05|BTCUSD"]
+    check("with a PIN required: raising the lots or switching ON needs it (the words in any case); lowering and OFF "
+          "never do, as switching the desk off never does",
+          not no["ok"] and "PIN" in no["why"] and yes["ok"] and down["ok"] and off["ok"] and not on_no["ok"]
+          and on_yes["ok"] and pc["contracts"] == 1 and pc["on"] is True, (no, yes, down, off, on_no, on_yes, pc))
+
+    # ── 38. 23 Nov: the rank ───────────────────────────────────────────────────────────────────────────
+    section("38. The rank: expected net R a trade from the backtest, the paper record and the real copies")
+    AT = "2026-11-20T00:00:00+05:30"
+    TP = M._iso_ts(AT)
+
+    def pk(acct, bt, src=M.PREMIUM):
+        return M.Pick(acct, "BTCUSD", "BTCUSD", acct, 0, 0.0, 0.0, 0, bt, AT, src, None if src == M.PREMIUM else "t")
+
+    def recs(acct, rs_, before=False):
+        t0 = TP - 86400 if before else TP + 3600
+        return [(t0 + i * 60, float(x), f"{acct}-{i}") for i, x in enumerate(rs_)]
+
+    A_ = pk("A", "loses: -0.20R a trade over 1,000 trades (t -4.0)")
+    B_ = pk("B", "never backtested")
+    C_ = pk("C", "earns: +0.10R a trade over 400 trades (t 1.5), not significant")
+    D_ = pk("D", "never backtested")
+    E_ = pk("E", "factory only: graded by the Strategy Factory's own backtest", src=M.GOLD_SF)
+    H_ = pk("H", "pooled only: the nine H1 templates together", src=M.GOLD_H1)
+    good = [2.0, -1.0] * 20                                  # +0.5R a trade over 40 trades
+    rs = {"A|BTCUSD": recs("A", [1.0, -1.0] * 10), "C|BTCUSD": recs("C", [2.0, -1.0, 0.0] * 10),
+          "D|BTCUSD": recs("D", good, before=True), "E|BTCUSD": recs("E", good)}
+    with M._use("crypto"):
+        rk = M._rank([A_, B_, C_, D_, E_, H_], rs, [])
+    tau_a = math.sqrt(1.3 ** 2 / 1000 + 0.1 ** 2)
+    sd_a = M._sd([1.0, -1.0] * 10)
+    mean_a = (-0.20 / tau_a ** 2) / (1 / tau_a ** 2 + 20 / sd_a ** 2)
+    check("a backtest of 1,000 trades at -0.20R and a flat 20-trade paper record: about -0.16R, as the formula says",
+          abs(rk["A|BTCUSD"]["edge_r"] - mean_a) < 1e-3 and rk["A|BTCUSD"]["prior"] == "backtest"
+          and rk["A|BTCUSD"]["post_n"] == 20, (rk["A|BTCUSD"], mean_a))
+    check("no trades and no backtest: its desk's average backtest, (-0.20 + 0.10) / 2, about 40% likely positive",
+          abs(rk["B|BTCUSD"]["edge_r"] + 0.05) < 1e-9 and rk["B|BTCUSD"]["prior"] == "untested"
+          and 0.39 < rk["B|BTCUSD"]["p_pos"] < 0.41, rk["B|BTCUSD"])
+    check("an H1 template with no record: 0, 50% likely positive", rk["H|BTCUSD"]["edge_r"] == 0 and
+          rk["H|BTCUSD"]["p_pos"] == 0.5 and rk["H|BTCUSD"]["prior"] == "pooled", rk["H|BTCUSD"])
+    check("the same 40 winning trades count more after the pick (E) than before it (D): E ranks above D",
+          rk["E|BTCUSD"]["edge_r"] > rk["D|BTCUSD"]["edge_r"] > rk["B|BTCUSD"]["edge_r"] and rk["D|BTCUSD"]["pre_n"] == 40
+          and rk["E|BTCUSD"]["post_n"] == 40 and rk["E|BTCUSD"]["pos"] < rk["D|BTCUSD"]["pos"],
+          (rk["E|BTCUSD"]["edge_r"], rk["D|BTCUSD"]["edge_r"]))
+    check("ranked 1..6 by expected R, best first; C (a positive backtest and a positive record) above A",
+          sorted(v["pos"] for v in rk.values()) == list(range(1, 7)) and all(v["of"] == 6 for v in rk.values())
+          and rk["C|BTCUSD"]["pos"] < rk["A|BTCUSD"]["pos"]
+          and [k for k, _ in sorted(rk.items(), key=lambda kv: kv[1]["pos"])]
+          == sorted(rk, key=lambda k: -rk[k]["edge_r"]), {k: (v["pos"], v["edge_r"]) for k, v in rk.items()})
+    # the real copies against their paper twins: F's real trades made 1R less than paper, K's the same, G has none
+    F_, G_, K_ = pk("F", "never backtested"), pk("G", "never backtested"), pk("K", "never backtested")
+    same = [1.0, -0.5] * 5
+    rs2 = {"F|BTCUSD": recs("F", same), "G|BTCUSD": recs("G", same), "K|BTCUSD": recs("K", same)}
+    rows2 = []
+    for acct, worse in (("F", 1.0), ("K", 0.0)):
+        for _, rr_, i in rs2[f"{acct}|BTCUSD"]:
+            rows2.append({"_id": i, "mode": "live", "status": "closed", "acct": acct, "mkt": "BTCUSD",
+                          "pnl_usd": (rr_ - worse) * 0.30, "plan": {"risk_usd": 0.30}})
+    with M._use("crypto"):
+        rk2 = M._rank([F_, G_, K_], rs2, rows2)
+    check("identical paper records: the strategy whose real copies lost 1R against paper (F) ranks below one with no "
+          "copies (G), below one whose copies matched paper (K); gaps -0.75, -0.5, -0.25 (each pulled toward the desk's)",
+          rk2["F|BTCUSD"]["pos"] == 3 and rk2["G|BTCUSD"]["pos"] == 2 and rk2["K|BTCUSD"]["pos"] == 1
+          and abs(rk2["F|BTCUSD"]["gap_r"] + 0.75) < 1e-9 and abs(rk2["G|BTCUSD"]["gap_r"] + 0.5) < 1e-9
+          and abs(rk2["K|BTCUSD"]["gap_r"] + 0.25) < 1e-9 and rk2["F|BTCUSD"]["gap_n"] == 10 and rk2["G|BTCUSD"]["gap_n"] == 0,
+          {k: (v["pos"], v["gap_r"]) for k, v in rk2.items()})
+    # on the page
+    db = fresh(btc=69000.0)
+    paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68700.0, 69600.0, ago=40000, open=False, r_net=1.5, exit_t=int(CLOCK[0] - 30000))
+    for k in ("crypto", "gold"):
+        g = await M.status(k)
+        poss = sorted(p["rank"]["pos"] for p in g["picks"] if p.get("rank"))
+        check(f"the {k} desk's page: every strategy ranked 1..{len(g['picks'])} once, with how it was ranked",
+              poss == list(range(1, len(g["picks"]) + 1)) and all(0 <= p["rank"]["p_pos"] <= 1 for p in g["picks"])
+              and "expected net R a trade" in g["rank_method"], (len(poss), len(g["picks"])))
+    old_rows = M._paper_rows
+
+    async def broken(_db):
+        raise RuntimeError("paper store down")
+    M._paper_rows = broken
+    M._PAPER_CACHE.clear()
+    g = await M.status("crypto")
+    M._paper_rows = old_rows
+    check("the paper side unreadable: no rank (nothing to rank on), and the page still reads",
+          all(p["rank"] is None for p in g["picks"]) and g["configured_db"] and len(g["picks"]) == 24)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -17,6 +17,11 @@
 // return % on the most margin it held at once, trading days, avg % a trading day, open now) in place of the record at
 // the pick and the 2-year backtest; one value a cell, so the app-wide sorter sorts them as numbers. Above it, the desk's
 // results (12 figures); below it, the desk day by day.
+// 23 Nov 2026: the strategies table gains the server's Rank (expected net R a trade from the backtest, the paper record
+// and the real copies; rows in rank order), the expected R and its chance of being positive, and each strategy's own
+// controls: Trading ON/OFF (default ON) and Lots, the contracts a new trade takes (default 1, − and + then Save). OFF and
+// lowering are instant; switching ON and raising ask once (the server needs the words REAL MONEY, which the page sends).
+// An older server without them shows the values read-only.
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { apiFetch } from "../../lib/api";
 
@@ -39,7 +44,15 @@ type Pick = { acct: string; mkt: string; product: string; name: string; trades: 
   src?: string; template?: string | null;   // src "gold_h1": a Gold Desk H1 template (18 Nov); "gold_sf": a Gold Desk
   //                                           Strategy Factory strategy (19 Nov); else a Premium book
   paper?: PaperRec | null;                  // undefined on an older server, null when the paper side cannot be read
-  results?: Results | null };               // null until it has a real trade (21 Nov)
+  results?: Results | null;                 // null until it has a real trade (21 Nov)
+  cfg?: PickCfg | null;                     // its own lots and switch (23 Nov); undefined on an older server
+  rank?: Rank | null };                     // the server's rank (23 Nov); null when the paper side cannot be read
+/** A strategy's own size and switch (23 Nov): the contracts a new real trade takes, 1..max, and whether it trades. */
+export type PickCfg = { contracts: number; on: boolean; max: number; at?: number | null };
+/** The server's rank (23 Nov): pos 1 = best by edge_r, the expected net R a trade, and its parts. */
+export type Rank = { pos: number; of: number; edge_r: number; sd_r: number; p_pos: number; prior_r: number; prior_sd: number;
+  prior: "backtest" | "untested" | "pooled"; pre_n: number; post_n: number; post_r: number | null; paper_r: number;
+  gap_r: number; gap_n: number };
 /** One of the strategies' latest paper trades, with what this desk did with it (18 Nov). */
 export type Signal = { id: string; acct: string; mkt: string; src?: string; side: number; entry_t: number; entry: number | null;
   stop: number | null; target: number | null; open: boolean; exit: number | null; exit_t: number | null; reason: string | null;
@@ -60,7 +73,11 @@ export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boole
     drift_frac: number; tick_s: number; risk_cap_usd?: number; risk_min_usd?: number; risk_set_at?: number | null;
     sizing?: "min" | "risk"; follow_all?: boolean; waiting?: number;
     // false on a desk that copies every signal (19 Nov): no daily loss stop, no cap on what one contract may lose
-    daily_stop_on?: boolean; contract_cap_on?: boolean };
+    daily_stop_on?: boolean; contract_cap_on?: boolean;
+    // true on a server that takes each strategy's own lots and switch (23 Nov)
+    pick_cfg?: boolean; lots_default?: number; lots_max?: Record<string, number> };
+  rank_method?: string;
+  pick_log?: { key: string; at: number; from: { contracts: number; on: boolean }; to: { contracts: number; on: boolean } }[];
   today: { live: number; shadow: number }; totals: { live: Totals; shadow: Totals }; picked_at: string; picks: Pick[];
   open: LiveTrade[]; recent: LiveTrade[]; notes: string[]; desk?: string; title?: string; products?: Record<string, unknown>;
   signals?: Signal[] | null; paper_view?: { at?: number; paper_age_s?: number | null; gold_desk_age_s?: number | null;
@@ -108,7 +125,9 @@ export const MODE: Record<string, { label: string; cls: string; what: string }> 
   shadow: { label: "SHADOW — no orders", cls: "shadow", what: "Every decision is made and logged with simulated fills; nothing is sent." },
   off: { label: "OFF", cls: "off", what: "No new trade. Anything still open is managed to its close." },
 };
-export type Ask = null | "live" | "flatten" | "risk";
+export type Ask = null | "live" | "flatten" | "risk" | "pick";
+/** A change to one strategy's own lots or switch (23 Nov), waiting for the PIN when the server asks for one. */
+export type PickChange = { key: string; acct: string; contracts?: number; on?: boolean; raises?: boolean };
 const PIN_KEY = "deltaLivePin";
 const readPin = () => { try { return window.localStorage.getItem(PIN_KEY) || ""; } catch { return ""; } };
 const keepPin = (p: string | null) => {
@@ -149,8 +168,53 @@ const verdict = (picks: Pick[]) => {
 const rr = (v: number | null | undefined) => (v === null || v === undefined ? "—" : `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(2)}R`);
 const pct = (n: number, d: number) => (d ? `${Math.round((100 * n) / d)}%` : "—");
 const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
-type PFilter = "all" | "inTrade" | "real" | "waiting";
+type PFilter = "all" | "inTrade" | "real" | "waiting" | "off";
 const inTrade = (p: Pick) => !!p.paper && p.paper.open.length > 0;
+const isOff = (p: Pick) => p.cfg?.on === false;
+const pkey = (p: Pick) => `${p.acct}|${p.mkt}`;
+/** R with its sign, the page's minus: "+0.12R". */
+const sr = (v: number | null | undefined, d = 2) =>
+  (v === null || v === undefined ? "—" : `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(d)}R`);
+/** One number a cell, so the app-wide sorter sorts it: "+0.12" (the unit is in the heading). */
+const sn = (v: number | null | undefined, d = 2) =>
+  (v === null || v === undefined ? "—" : `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(d)}`);
+const rankCls = (k: Rank) => (k.p_pos >= 0.7 ? "hi" : k.p_pos >= 0.5 ? "mid" : "lo");
+const rankTip = (k: Rank) => [
+  `Rank ${k.pos} of ${k.of}: expected ${sr(k.edge_r)} a trade (± ${k.sd_r.toFixed(2)}R), ${Math.round(100 * k.p_pos)}% likely above zero.`,
+  `Starting point: ${k.prior === "backtest" ? `its own backtest, ${sr(k.prior_r)} a trade` : k.prior === "pooled"
+    ? "the H1 templates' pooled test, 0R" : `untested, so its desk's average backtest, ${sr(k.prior_r)}`} (± ${k.prior_sd.toFixed(2)}R).`,
+  `Paper record: ${k.post_n} trade${k.post_n === 1 ? "" : "s"} since it was picked${k.post_r !== null ? ` (${sr(k.post_r)} each)` : ""}`
+    + ` and ${k.pre_n} before (counted a quarter): ${sr(k.paper_r)} a trade.`,
+  `Real copies against their paper twins: ${sr(k.gap_r)} a trade${k.gap_n ? ` (${k.gap_n} of its own, pulled toward the desk's)` : " (the desk's average)"}.`,
+].join("\n");
+
+/** A strategy's lots: − and + (or type a number), then Save; Undo puts it back. The visually hidden number keeps the
+ *  cell sortable by the app-wide sorter (an input's value is not text). */
+function LotCtl({ value, max, disabled, title, onSave }: { value: number; max: number; disabled: boolean; title: string;
+  onSave: (n: number) => void }) {
+  const [draft, setDraft] = useState(value);
+  useEffect(() => setDraft(value), [value]);
+  const clamp = (n: number) => Math.min(max, Math.max(1, Math.round(n)));
+  const dirty = draft !== value;
+  return (
+    <span className={`ld-lot${dirty ? " dirty" : ""}`} title={title}>
+      <span className="ld-sr" aria-hidden="true">{draft}</span>
+      <button type="button" className="ld-lot-b ld-dec" aria-label="One contract fewer" disabled={disabled || draft <= 1}
+        onClick={() => setDraft(clamp(draft - 1))} />
+      <input type="number" className="ld-lot-v" aria-label="Contracts a trade" min={1} max={max} step={1} value={draft} disabled={disabled}
+        onChange={(e) => { const n = Number(e.target.value); if (Number.isFinite(n) && e.target.value !== "") setDraft(clamp(n)); }}
+        onKeyDown={(e) => { if (e.key === "Enter" && dirty && !disabled) onSave(draft); if (e.key === "Escape") setDraft(value); }} />
+      <button type="button" className="ld-lot-b ld-inc" aria-label="One contract more" disabled={disabled || draft >= max}
+        onClick={() => setDraft(clamp(draft + 1))} />
+      {dirty && (
+        <>
+          <button type="button" className="ld-lot-save" disabled={disabled} onClick={() => onSave(draft)}>Save</button>
+          <button type="button" className="ld-lot-b ld-undo" aria-label="Undo" disabled={disabled} onClick={() => setDraft(value)} />
+        </>
+      )}
+    </span>
+  );
+}
 /** What this desk did with a paper trade, as a badge (the reason goes under it). */
 const DESK_STATE: Record<string, { label: string; cls: string }> = {
   open: { label: "Copied · open", cls: "open" }, entering: { label: "Copied · entering", cls: "open" },
@@ -168,11 +232,14 @@ const notCopied = (x: Signal) => ["before", "off", "missed"].includes(x.desk.sta
 
 /** What the page shows, given the desk's status: no state of its own beyond its props (and the trade-log filter). */
 export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, saved, ask, pendingRisk, busy, msg, onToggle,
-  onShadow, onFlatten, onRisk, onSubmitPin, onCancel, onForgetPin, intro }: {
+  onShadow, onFlatten, onRisk, onSubmitPin, onCancel, onForgetPin, intro, onPick, pickBusy = null, pendingPick = null, pickMsg = null }: {
   s: LiveStatus; now: number; pin: string; setPin: (v: string) => void; remember: boolean; setRemember: (v: boolean) => void;
   saved: boolean; ask: Ask; pendingRisk: number | "min" | null; busy: string | null; msg: string | null; onToggle: () => void;
   onShadow: () => void; onFlatten: () => void; onRisk: (r: number | "min") => void; onSubmitPin: () => void; onCancel: () => void;
   onForgetPin: () => void; intro?: ReactNode;
+  // each strategy's own lots and switch (23 Nov): absent, the table shows them read-only
+  onPick?: (p: Pick, change: { contracts?: number; on?: boolean }) => void; pickBusy?: string | null; pendingPick?: PickChange | null;
+  pickMsg?: string | null;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
   const isLive = s.mode === "live";
@@ -182,7 +249,13 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   // the risk a trade the owner picks, whole dollars from the server's minimum to its cap; shown once the server offers it
   const risks = L.risk_cap_usd ? [1, 2, 3, 4, 5].filter((r) => r >= (L.risk_min_usd ?? 1) && r <= (L.risk_cap_usd ?? 5)) : [];
   const oneContract = L.sizing === "min";       // one contract a trade, the smallest order (the default from 15 Nov)
-  const sizeText = oneContract ? "1 contract a trade (the smallest order Delta allows)" : `${usd(L.risk_usd)} risked a trade`;
+  const lotsSet = s.picks.filter((p) => (p.cfg?.contracts ?? 1) > 1).length;     // strategies set above one contract (23 Nov)
+  const offN = s.picks.filter(isOff).length;
+  const sizeText = oneContract
+    ? (lotsSet ? `each strategy's own lots, 1 contract unless set higher in the strategies table (${lotsSet} ${lotsSet === 1 ? "strategy" : "strategies"} set higher)`
+      : "1 contract a trade (the smallest order Delta allows)")
+    : `${usd(L.risk_usd)} risked a trade`;
+  const canPick = !!L.pick_cfg && !!onPick;     // a server that takes each strategy's own lots and switch
   const noDayStop = L.daily_stop_on === false;   // a desk that copies every signal (19 Nov)
   const noCap = L.contract_cap_on === false;
   const live = s.totals.live;
@@ -211,10 +284,14 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   const pCounts = {
     all: s.picks.length, inTrade: s.picks.filter(inTrade).length,
     real: s.picks.filter((p) => (p.live?.trades ?? 0) + (p.live?.open ?? 0) > 0).length,
-    waiting: s.picks.filter((p) => !inTrade(p)).length,
+    waiting: s.picks.filter((p) => !inTrade(p)).length, off: offN,
   };
+  const hasRank = s.picks.some((p) => !!p.rank);
+  const hasCfg = s.picks.some((p) => p.cfg !== undefined);
+  // in rank order when the server ranks them (23 Nov); the app-wide sorter can re-sort by any column
   const picksShown = s.picks.filter((p) => pf === "all" ? true : pf === "inTrade" ? inTrade(p)
-    : pf === "real" ? (p.live?.trades ?? 0) + (p.live?.open ?? 0) > 0 : !inTrade(p));
+    : pf === "real" ? (p.live?.trades ?? 0) + (p.live?.open ?? 0) > 0 : pf === "off" ? isOff(p) : !inTrade(p))
+    .slice().sort((a, b) => (a.rank?.pos ?? 1e9) - (b.rank?.pos ?? 1e9));
   const sig = s.signals ?? [];
   const sCounts = { all: sig.length, copied: sig.filter(copied).length, skipped: sig.filter((x) => x.desk.status === "skipped"
     || x.desk.status === "error").length, not: sig.filter(notCopied).length };
@@ -284,14 +361,15 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
               </div>
               <span className="ld-risk-s">
                 {busy === "risk" ? "Saving…" : oneContract
-                  ? `Every trade is 1 contract, the smallest order Delta allows. What it loses at its stop depends on how far away the stop is: on bitcoin usually $0.20-0.60, on gold under 5 cents, plus fees. ${noCap ? "Every signal is taken at one contract, however far its stop (a stop more than 7% away is pulled in to 7%, inside the point where Delta would liquidate at 10x)." : "A trade whose one contract would lose more than $5 is skipped."}`
+                  ? `Every trade is 1 contract, the smallest order Delta allows${canPick ? ", unless you set a strategy's own lots higher in the strategies table" : ""}. What one contract loses at its stop depends on how far away the stop is: on bitcoin usually $0.20-0.60, on gold under 5 cents, plus fees. ${noCap ? "Every signal is taken at one contract, however far its stop (a stop more than 7% away is pulled in to 7%, inside the point where Delta would liquidate at 10x)." : "A trade whose one contract would lose more than $5 is skipped."}`
                   : "A dollar amount is the most one trade loses if its stop is hit, plus about $0.10-0.30 of fees. A trade whose smallest order (one contract) would lose more is skipped."}
               </span>
             </div>
           )}
           {ask && (
             <div className="ld-ctl-row">
-              <label>{ask === "live" ? "Your PIN, to switch ON" : ask === "risk" ? `Your PIN, to set ${sizeLabel(pendingRisk)}` : "Your PIN, to close every position"}
+              <label>{ask === "live" ? "Your PIN, to switch ON" : ask === "risk" ? `Your PIN, to set ${sizeLabel(pendingRisk)}`
+                : ask === "pick" ? `Your PIN, to change ${pendingPick?.acct ?? "this strategy"}` : "Your PIN, to close every position"}
                 <input type="password" autoComplete="off" inputMode="numeric" autoFocus value={pin} onChange={(e) => setPin(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") onSubmitPin(); }} />
               </label>
@@ -299,7 +377,8 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
                 <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Remember the PIN on this device
               </label>
               <button className={`ld-btn${ask === "live" ? " danger" : ""}`} disabled={!!busy || !pin} onClick={onSubmitPin}>
-                {ask === "live" ? "Switch ON — real money" : ask === "risk" ? `Set ${sizeLabel(pendingRisk)}` : "Close every position now"}
+                {ask === "live" ? "Switch ON — real money" : ask === "risk" ? `Set ${sizeLabel(pendingRisk)}`
+                  : ask === "pick" ? `Save ${pendingPick?.acct ?? "the change"}` : "Close every position now"}
               </button>
               <button className="ld-btn" disabled={!!busy} onClick={onCancel}>Cancel</button>
             </div>
@@ -389,17 +468,25 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         <span>{`The ${s.picks.length} strategies, real-money results`}</span>
         {hasPaper && (
           <span className="ld-filters" role="group" aria-label="Show strategies">
-            {([["all", "All"], ["inTrade", "In a paper trade"], ["real", "With real trades"], ["waiting", "Waiting"]] as [PFilter, string][]).map(([k, label]) => (
+            {([["all", "All"], ["inTrade", "In a paper trade"], ["real", "With real trades"], ["waiting", "Waiting"],
+              ...(hasCfg ? [["off", "Switched off"] as [PFilter, string]] : [])] as [PFilter, string][]).map(([k, label]) => (
               <button key={k} type="button" className={`ld-fchip${pf === k ? " on" : ""}`} aria-pressed={pf === k}
                 onClick={() => setPf(k)}>{label} <span>{pCounts[k]}</span></button>
             ))}
           </span>
         )}
       </h4>
+      {pickMsg && <div className="ld-note ld-pickmsg" role="status">{pickMsg}</div>}
       <div className="ld-card ld-scroll">
         <table className="ld-table ld-strats">
           <thead>
-            <tr><th className="l">Strategy</th>{hasPaper && <th className="l">Paper now</th>}
+            <tr>{hasRank && <th title="1 = most likely to make money from here (see the note under the table)">Rank</th>}
+              <th className="l">Strategy</th>
+              {hasCfg && <th title="ON: every new signal of this strategy becomes a real trade. OFF: none; one already open still closes at its stop, target or exit.">Trading</th>}
+              {hasCfg && <th title="Contracts a new real trade of this strategy takes">Lots</th>}
+              {hasRank && <th title="Expected net R a trade (R = what a trade risks at its stop)">Exp. R / trade</th>}
+              {hasRank && <th title="How likely the expected R is above zero">Chance &gt; 0</th>}
+              {hasPaper && <th className="l">Paper now</th>}
               <th>Trades</th><th>Win %</th><th>PF</th><th>t‑stat</th><th>Net P&amp;L</th><th>Return %</th><th>Trading days</th>
               <th>Avg % / trading day</th><th>Open now</th>{hasPaper && <th className="l">Paper so far</th>}</tr>
           </thead>
@@ -413,14 +500,46 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
               const wins = r ? r.wins : lv?.wins ?? 0;
               const net = r ? r.net_usd : lv?.pnl_usd ?? 0;
               const openN = r ? r.open : lv?.open ?? 0;
+              const k = p.rank;
+              const c = p.cfg;
+              const key = pkey(p);
+              const lock = !canPick || !c || !!busy || pickBusy === key;
+              const lotsNote = !canPick ? "Shown read-only: the server does not take changes yet"
+                : !oneContract ? `Not used while the desk sizes every trade by ${usd(L.risk_usd)} of risk`
+                : `${c?.contracts ?? 1} contract${(c?.contracts ?? 1) === 1 ? "" : "s"} a trade; 1 to ${c?.max ?? 1}. A trade already open keeps its size.`;
               return (
-                <tr key={`${p.acct}|${p.mkt}`} className={inTrade(p) ? "ld-row-on" : ""}>
+                <tr key={key} className={`${inTrade(p) ? "ld-row-on" : ""}${isOff(p) ? " ld-row-off" : ""}`}>
+                  {hasRank && (
+                    <td className={k ? `ld-rk ${rankCls(k)}` : "ld-dim"} title={k ? rankTip(k) : "not ranked: the paper side could not be read"}>
+                      {k ? k.pos : "—"}</td>
+                  )}
                   <td className="l ld-strat">
                     <b>{p.acct}</b> <span className="ld-chip">{p.product}</span>
                     {p.src === "gold_h1" ? <span className="ld-chip ld-chip-src">Gold Desk H1</span> : null}
                     {p.src === "gold_sf" ? <span className="ld-chip ld-chip-src">Strategy Factory</span> : null}
                     <div className="ld-sub">{p.name}</div>
                   </td>
+                  {hasCfg && (
+                    <td className="ld-onoff">
+                      <button type="button" role="switch" aria-checked={c?.on !== false} aria-label={`${p.acct} ${p.product} trading`}
+                        className={`ld-mini${c?.on !== false ? " on" : ""}`} disabled={lock}
+                        title={c?.on !== false ? "ON: its next signal places a real order. Click to switch it OFF." : "OFF: no new real trade. Click to switch it ON."}
+                        onClick={() => onPick?.(p, { on: c?.on === false })}>
+                        <span className="ld-mini-k" aria-hidden="true" />
+                        <span className="ld-mini-t">{c?.on !== false ? "On" : "Off"}</span>
+                      </button>
+                    </td>
+                  )}
+                  {hasCfg && (
+                    <td className="ld-lots-c">
+                      <LotCtl value={c?.contracts ?? 1} max={c?.max ?? 1} disabled={lock || !oneContract} title={lotsNote}
+                        onSave={(n) => onPick?.(p, { contracts: n })} />
+                    </td>
+                  )}
+                  {hasRank && (
+                    <td className={`ld-num ${k ? tone(k.edge_r) : ""}`} title={k ? rankTip(k) : undefined}>{k ? sn(k.edge_r) : "—"}</td>
+                  )}
+                  {hasRank && <td title={k ? rankTip(k) : undefined}>{k ? `${Math.round(100 * k.p_pos)}%` : "—"}</td>}
                   {hasPaper && (
                     <>
                       <td className="l">
@@ -472,6 +591,14 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
           trading day = return % ÷ trading days, the IST days on which one of its real trades closed. No t-stat under {MIN_T} trades,
           and no profit factor before a losing trade.
         </p>
+        {hasRank && s.rank_method && (
+          <p className="ld-foot">{`${s.rank_method} Hover a rank for its parts. Green = 70% or more likely positive, amber 50-70%, grey under 50%. It is an estimate from short records, not a promise.`}</p>
+        )}
+        {hasCfg && (
+          <p className="ld-foot">
+            {`Trading ON/OFF and Lots are each strategy's own. OFF takes no new real trade for that strategy (its open paper trades wait, so ON again copies one still open); a real trade already open still closes at its stop, its target or its strategy's exit. Lots = the contracts each new real trade takes, 1 up to ${Object.entries(L.lots_max ?? {}).map(([sym, n]) => `${n} on ${sym}`).join(", ")}; a trade already open keeps its size. Switching ON and raising the lots ask you once; OFF and lowering are instant.${!oneContract ? ` Lots are not used while the desk sizes every trade by ${usd(L.risk_usd)} of risk (Trade size above).` : ""}${!canPick ? " The server running now does not take these changes yet, so they are shown read-only." : ""}`}
+          </p>
+        )}
         {showShadow && (
           <p className="ld-foot">{`Shadow: ${s.picks.filter((p) => p.shadow).map((p) => `${p.acct} ${usd(p.shadow!.pnl_usd, true)} (${p.shadow!.trades})`).join(" · ") || "no shadow trade yet"}`}</p>
         )}
@@ -778,6 +905,41 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-signals td:nth-child(4) { font-family: var(--font-data); }
         .ld .ld-table td.ld-num.gain { color: var(--gain); }      /* a result keeps its colour in a dimmed row */
         .ld .ld-table td.ld-num.loss { color: var(--loss); }
+        /* 23 Nov: rank, each strategy's own switch and lots */
+        .ld .ld-strats td.ld-rk { font-family: var(--font-data); font-weight: 800; font-size: 13.5px; text-align: center; cursor: help; }
+        .ld .ld-strats td.ld-rk.hi { color: var(--gain); }
+        .ld .ld-strats td.ld-rk.mid { color: var(--warn); }
+        .ld .ld-strats td.ld-rk.lo { color: var(--text-faint); }
+        .ld .ld-strats td.ld-onoff, .ld .ld-strats td.ld-lots-c { text-align: left; white-space: nowrap; }
+        .ld .ld-mini { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px 2px 2px; border-radius: 999px; cursor: pointer;
+                       border: 1px solid var(--panel-border); background: var(--canvas-soft); color: var(--text-muted);
+                       font-size: 11.5px; font-weight: 800; transition: background 0.15s; }
+        .ld .ld-mini-k { width: 16px; height: 16px; border-radius: 50%; background: var(--text-faint); transition: background 0.15s; }
+        .ld .ld-mini.on { background: var(--gain-dim); border-color: var(--gain); color: var(--gain); }
+        .ld .ld-mini.on .ld-mini-k { background: var(--gain-solid); }
+        .ld .ld-mini:disabled { cursor: not-allowed; opacity: 0.6; }
+        .ld .ld-mini:focus-visible, .ld .ld-lot-b:focus-visible, .ld .ld-lot-v:focus-visible, .ld .ld-lot-save:focus-visible {
+          outline: 2px solid var(--accent); outline-offset: 2px; }
+        .ld .ld-lot { position: relative; display: inline-flex; align-items: center; gap: 3px; }
+        .ld .ld-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0);
+                     white-space: nowrap; border: 0; }
+        .ld .ld-lot-b { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--panel-border); background: var(--panel);
+                        color: var(--text); cursor: pointer; font-size: 14px; font-weight: 800; line-height: 1; padding: 0; }
+        .ld .ld-lot-b:disabled { cursor: not-allowed; opacity: 0.4; }
+        .ld .ld-dec::before { content: "−"; }
+        .ld .ld-inc::before { content: "+"; }
+        .ld .ld-undo::before { content: "✕"; font-size: 11px; }
+        .ld .ld-lot-v { width: 44px; height: 22px; padding: 0 4px; border-radius: 6px; border: 1px solid var(--panel-border);
+                        background: var(--panel); color: var(--text); font-family: var(--font-data); font-size: 12.5px;
+                        font-weight: 700; text-align: center; -moz-appearance: textfield; }
+        .ld .ld-lot-v::-webkit-outer-spin-button, .ld .ld-lot-v::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .ld .ld-lot-v:disabled { opacity: 0.7; }
+        .ld .ld-lot.dirty .ld-lot-v { border-color: var(--warn-border); background: var(--warn-dim); }
+        .ld .ld-lot-save { height: 22px; padding: 0 9px; border-radius: 6px; border: 0; background: var(--text); color: var(--panel);
+                           font-size: 11.5px; font-weight: 800; cursor: pointer; }
+        .ld .ld-lot-save:disabled { opacity: 0.5; cursor: not-allowed; }
+        .ld .ld-row-off td:not(.ld-onoff):not(.ld-lots-c):not(.ld-rk) { opacity: 0.55; }
+        .ld .ld-pickmsg { margin: 0 0 8px; }
         @media (max-width: 640px) {
           .ld .ld-v { font-size: 19px; } .ld .ld-ctl input { min-width: 140px; } .ld .ld-seg-b { padding: 7px 10px; }
           .ld .ld-status { padding: 14px; } .ld .ld-pos-dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -803,6 +965,9 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now() / 1000);
+  const [pickBusy, setPickBusy] = useState<string | null>(null);      // the strategy whose change is being saved
+  const [pendingPick, setPendingPick] = useState<PickChange | null>(null);
+  const [pickMsg, setPickMsg] = useState<string | null>(null);   // the last strategy change, shown above its table
 
   const load = useCallback(async () => {
     try {
@@ -899,8 +1064,59 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
     if (ask === "live") goLive(pin);
     else if (ask === "flatten") doFlatten(pin);
     else if (ask === "risk" && pendingRisk !== null) setRisk(pendingRisk, pin);
+    else if (ask === "pick" && pendingPick) sendPick(pendingPick, pin, !!pendingPick.raises);
   };
-  const onCancel = () => { setAsk(null); setPendingRisk(null); if (!saved) setPin(""); };
+  // one strategy's own lots or switch (23 Nov): OFF and lowering are instant; ON and raising ask once, and send the
+  // words the server needs for them (and the PIN, when the server requires one)
+  const sendPick = async (ch: PickChange, usePin: string, raises: boolean) => {
+    setPickBusy(ch.key);
+    setPickMsg(null);
+    try {
+      const r = await apiFetch(`${base}/pick`, { method: "POST", body: JSON.stringify({ key: ch.key, contracts: ch.contracts, on: ch.on,
+        pin: usePin, ...(raises ? { confirm: "REAL MONEY" } : {}) }) });
+      if (r?.status) setS(r.status);
+      if (r?.ok) {
+        setPickMsg(ch.on === false ? `${ch.acct} is OFF: no new real trade (one already open still closes as usual).`
+          : ch.on === true ? `${ch.acct} is ON: real orders on Delta again (a paper trade of it still open is copied at the next check).`
+          : `${ch.acct}: ${ch.contracts} contract${ch.contracts === 1 ? "" : "s"} a trade from its next signal.`);
+        setAsk(null);
+        setPendingPick(null);
+        if (usePin) { if (remember) { keepPin(usePin); setSaved(true); } else forget(); }
+      } else {
+        const why = r?.why ?? "Refused.";
+        setPickMsg(`${ch.acct}: ${why}`);
+        if (/wrong PIN|locked/i.test(why)) { forget(); setPendingPick(ch); setAsk("pick"); }
+      }
+    } catch (e) {
+      setPickMsg(e instanceof Error ? e.message : "The request failed.");
+    } finally {
+      setPickBusy(null);
+      setNow(Date.now() / 1000);
+    }
+  };
+  const onPick = (p: Pick, change: { contracts?: number; on?: boolean }) => {
+    if (!s || busy || pickBusy) return;
+    const cur = p.cfg ?? { contracts: 1, on: true, max: 1 };
+    const ch: PickChange = { key: pkey(p), acct: p.acct, ...change };
+    const raises = (change.contracts !== undefined && change.contracts > cur.contracts) || (change.on === true && !cur.on);
+    if (raises) {
+      const recentPlan = s.recent.find((t) => t.product === p.product && t.plan?.margin_usd && t.plan?.contracts)?.plan;
+      const perMargin = recentPlan ? recentPlan.margin_usd / recentPlan.contracts : null;
+      const n = change.contracts ?? cur.contracts;
+      const text = change.on === true
+        ? `Switch ${p.acct} (${p.product}) ON? ${inTrade(p) ? "Its paper trade open now is copied to Delta Exchange at once, at the price then, and each"
+          : "Its"} next signal places a real order on Delta Exchange, ${n} contract${n === 1 ? "" : "s"} a trade.`
+        : `Trade ${n} contracts a trade on ${p.acct} (${p.product}) with real money? Each new signal then risks ${n} times what one contract `
+          + `loses at its stop${perMargin ? `, and holds about ${usd(perMargin * n)} of margin` : ""}. A trade already open keeps its size.`;
+      if (!window.confirm(text)) return;
+    }
+    // lowering or OFF only takes risk away: never a PIN (as switching the desk off); none at all when the owner chose so (15 Nov)
+    if (!raises || s.pin_required === false) { sendPick(ch, "", raises); return; }
+    if (saved && pin) { sendPick(ch, pin, raises); return; }
+    setPendingPick({ ...ch, raises });
+    setAsk("pick");
+  };
+  const onCancel = () => { setAsk(null); setPendingRisk(null); setPendingPick(null); if (!saved) setPin(""); };
   const onForgetPin = () => { forget(); setMsg("The PIN saved on this device is forgotten."); };
 
   if (err && !s) {
@@ -915,5 +1131,6 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   if (!s.configured_db) return <div style={{ fontSize: 13, color: "var(--loss)" }}>The paper desk&apos;s database is not configured on this server.</div>;
   return <LiveDeltaView s={s} now={now} pin={pin} setPin={setPin} remember={remember} setRemember={setRemember} saved={saved} ask={ask}
     pendingRisk={pendingRisk} busy={busy} msg={msg} onToggle={onToggle} onShadow={onShadow} onFlatten={onFlatten} onRisk={onRisk}
-    onSubmitPin={onSubmitPin} onCancel={onCancel} onForgetPin={onForgetPin} intro={intro} />;
+    onSubmitPin={onSubmitPin} onCancel={onCancel} onForgetPin={onForgetPin} intro={intro}
+    onPick={onPick} pickBusy={pickBusy} pendingPick={pendingPick} pickMsg={pickMsg} />;
 }

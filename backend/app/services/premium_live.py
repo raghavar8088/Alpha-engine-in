@@ -123,6 +123,24 @@ its desk was skipped. New:
 Records at NEW_PICKED_AT_4 (14:30 IST, the screenshots), by the methods above (each re-proven on a frozen record).
 A product that joins a desk already live never went through going live, where leverage is set (_set_mode_one): its
 leverage is confirmed at LEVERAGE before its first entry (_confirm_leverage), and its signals wait until it is.
+
+23 NOV 2026: EACH STRATEGY'S OWN SIZE AND SWITCH, AND A RANK. The owner asked, for both desks' strategies tables, for a
+Rank column, a lot size per strategy (today's one contract the default, with increase and decrease) and an ON/OFF per
+strategy (ON the default). Kept in the desk's state as pick_cfg["acct|mkt"] (set_pick; the last changes in pick_log):
+- lots: the contracts a new trade of that strategy takes in the desk's contract sizing ("min"), 1 up to LOTS_MAX of its
+  product (about $700-1,000 of notional; MAX_NOTIONAL_USD still caps every trade). A dollar risk picked for the desk
+  sizes by risk instead and ignores lots. A trade already open keeps the size it was given.
+- on / off: OFF takes no new real trade for that strategy (on a follow_all desk its open paper trades wait, so switching
+  it back ON copies what is still open, as switching the desk on does; one that closes meanwhile is recorded as skipped);
+  a real trade already open is still managed to its close, exactly like the desk's own switch.
+Raising the lots or switching a strategy back ON needs the words REAL MONEY in the request (the page asks once), and
+the PIN when the server requires one (PREMIUM_LIVE_REQUIRE_PIN=1), as going live does; lowering or switching OFF needs
+neither, as switching the desk off never does.
+RANK (_rank): the strategies in order of their expected net R a trade, best first, from all a strategy's evidence: its
+own backtest (the prior: its R a trade, trusted by its number of trades plus RANK_DRIFT_SD of drift; an untested one
+starts at its desk's typical backtest), its whole paper record (trades closed before its pick count RANK_PRE_W: a good
+record is what got it picked, so they are partly luck), and how its real Delta copies did against their own paper
+twins (the gap, pulled toward the desk's). Shown with how likely the edge is above zero. Read only: it trades nothing.
 """
 
 from __future__ import annotations
@@ -135,6 +153,7 @@ import hmac
 import logging
 import math
 import os
+import re
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
@@ -171,6 +190,21 @@ MAX_STOP_FRAC = 0.07           # a copy's stop is never farther than this from i
 #                                a position about 9.5% against it, so a farther stop would never be reached (and the
 #                                trade's own stop order, not reduce-only, could later open a position nobody holds)
 MARGIN_BUFFER = 1.25           # free balance needed: margin x this
+# Each strategy's own size (23 Nov 2026): the contracts a new trade takes in contract sizing, 1 (the default, the size
+# every trade had before) up to its product's cap here - about $700-1,000 of notional at late-November prices.
+LOTS_DEFAULT = 1
+LOTS_MAX = {"BTCUSD": 10, "ETHUSD": 30, "XAUTUSD": 250}
+PICK_LOG_N = 200               # the last changes to the strategies' sizes and switches kept in the desk's state
+# The rank (23 Nov 2026, _rank): expected net R a trade from the backtest, the paper record and the real copies.
+RANK_DRIFT_SD = 0.10           # how far (R a trade) a backtest's edge may drift before live trading, beyond its own noise
+RANK_UNTESTED_SD = 0.20        # an untested strategy's prior spread around its desk's typical backtest
+RANK_POOLED_SD = 0.15          # the H1 templates: only their pooled backtest is known
+RANK_PRE_W = 0.25              # paper trades closed before the pick count this much: their record is why it was picked
+RANK_SD_MIN, RANK_SD_MAX, RANK_SD_N = 0.7, 4.0, 8   # a record's own R spread once it has RANK_SD_N trades, kept in range
+RANK_SD_DEFAULT = 1.3          # ... and before that, its desk's median (this when no record has enough trades)
+RANK_R_CLIP = 10.0             # one trade counts at most this many R either way
+RANK_GAP_K = 10.0              # real-vs-paper gap: a strategy's own pairs weigh against this many of the desk's
+RANK_GAP_CLIP = 5.0
 ERRORS_TO_STOP = 3
 PIN_TRIES = 5                  # wrong PINs an hour before going live is locked for the hour
 GST = 0.18                     # on Delta India's fees (shadow estimates only; live uses Delta's own figures)
@@ -536,6 +570,8 @@ for _k, _desk in DESKS.items():
         raise RuntimeError(f"the {_k} desk names one book twice")
     if any(p.src in (GOLD_H1, GOLD_SF) and not p.template for p in _desk.picks):
         raise RuntimeError(f"the {_k} desk has an H1 or Factory pick without its template")
+    if any("." in f"{p.acct}|{p.mkt}" or f"{p.acct}|{p.mkt}".startswith("$") for p in _desk.picks):
+        raise RuntimeError(f"the {_k} desk has a pick whose key cannot be a stored field name (pick_cfg)")
 # The desk the current task works for. The loop and every API call set it (_use); the default is the gold desk, so
 # a caller that names no desk gets the original one.
 _CUR: contextvars.ContextVar[str] = contextvars.ContextVar("premium_live_desk", default="gold")
@@ -638,6 +674,26 @@ def _trade_risk(t: dict) -> float:
     except (TypeError, ValueError):
         r = 0.0
     return r if r > 0 else _d().risk_usd
+
+
+def _pkey(p: Pick) -> str:
+    """A strategy's key in the desk's state and on the page: "acct|mkt" (a pick is an account and its market)."""
+    return f"{p.acct}|{p.mkt}"
+
+
+def _lots_max(product: str) -> int:
+    return int(LOTS_MAX.get(product, LOTS_DEFAULT))
+
+
+def _cfg(st: dict, p: Pick) -> dict:
+    """A strategy's own size and switch (23 Nov 2026): {"contracts", "on", "at"}; the defaults (one contract, ON) until
+    the owner changes them. A stored size outside 1..LOTS_MAX (a cap lowered later) is read inside it."""
+    c = (st.get("pick_cfg") or {}).get(_pkey(p)) or {}
+    try:
+        n = int(c.get("contracts", LOTS_DEFAULT))
+    except (TypeError, ValueError):
+        n = LOTS_DEFAULT
+    return {"contracts": min(max(n, 1), _lots_max(p.product)), "on": c.get("on") is not False, "at": c.get("at")}
 
 
 async def _state(db) -> dict:
@@ -959,9 +1015,10 @@ async def _paper_view(db, st: dict) -> dict | None:
     try:
         rows = await _paper_rows(db)
         per: dict[str, dict] = {}
+        rs: dict[str, list] = {}                   # each closed paper trade (exit time, R, id), for the rank; not shown
         for t in rows:
-            x = per.setdefault(f"{t.get('acct')}|{t.get('mkt')}", {"trades": 0, "wins": 0, "sum_r": 0.0, "open": [],
-                                                                    "last_t": None})
+            key = f"{t.get('acct')}|{t.get('mkt')}"
+            x = per.setdefault(key, {"trades": 0, "wins": 0, "sum_r": 0.0, "open": [], "last_t": None})
             et = float(t.get("entry_t") or 0)
             x["last_t"] = max(x["last_t"] or 0.0, et) or None
             if t.get("open"):
@@ -972,6 +1029,8 @@ async def _paper_view(db, st: dict) -> dict | None:
                 x["trades"] += 1
                 x["wins"] += 1 if r > 0 else 0
                 x["sum_r"] += r
+                if math.isfinite(r):
+                    rs.setdefault(key, []).append((float(t.get("exit_t") or t.get("entry_t") or 0), r, t["_id"]))
         for x in per.values():
             x["sum_r"] = round(x["sum_r"], 2)
             x["open"].sort(key=lambda o: -o["entry_t"])
@@ -1006,7 +1065,7 @@ async def _paper_view(db, st: dict) -> dict | None:
                             "exit_t": t.get("exit_t"), "reason": t.get("reason"),
                             "r": round(float(t["r_net"]), 2) if closed else None,
                             "r_now": _r_now(t) if t.get("open") else None, "desk": desk})
-        view = {"per": per, "signals": signals, "at": _now(), "paper_age_s": round(await _desk_age(db), 1)}
+        view = {"per": per, "signals": signals, "at": _now(), "paper_age_s": round(await _desk_age(db), 1), "rs": rs}
         if _h1_picks():
             view["gold_desk_age_s"] = round(await _h1_age(), 1)
         if _sf_picks():
@@ -1610,6 +1669,13 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
         waits[tid] = {"why": why, "at": _now()}
         return f"waiting: {why}"
 
+    cfg = _cfg(st, pick)
+    if not cfg["on"]:
+        # switched off by the owner (23 Nov): no new real trade. A follow_all desk keeps its open paper trades waiting,
+        # so switching the strategy back on copies what is still open (as switching the desk on does).
+        if not paper.get("open"):
+            return await skip("closed on paper while this strategy was switched off")
+        return await hold("this strategy is switched off: no new real trade until it is switched on")
     lag = _now() - float(paper.get("entry_t") or 0)
     if not paper.get("open"):
         return await skip("closed on paper before it could be copied")
@@ -1659,11 +1725,14 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
         base["late_s"] = round(lag)
     sizing = _sizing(st)
     one = abs(px - stop) * product.contract_value           # what a single contract loses at the stop
-    if sizing == "min":         # the smallest order; the desk's own risk caps it, except on a follow_all desk (19 Nov)
-        if one > _d().risk_usd and not follow:
-            return await skip(f"one contract would lose ${one:.2f} at its stop, more than the ${_d().risk_usd:.2f} cap a "
-                              "trade", price=px)
-        risk, by_risk = one, 1
+    lots = cfg["contracts"]
+    if sizing == "min":         # the strategy's own lots: one contract (the smallest order) unless the owner chose more
+        #                         (23 Nov); the desk's own risk caps it, except on a follow_all desk (19 Nov)
+        if one * lots > _d().risk_usd and not follow:
+            what = "one contract" if lots == 1 else f"{lots} contracts"
+            return await skip(f"{what} would lose ${one * lots:.2f} at its stop, more than the ${_d().risk_usd:.2f} cap "
+                              "a trade", price=px)
+        risk, by_risk = one * lots, lots
     else:
         risk = _risk(st)
         by_risk = math.floor(risk / one)
@@ -1676,7 +1745,7 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
     notional = contracts * product.contract_value * px
     plan = {"price": px, "contracts": contracts, "risk_usd": round(one * contracts, 6), "risk_set_usd": round(risk, 6),
             "sizing": sizing, "notional_usd": round(notional, 2), "margin_usd": round(notional / LEVERAGE, 2),
-            "capped": by_cap < by_risk}
+            "capped": by_cap < by_risk, "lots": lots if sizing == "min" else None}
 
     if mode == "shadow":
         waits.pop(tid, None)
@@ -2089,6 +2158,71 @@ async def set_risk(risk_usd, pin: str | None = None, desk: str = "gold") -> dict
         return await _set_risk_one(risk_usd, pin)
 
 
+def _as_bool(v) -> bool | None:
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, str) and v.strip().lower() in ("on", "true", "1", "yes"):
+        return True
+    if isinstance(v, str) and v.strip().lower() in ("off", "false", "0", "no"):
+        return False
+    return None
+
+
+async def _set_pick_one(key, contracts=None, on=None, pin: str | None = None, confirm: str | None = None) -> dict:
+    db = _db()
+    if db is None:
+        return {"ok": False, "why": "the paper desk's database is not configured on this server"}
+    p = next((x for x in _d().picks if _pkey(x) == str(key or "")), None)
+    if p is None:
+        return {"ok": False, "why": f"{key!r} is not one of this desk's strategies"}
+    st = await _state(db)
+    cur = _cfg(st, p)
+    new = {"contracts": cur["contracts"], "on": cur["on"]}
+    if contracts is not None:
+        try:
+            n = float(contracts)
+        except (TypeError, ValueError):
+            return {"ok": False, "why": "the lot size must be a whole number of contracts"}
+        hi = _lots_max(p.product)
+        if not (math.isfinite(n) and n == int(n) and 1 <= n <= hi):
+            return {"ok": False, "why": f"the lot size of a {p.product} strategy must be a whole number from 1 to {hi} "
+                                        "contracts"}
+        new["contracts"] = int(n)
+    if on is not None:
+        b = _as_bool(on)
+        if b is None:
+            return {"ok": False, "why": "on must be true or false"}
+        new["on"] = b
+    if new == {"contracts": cur["contracts"], "on": cur["on"]}:
+        return {"ok": True, "key": _pkey(p), **new, "changed": False}
+    raises = new["contracts"] > cur["contracts"] or (new["on"] and not cur["on"])
+    if raises:                  # more real money at stake: the words, and the PIN when one is required, as going live
+        if str(confirm or "").strip().upper() != CONFIRM:
+            return {"ok": False, "why": f"raising a strategy's size or switching it on needs the words {CONFIRM}"}
+        why = await _check_pin(db, st, pin)
+        if why:
+            return {"ok": False, "why": why}
+    # lowering or switching off only takes risk away: never a PIN, as switching the desk off never needs one
+    at = _now()
+    entry = {"key": _pkey(p), "at": at, "from": {"contracts": cur["contracts"], "on": cur["on"]}, "to": dict(new)}
+    log = [x for x in (st.get("pick_log") or []) if isinstance(x, dict)][-(PICK_LOG_N - 1):] + [entry]
+    await _set_state(db, **{f"pick_cfg.{_pkey(p)}": {**new, "at": at}, "pick_log": log})
+    logger.info("[premium live %s] %s: %s -> %s", _d().key, _pkey(p), entry["from"], entry["to"])
+    return {"ok": True, "key": _pkey(p), **new, "changed": True}
+
+
+async def set_pick(key, contracts=None, on=None, pin: str | None = None, confirm: str | None = None,
+                   desk: str = "gold") -> dict:
+    """One strategy's own size and switch (23 Nov 2026), set from the page: `contracts` (1..LOTS_MAX of its product;
+    used in the desk's contract sizing) and/or `on`. Raising the size or switching a strategy on needs confirm=REAL
+    MONEY (and the PIN when one is required); lowering or switching off needs neither. A trade already open keeps its
+    size and is managed to its close."""
+    if desk not in DESKS:
+        return {"ok": False, "why": f"unknown desk {desk!r}"}
+    with _use(desk):
+        return await _set_pick_one(key, contracts, on, pin, confirm)
+
+
 # -- the read model ------------------------------------------------------------------------------------
 
 
@@ -2194,6 +2328,116 @@ def _results(rows: list, prods: dict, now: float) -> dict:
     return {"desk": _record(live, prods, now, by_day=True), "per": {k: _record(v, prods, now) for k, v in per.items()}}
 
 
+# The rank (23 Nov 2026): every strategy of a desk in order of its EXPECTED net R a trade, best first, estimated from
+# all the evidence it has - and shrunk, because most of these records are short and many were picked for a lucky start:
+# 1. a prior from its own backtest: the R a trade it reported, trusted by its number of trades (sd 1.3 / sqrt(n)) plus
+#    RANK_DRIFT_SD for the backtest-to-live drift; untested (or graded only by the Strategy Factory, whose replay reads
+#    future bars), it starts at its desk's average backtest with RANK_UNTESTED_SD; the H1 templates, whose only test is
+#    pooled, at 0 with RANK_POOLED_SD;
+# 2. its whole paper record, each trade's net R (at most RANK_R_CLIP either way): trades after its pick count fully, those
+#    before at RANK_PRE_W (that record is what got it picked); a record's own spread of R once it has RANK_SD_N trades;
+# 3. how its real Delta copies did against their own paper twins (R real - R paper: fees, slippage, late copies), its
+#    own pairs weighed against RANK_GAP_K of the desk's.
+# Normal-normal: posterior mean = (prior / prior var + sum of R / spread^2) / (1 / prior var + n / spread^2). Rank by it;
+# "likely positive" = the chance the edge is above zero. Read only: it changes nothing the desk does.
+RANK_METHOD = ("Rank = expected net R a trade (R = what a trade risks at its stop), best first: each strategy's own "
+               "backtest as the starting point (trusted by its number of trades; an untested one starts at its desk's "
+               "average backtest), updated by its whole paper record (trades before it was picked count a quarter: a "
+               "good record is what got it picked), then corrected by how its real Delta copies did against their paper "
+               "twins. A short record stays near its starting point. % = how likely that edge is above zero.")
+_BT_RE = re.compile(r"([+-]?\d+(?:\.\d+)?)R a trade over ([\d,]+)")
+
+
+def _bt_edge(backtest: str) -> tuple[float, int] | None:
+    """A pick's own backtest as (R a trade, trades) when it reports one ("loses: -0.06R a trade over 795 trades")."""
+    if not str(backtest or "").startswith(("loses", "earns")):
+        return None
+    m = _BT_RE.search(backtest)
+    return (float(m.group(1)), int(m.group(2).replace(",", ""))) if m else None
+
+
+def _iso_ts(s) -> float | None:
+    try:
+        return datetime.fromisoformat(str(s)).timestamp()
+    except (TypeError, ValueError):
+        return None
+
+
+def _sd(xs: list) -> float | None:
+    n = len(xs)
+    if n < 2:
+        return None
+    m = sum(xs) / n
+    return math.sqrt(sum((x - m) ** 2 for x in xs) / (n - 1))
+
+
+def _real_r(t: dict) -> float | None:
+    """A closed real trade's net R: its P&L over what it risked at its stop when it went in."""
+    try:
+        risk = float((t.get("plan") or {}).get("risk_usd") or 0.0) or _trade_risk(t)
+        r = float(t.get("pnl_usd") or 0.0) / risk if risk > 0 else None
+    except (TypeError, ValueError):
+        return None
+    return r if r is not None and math.isfinite(r) else None
+
+
+def _rank(picks: list, rs: dict, rows: list) -> dict:
+    """Each pick's rank, keyed "acct|mkt": pos (1 = best), edge_r (expected net R a trade), p_pos and the parts."""
+    def clip(x: float, c: float) -> float:
+        return max(-c, min(c, x))
+    tested = [e for e in (_bt_edge(p.backtest) for p in picks) if e]
+    desk_mu = sum(e[0] for e in tested) / len(tested) if tested else -0.10
+    own_sd: dict[str, float] = {}
+    for p in picks:
+        xs = [clip(r, RANK_R_CLIP) for _, r, _ in rs.get(_pkey(p), [])]
+        s = _sd(xs) if len(xs) >= RANK_SD_N else None
+        if s:
+            own_sd[_pkey(p)] = min(max(s, RANK_SD_MIN), RANK_SD_MAX)
+    sds = sorted(own_sd.values())
+    sd_desk = sds[len(sds) // 2] if sds else RANK_SD_DEFAULT
+    paper_r = {i: r for v in rs.values() for _, r, i in v}
+    gaps: dict[str, list] = {}
+    for t in rows:
+        if t.get("mode") != "live" or t.get("status") != "closed" or t.get("_id") not in paper_r:
+            continue
+        rr = _real_r(t)
+        if rr is not None:
+            gaps.setdefault(f"{t.get('acct')}|{t.get('mkt')}", []).append(clip(rr - paper_r[t["_id"]], RANK_GAP_CLIP))
+    allg = [g for v in gaps.values() for g in v]
+    g_desk = sum(allg) / len(allg) if allg else 0.0
+    sg = (_sd(allg) if len(allg) >= 3 else None) or 0.5
+    out: dict[str, dict] = {}
+    for p in picks:
+        k = _pkey(p)
+        bt = _bt_edge(p.backtest)
+        if bt:
+            mu0, tau, kind = bt[0], math.sqrt(RANK_SD_DEFAULT ** 2 / max(bt[1], 1) + RANK_DRIFT_SD ** 2), "backtest"
+        elif str(p.backtest).startswith("pooled only"):
+            mu0, tau, kind = 0.0, RANK_POOLED_SD, "pooled"
+        else:
+            mu0, tau, kind = desk_mu, RANK_UNTESTED_SD, "untested"
+        t_pick = _iso_ts(p.picked_at or _d().picked_at) or 0.0
+        mine = rs.get(k, [])
+        pre = [clip(r, RANK_R_CLIP) for x, r, _ in mine if x < t_pick]
+        post = [clip(r, RANK_R_CLIP) for x, r, _ in mine if x >= t_pick]
+        s = own_sd.get(k, sd_desk)
+        prec = 1.0 / tau ** 2 + (RANK_PRE_W * len(pre) + len(post)) / s ** 2
+        mean = (mu0 / tau ** 2 + (RANK_PRE_W * sum(pre) + sum(post)) / s ** 2) / prec
+        g = gaps.get(k, [])
+        gap = (sum(g) + RANK_GAP_K * g_desk) / (len(g) + RANK_GAP_K) if allg else 0.0
+        var = 1.0 / prec + ((sg ** 2) / (len(g) + RANK_GAP_K) if allg else 0.0)
+        edge, sd = mean + gap, math.sqrt(var)
+        out[k] = {"edge_r": round(edge, 4), "sd_r": round(sd, 4),
+                  "p_pos": round(0.5 * (1.0 + math.erf(edge / sd / math.sqrt(2.0))), 4) if sd > 0 else float(edge > 0),
+                  "prior_r": round(mu0, 4), "prior_sd": round(tau, 4), "prior": kind,
+                  "pre_n": len(pre), "post_n": len(post), "post_r": round(sum(post) / len(post), 4) if post else None,
+                  "paper_r": round(mean, 4), "gap_r": round(gap, 4), "gap_n": len(g)}
+    order = sorted(out, key=lambda k: (-out[k]["edge_r"], -out[k]["p_pos"], k))
+    for n, k in enumerate(order, start=1):
+        out[k].update(pos=n, of=len(order))
+    return out
+
+
 async def _status_one() -> dict:
     db = _db()
     if db is None:
@@ -2218,12 +2462,20 @@ async def _status_one() -> dict:
     except Exception:                                  # extras for the page: never let them break what it reads
         logger.exception("premium live %s: results not counted", _d().key)
         res = None
+    rank = None
+    if view is not None:
+        try:
+            rank = _rank(list(_d().picks), view.get("rs") or {}, rows)
+        except Exception:                              # an extra for the page: never let it break what it reads
+            logger.exception("premium live %s: rank not computed", _d().key)
     empty = {"trades": 0, "wins": 0, "sum_r": 0.0, "open": [], "last_t": None}
     picks = []
     for p in _d().picks:
         picks.append({**asdict(p), "live": per.get(f"live|{p.acct}|{p.mkt}"), "shadow": per.get(f"shadow|{p.acct}|{p.mkt}"),
                       "paper": None if view is None else view["per"].get(f"{p.acct}|{p.mkt}", empty),
-                      "results": None if res is None else res["per"].get(f"{p.acct}|{p.mkt}")})
+                      "results": None if res is None else res["per"].get(f"{p.acct}|{p.mkt}"),
+                      "cfg": {**_cfg(st, p), "max": _lots_max(p.product)},
+                      "rank": None if rank is None else rank.get(_pkey(p))})
     today = {m: await _day_pnl(db, m, None) for m in ("live", "shadow")}
     totals = {}
     for m in ("live", "shadow"):
@@ -2244,7 +2496,9 @@ async def _status_one() -> dict:
                    "max_notional_usd": MAX_NOTIONAL_USD, "leverage": LEVERAGE, "max_lag_s": _d().max_lag_s,
                    "drift_frac": DRIFT_FRAC, "tick_s": TICK_S, "follow_all": _d().follow_all,
                    "daily_stop_on": not _d().follow_all, "contract_cap_on": not _d().follow_all,
-                   "waiting": len(_WAITING.get(_d().key, {}))},
+                   "waiting": len(_WAITING.get(_d().key, {})),
+                   "pick_cfg": True, "lots_default": LOTS_DEFAULT, "lots_max": dict(LOTS_MAX)},
+        "pick_log": [x for x in (st.get("pick_log") or []) if isinstance(x, dict)][-30:], "rank_method": RANK_METHOD,
         "today": today, "totals": totals, "picked_at": _d().picked_at, "picks": picks,
         "results": None if res is None else res["desk"],
         "desk": _d().key, "title": _d().title, "desk_products": _d().products,
