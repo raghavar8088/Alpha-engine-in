@@ -27,7 +27,11 @@ export function useDesk<T = any>(path: string | null, everyMs = 60_000) {
         setError(null);
       }
     } catch (e) {
-      if (alive.current) setError(e instanceof Error ? e.message : "Could not load");
+      const msg = e instanceof Error ? e.message : "Could not load";
+      // Until the desk's server part is deployed, the backend answers its routes with 404 "Not Found".
+      if (alive.current) setError(/^(Not Found|Request failed: 404)$/.test(msg)
+        ? "Not available yet: the desk's server part is not deployed on the backend (or the backend is restarting)."
+        : msg);
     } finally {
       if (alive.current) setLoading(false);
     }
