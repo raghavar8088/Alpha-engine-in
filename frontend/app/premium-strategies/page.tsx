@@ -194,6 +194,8 @@ export default function PremiumStrategiesPage() {
           </button>
         ))}
         <Link href="/premium-strategies/ai-approved" className="ps-tab">AI Approved</Link>
+        {/* Child module (2026-11-22). prefetch off: this page never loads the child's code or data. */}
+        <Link href="/premium-strategies/intraday" prefetch={false} className="ps-tab">Premium Intraday Strategies</Link>
       </div>
 
       {tab === "paper" && <PaperDesk summary={summary} error={error} />}

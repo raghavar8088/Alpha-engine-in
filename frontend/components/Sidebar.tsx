@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import ThemeToggle from "./ThemeToggle";
 import { useEffect, useState } from "react";
 
-const GROUPS: { label: string; links: { href: string; label: string; icon: React.ReactNode }[] }[] = [
+const GROUPS: { label: string; links: { href: string; label: string; icon: React.ReactNode; child?: boolean }[] }[] = [
   {
     label: "Trading",
     links: [
@@ -61,6 +61,21 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
           <>
             <path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 10H5L3 8z" />
             <path d="M5 21h14" />
+          </>
+        ),
+      },
+      {
+        // Child of Premium Strategies (2026-11-22): Premium Strategies -> Premium Intraday Strategies, an independent
+        // paper desk for NSE cash equities with its own container and switch. Drawn indented under its parent, and
+        // never prefetched: its page and research data load only when this link is clicked.
+        href: "/premium-strategies/intraday",
+        label: "Premium Intraday Strategies",
+        child: true,
+        icon: (
+          <>
+            <path d="M4 19h16" />
+            <path d="M6 15l3.5-4 3 2.5L18 7" />
+            <path d="M15 7h3v3" />
           </>
         ),
       },
@@ -696,7 +711,9 @@ export default function Sidebar() {
               {group.links.map((link) => {
                 const active = pathname === link.href;
                 return (
-                  <Link key={link.href} href={link.href} className={`nav-item${active ? " active" : ""}`}>
+                  <Link key={link.href} href={link.href} className={`nav-item${active ? " active" : ""}`}
+                    prefetch={link.child ? false : undefined}
+                    style={link.child ? { paddingLeft: 30, fontSize: 12.5 } : undefined}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                       {link.icon}
                     </svg>

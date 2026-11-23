@@ -1,0 +1,10460 @@
+{
+ "built": "2026-11-22",
+ "index_members": {
+  "ind_nifty50list": [
+   "ADANIENT",
+   "ADANIPORTS",
+   "APOLLOHOSP",
+   "ASIANPAINT",
+   "AXISBANK",
+   "BAJAJ-AUTO",
+   "BAJAJFINSV",
+   "BAJFINANCE",
+   "BEL",
+   "BHARTIARTL",
+   "BSE",
+   "CIPLA",
+   "COALINDIA",
+   "DRREDDY",
+   "EICHERMOT",
+   "ETERNAL",
+   "GRASIM",
+   "HCLTECH",
+   "HDFCBANK",
+   "HDFCLIFE",
+   "HINDALCO",
+   "HINDUNILVR",
+   "ICICIBANK",
+   "INDIGO",
+   "INFY",
+   "ITC",
+   "JIOFIN",
+   "JSWSTEEL",
+   "KOTAKBANK",
+   "LT",
+   "M&M",
+   "MARUTI",
+   "MAXHEALTH",
+   "NESTLEIND",
+   "NTPC",
+   "ONGC",
+   "POWERGRID",
+   "RELIANCE",
+   "SBILIFE",
+   "SBIN",
+   "SHRIRAMFIN",
+   "SUNPHARMA",
+   "TATACONSUM",
+   "TATASTEEL",
+   "TCS",
+   "TECHM",
+   "TITAN",
+   "TMPV",
+   "TRENT",
+   "ULTRACEMCO"
+  ],
+  "ind_nifty_privatebanklist": [
+   "AXISBANK",
+   "BANDHANBNK",
+   "FEDERALBNK",
+   "HDFCBANK",
+   "ICICIBANK",
+   "IDFCFIRSTB",
+   "INDUSINDBK",
+   "KOTAKBANK",
+   "RBLBANK",
+   "YESBANK"
+  ],
+  "ind_niftyautolist": [
+   "ASHOKLEY",
+   "BAJAJ-AUTO",
+   "BHARATFORG",
+   "BOSCHLTD",
+   "EICHERMOT",
+   "HEROMOTOCO",
+   "HYUNDAI",
+   "M&M",
+   "MARUTI",
+   "MOTHERSON",
+   "SONACOMS",
+   "TIINDIA",
+   "TMPV",
+   "TVSMOTOR",
+   "UNOMINDA"
+  ],
+  "ind_niftybanklist": [
+   "AUBANK",
+   "AXISBANK",
+   "BANKBARODA",
+   "CANBK",
+   "FEDERALBNK",
+   "HDFCBANK",
+   "ICICIBANK",
+   "IDFCFIRSTB",
+   "INDUSINDBK",
+   "KOTAKBANK",
+   "PNB",
+   "SBIN",
+   "UNIONBANK",
+   "YESBANK"
+  ],
+  "ind_niftyconsumerdurableslist": [
+   "AMBER",
+   "BATAINDIA",
+   "BLUESTARCO",
+   "CROMPTON",
+   "DIXON",
+   "HAVELLS",
+   "KAJARIACER",
+   "KALYANKJIL",
+   "LGEINDIA",
+   "PGEL",
+   "THANGAMAYL",
+   "TITAN",
+   "VOLTAS",
+   "WHIRLPOOL"
+  ],
+  "ind_niftyenergylist": [
+   "ABB",
+   "ADANIENSOL",
+   "ADANIGREEN",
+   "ADANIPOWER",
+   "AEGISLOG",
+   "ATGL",
+   "BHEL",
+   "BPCL",
+   "CASTROLIND",
+   "CESC",
+   "CGPOWER",
+   "COALINDIA",
+   "ENRIN",
+   "GAIL",
+   "GVT&D",
+   "HINDPETRO",
+   "IGL",
+   "INOXWIND",
+   "IOC",
+   "JPPOWER",
+   "JSWENERGY",
+   "MGL",
+   "NAVA",
+   "NHPC",
+   "NLCINDIA",
+   "NTPC",
+   "NTPCGREEN",
+   "OIL",
+   "ONGC",
+   "PETRONET",
+   "POWERGRID",
+   "POWERINDIA",
+   "RELIANCE",
+   "RPOWER",
+   "SIEMENS",
+   "SUZLON",
+   "TATAPOWER",
+   "TDPOWERSYS",
+   "THERMAX",
+   "TORNTPOWER"
+  ],
+  "ind_niftyfinancelist": [
+   "AXISBANK",
+   "BAJAJFINSV",
+   "BAJFINANCE",
+   "BSE",
+   "CHOLAFIN",
+   "HDFCBANK",
+   "HDFCLIFE",
+   "ICICIBANK",
+   "ICICIGI",
+   "JIOFIN",
+   "KOTAKBANK",
+   "LICHSGFIN",
+   "MFSL",
+   "MUTHOOTFIN",
+   "PFC",
+   "RECLTD",
+   "SBICARD",
+   "SBILIFE",
+   "SBIN",
+   "SHRIRAMFIN"
+  ],
+  "ind_niftyfmcglist": [
+   "BRITANNIA",
+   "COLPAL",
+   "DABUR",
+   "GODFRYPHLP",
+   "GODREJCP",
+   "HINDUNILVR",
+   "ITC",
+   "MARICO",
+   "NESTLEIND",
+   "PATANJALI",
+   "RADICO",
+   "TATACONSUM",
+   "UBL",
+   "UNITDSPR",
+   "VBL"
+  ],
+  "ind_niftyhealthcarelist": [
+   "ABBOTINDIA",
+   "ALKEM",
+   "APOLLOHOSP",
+   "AUROPHARMA",
+   "BIOCON",
+   "CIPLA",
+   "DIVISLAB",
+   "DRREDDY",
+   "FORTIS",
+   "GLAND",
+   "GLENMARK",
+   "IPCALAB",
+   "KIMS",
+   "LAURUSLABS",
+   "LUPIN",
+   "MANKIND",
+   "MAXHEALTH",
+   "SUNPHARMA",
+   "TORNTPHARM",
+   "ZYDUSLIFE"
+  ],
+  "ind_niftyinfralist": [
+   "ADANIGREEN",
+   "ADANIPORTS",
+   "ADANIPOWER",
+   "APOLLOHOSP",
+   "ASHOKLEY",
+   "BHARATFORG",
+   "BHARTIARTL",
+   "BPCL",
+   "CGPOWER",
+   "CUMMINSIND",
+   "DLF",
+   "FORTIS",
+   "GAIL",
+   "GRASIM",
+   "GVT&D",
+   "HINDPETRO",
+   "INDHOTEL",
+   "INDIGO",
+   "INDUSTOWER",
+   "IOC",
+   "LT",
+   "MAXHEALTH",
+   "MOTHERSON",
+   "NTPC",
+   "ONGC",
+   "POWERGRID",
+   "RELIANCE",
+   "SUZLON",
+   "TATAPOWER",
+   "ULTRACEMCO"
+  ],
+  "ind_niftyitlist": [
+   "COFORGE",
+   "HCLTECH",
+   "INFY",
+   "LTM",
+   "MPHASIS",
+   "OFSS",
+   "PERSISTENT",
+   "TCS",
+   "TECHM",
+   "WIPRO"
+  ],
+  "ind_niftymedialist": [
+   "DBCORP",
+   "MPSLTD",
+   "NAZARA",
+   "NETWORK18",
+   "PFOCUS",
+   "PVRINOX",
+   "SAREGAMA",
+   "SUNTV",
+   "TIPSMUSIC",
+   "ZEEL"
+  ],
+  "ind_niftymetallist": [
+   "ADANIENT",
+   "APLAPOLLO",
+   "HINDALCO",
+   "HINDCOPPER",
+   "HINDZINC",
+   "JINDALSTEL",
+   "JSL",
+   "JSWSTEEL",
+   "LLOYDSME",
+   "NATIONALUM",
+   "NMDC",
+   "SAIL",
+   "TATASTEEL",
+   "VAML",
+   "VEDL"
+  ],
+  "ind_niftyoilgaslist": [
+   "AEGISLOG",
+   "AEGISVOPAK",
+   "ATGL",
+   "BPCL",
+   "CASTROLIND",
+   "CHENNPETRO",
+   "GAIL",
+   "HINDPETRO",
+   "IGL",
+   "IOC",
+   "MGL",
+   "OIL",
+   "ONGC",
+   "PETRONET",
+   "RELIANCE"
+  ],
+  "ind_niftypharmalist": [
+   "ABBOTINDIA",
+   "AJANTPHARM",
+   "ALKEM",
+   "AUROPHARMA",
+   "BIOCON",
+   "CIPLA",
+   "DIVISLAB",
+   "DRREDDY",
+   "GLAND",
+   "GLENMARK",
+   "IPCALAB",
+   "LAURUSLABS",
+   "LUPIN",
+   "MANKIND",
+   "PPLPHARMA",
+   "SAILIFE",
+   "SUNPHARMA",
+   "TORNTPHARM",
+   "WOCKPHARMA",
+   "ZYDUSLIFE"
+  ],
+  "ind_niftypsubanklist": [
+   "BANKBARODA",
+   "BANKINDIA",
+   "CANBK",
+   "CENTRALBK",
+   "INDIANB",
+   "IOB",
+   "MAHABANK",
+   "PNB",
+   "PSB",
+   "SBIN",
+   "UCOBANK",
+   "UNIONBANK"
+  ],
+  "ind_niftyrealtylist": [
+   "ABREL",
+   "ANANTRAJ",
+   "BRIGADE",
+   "DLF",
+   "GODREJPROP",
+   "LODHA",
+   "OBEROIRLTY",
+   "PHOENIXLTD",
+   "PRESTIGE",
+   "SOBHA"
+  ]
+ },
+ "rule": "banks = NIFTY BANK / PSU BANK / PRIVATE BANK members or names ending 'Bank Ltd.'; others by NSE Industry -> sector label and sectoral index",
+ "sources": {
+  "app_industry_table": "stock_universe.sector export (D:/intraday_ai_data/exports/sectors.json)",
+  "niftyindices": "https://www.niftyindices.com/IndexConstituent/<list>.csv (downloaded 2026-11-22)"
+ },
+ "symbols": {
+  "360ONE": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "3MINDIA": {
+   "index": null,
+   "industry": "Diversified",
+   "sector": "Diversified"
+  },
+  "AADHARHFC": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "AARTIDRUGS": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "AARTIIND": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "AARTIPHARM": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "AAVAS": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ABB": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ABBOTINDIA": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "ABCAPITAL": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ABDL": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "ABFRL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "ABLBL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "ABREL": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "ABSLAMC": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ACC": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "ACE": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ACI": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "ACMESOLAR": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "ACUTAAS": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "ADANIENSOL": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "ADANIENT": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "ADANIGREEN": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "ADANIPORTS": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "ADANIPOWER": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "ADVENZYMES": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "AEGISLOG": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "AEGISVOPAK": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "AEQUS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "AETHER": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "AFCONS": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "AFFLE": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "AGARWALEYE": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "AHLUCONT": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "AIAENG": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "AIIL": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "AJANTPHARM": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "AKUMS": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "ALIVUS": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "ALKEM": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "ALKYLAMINE": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "ALOKINDS": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Textiles",
+   "sector": "Consumer"
+  },
+  "AMBER": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "AMBUJACEM": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "ANANDRATHI": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ANANTRAJ": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "ANGELONE": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ANTHEM": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "ANUP": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ANURAS": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "APARINDS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "APLAPOLLO": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "APLLTD": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "APOLLO": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "APOLLOHOSP": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "APOLLOTYRE": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "APTUS": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ARE&M": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "ARVIND": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Textiles",
+   "sector": "Consumer"
+  },
+  "ARVINDFASN": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "ASAHIINDIA": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "ASHAPURMIN": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "ASHOKA": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "ASHOKLEY": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ASIANPAINT": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "ASKAUTOLTD": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "ASTERDM": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "ASTRAL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ASTRAMICRO": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ATGL": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "ATHERENERG": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "ATLANTAELE": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ATUL": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "AUBANK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "AURIONPRO": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "AUROPHARMA": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "AVALON": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "AVANTIFEED": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "AVL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "AWFIS": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "AWL": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "AXISBANK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "AXISCADES": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "AZAD": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "BAGMANE": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "BAJAJ-AUTO": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "BAJAJELEC": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "BAJAJFINSV": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "BAJAJHFL": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "BAJAJHLDNG": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "BAJFINANCE": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "BALAMINES": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "BALKRISIND": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "BALRAMCHIN": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "BALUFORGE": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "BANCOINDIA": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "BANDHANBNK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "BANKBARODA": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "BANKINDIA": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "BATAINDIA": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "BAYERCROP": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "BBOX": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "BBTC": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "BDL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "BECTORFOOD": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "BEL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "BELRISE": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "BEML": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "BERGEPAINT": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "BHARATCOAL": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "BHARATFORG": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "BHARTIARTL": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "BHARTIHEXA": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "BHEL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "BIKAJI": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "BIOCON": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "BIRET": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "BIRLACORPN": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "BLACKBUCK": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "BLS": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "BLUEDART": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "BLUEJET": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "BLUESTARCO": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "BLUESTONE": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "BORORENEW": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "BOSCHLTD": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "BPCL": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "BRIGADE": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "BRITANNIA": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "BSE": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "BSOFT": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "CAMPUS": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "CAMS": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CANBK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "CANFINHOME": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CANHLIFE": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CAPILLARY": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "CAPLIPOINT": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "CARBORUNIV": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "CARTRADE": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "CASTROLIND": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "CCAVENUE": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CCL": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "CDSL": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CEATLTD": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "CELLO": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "CEMPRO": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "CENTRALBK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "CENTURYPLY": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "CERA": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "CESC": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "CGCL": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CGPOWER": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "CHALET": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "CHAMBLFERT": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "CHENNPETRO": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "CHOICEIN": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CHOLAFIN": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CHOLAHLDNG": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CIEINDIA": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "CIPLA": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "CLEAN": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "CLEANMAX": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "CMPDI": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "CMSINFO": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "COALINDIA": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "COCHINSHIP": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "COFORGE": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "COHANCE": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "COLPAL": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "CONCOR": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "CONCORDBIO": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "COROMANDEL": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "CORONA": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "CPPLUS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "CRAFTSMAN": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "CRAMC": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CREDITACC": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CRISIL": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CRIZAC": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "CROMPTON": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "CSBBANK": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "CUB": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "CUMMINSIND": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "CUPID": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "CYIENT": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "DABUR": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "DALBHARAT": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "DATAMATICS": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "DATAPATTNS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "DBL": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "DBREALTY": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "DCBBANK": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "DCMSHRIRAM": {
+   "index": null,
+   "industry": "Diversified",
+   "sector": "Diversified"
+  },
+  "DEEPAKFERT": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "DEEPAKNTR": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "DELHIVERY": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "DEVYANI": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "DIACABS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "DIVISLAB": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "DIXON": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "DLF": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "DMART": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "DOMS": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "DRREDDY": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "DUMMYHEG": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "DUMMYINGL1": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "DUMMYINGL2": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "DUMMYINXGN": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "DUMMYTRVN": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "DYNAMATECH": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ECLERX": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "EDELWEISS": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "EICHERMOT": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "EIDPARRY": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "EIEL": {
+   "index": "NIFTYENERGY",
+   "industry": "Utilities",
+   "sector": "Energy & Power"
+  },
+  "EIHOTEL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "ELECON": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ELECTCAST": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ELGIEQUIP": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ELLEN": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "EMAMILTD": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "EMBASSY": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "EMBDL": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "EMCURE": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "EMIL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "EMMVEE": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ENDURANCE": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "ENGINERSIN": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "ENRIN": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ENTERO": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "EPL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "EQUITASBNK": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ERIS": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "ESCORTS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ETERNAL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "ETHOSLTD": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "EUREKAFORB": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "EXIDEIND": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "FACT": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "FEDERALBNK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "FEDFINA": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "FIEMIND": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "FINCABLES": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "FINPIPE": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "FIRSTCRY": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "FIVESTAR": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "FLUOROCHEM": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "FORCEMOT": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "FORTIS": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "FRACTAL": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "FSL": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "GABRIEL": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "GAEL": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "GAIL": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "GALLANTT": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "GESHIP": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "GHCL": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "GICRE": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "GILLETTE": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "GLAND": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "GLAXO": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "GLENMARK": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "GMDCLTD": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "GMMPFAUDLR": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "GMRAIRPORT": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "GMRP&UI": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "GNFC": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "GODFRYPHLP": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "GODIGIT": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "GODREJAGRO": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "GODREJCP": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "GODREJIND": {
+   "index": null,
+   "industry": "Diversified",
+   "sector": "Diversified"
+  },
+  "GODREJPROP": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "GOKEX": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Textiles",
+   "sector": "Consumer"
+  },
+  "GOKULAGRO": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "GPIL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "GPPL": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "GRANULES": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "GRAPHITE": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "GRASIM": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "GRAVITA": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "GREAVESCOT": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "GRINDWELL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "GROWW": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "GRSE": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "GRWRHITECH": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "GSFC": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "GVT&D": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "HAL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "HAPPSTMNDS": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "HAVELLS": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "HBLENGINE": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "HCC": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "HCG": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "HCLTECH": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "HDBFS": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "HDFCAMC": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "HDFCBANK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "HDFCLIFE": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "HEGAM": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "HEMIPROP": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "HERITGFOOD": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "HEROMOTOCO": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "HEXT": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "HFCL": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "HGINFRA": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "HINDALCO": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "HINDCOPPER": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "HINDPETRO": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "HINDUNILVR": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "HINDZINC": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "HOMEFIRST": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "HONASA": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "HONAUT": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "HSCL": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "HUDCO": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "HYUNDAI": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "ICICIAMC": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ICICIBANK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "ICICIGI": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ICICILIFE": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ICICIPRULI": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ICIL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Textiles",
+   "sector": "Consumer"
+  },
+  "IDBI": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "IDEA": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "IDFCFIRSTB": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "IEX": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "IFBIND": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "IFCI": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "IGIL": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "IGL": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "IIFL": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "IIFLCAPS": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "IKS": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "IMFA": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "INDGN": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "INDHOTEL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "INDIACEM": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "INDIAGLYCO": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "INDIAMART": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "INDIANB": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "INDIASHLTR": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "INDIGO": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "INDIGOPNTS": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "INDUSINDBK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "INDUSTOWER": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "INFY": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "INOXGREEN": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "INOXINDIA": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "INOXWIND": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "INTELLECT": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "IOB": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "IOC": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "IONEXCHANG": {
+   "index": "NIFTYENERGY",
+   "industry": "Utilities",
+   "sector": "Energy & Power"
+  },
+  "IPCALAB": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "IRB": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "IRCON": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "IRCTC": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "IREDA": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "IRFC": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ITC": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "ITCHOTELS": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "ITI": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "IXIGO": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "J&KBANK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "JAIBALAJI": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "JAINREC": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "JAMNAAUTO": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "JAYNECOIND": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "JBMA": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "JINDALSAW": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "JINDALSTEL": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "JIOFIN": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "JKCEMENT": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "JKLAKSHMI": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "JKPAPER": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Forest Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "JKTYRE": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "JLHL": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "JMFINANCIL": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "JPPOWER": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "JSFB": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "JSL": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "JSLL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "JSWCEMENT": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "JSWDULUX": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "JSWENERGY": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "JSWINFRA": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "JSWSTEEL": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "JUBLFOOD": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "JUBLINGREA": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "JUBLPHARMA": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "JUSTDIAL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "JWL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "JYOTHYLAB": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "JYOTICNC": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "KAJARIACER": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "KALYANKJIL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "KANSAINER": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "KARURVYSYA": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "KAYNES": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "KEC": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "KEI": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "KFINTECH": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "KIMS": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "KIRLOSBROS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "KIRLOSENG": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "KIRLPNU": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "KITEX": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Textiles",
+   "sector": "Consumer"
+  },
+  "KNRCON": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "KOTAKBANK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "KPIGREEN": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "KPIL": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "KPITTECH": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "KPRMILL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Textiles",
+   "sector": "Consumer"
+  },
+  "KRBL": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "KRN": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "KSB": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "KSCL": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "KTKBANK": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "LALPATHLAB": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "LATENTVIEW": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "LAURUSLABS": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "LEMONTREE": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "LENSKART": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "LGEINDIA": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "LICHSGFIN": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "LICI": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "LINDEINDIA": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "LLOYDSENGG": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "LLOYDSENT": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "LLOYDSME": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "LODHA": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "LOTUSDEV": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "LT": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "LTF": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "LTFOODS": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "LTM": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "LTTS": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "LUMAXTECH": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "LUPIN": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "LXCHEM": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "M&M": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "M&MFIN": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "MAHABANK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "MAHSCOOTER": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "MAHSEAMLES": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "MANAPPURAM": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "MANKIND": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "MANORAMA": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "MANYAVAR": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "MAPMYINDIA": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "MARICO": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "MARKSANS": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "MARUTI": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "MASTEK": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "MAXHEALTH": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "MAZDOCK": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "MCX": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "MEDANTA": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "MEDPLUS": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "MEESHO": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "METROPOLIS": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "MFSL": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "MGL": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "MIDHANI": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "MINDACORP": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "MMTC": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "MOIL": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "MOTHERSON": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "MOTILALOFS": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "MPHASIS": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "MRF": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "MRPL": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "MSTCLTD": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "MSUMI": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "MTARTECH": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "MUTHOOTFIN": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "NAM-INDIA": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "NATCOPHARM": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "NATIONALUM": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "NAUKRI": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "NAVA": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "NAVINFLUOR": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "NAZARA": {
+   "index": "NIFTYMEDIA",
+   "industry": "Media Entertainment & Publication",
+   "sector": "Media"
+  },
+  "NBCC": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "NCC": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "NEOGEN": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "NESCO": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "NESTLEIND": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "NETWEB": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "NETWORK18": {
+   "index": "NIFTYMEDIA",
+   "industry": "Media Entertainment & Publication",
+   "sector": "Media"
+  },
+  "NEULANDLAB": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "NEWGEN": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "NFL": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "NH": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "NHPC": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "NIACL": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "NIVABUPA": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "NLCINDIA": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "NMDC": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "NSLNISP": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "NTPC": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "NTPCGREEN": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "NUVAMA": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "NUVOCO": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "NYKAA": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "OBEROIRLTY": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "OFSS": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "OIL": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "OLAELEC": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "OLECTRA": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "ONESOURCE": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "ONGC": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "OPTIEMUS": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "ORIENTCEM": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "ORKLAINDIA": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "OSWALPUMPS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "PAGEIND": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Textiles",
+   "sector": "Consumer"
+  },
+  "PARADEEP": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "PARAS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "PARKHOSPS": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "PATANJALI": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "PAYTM": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "PCBL": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "PCJEWELLER": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "PERSISTENT": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "PETRONET": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "PFC": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "PFIZER": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "PFOCUS": {
+   "index": "NIFTYMEDIA",
+   "industry": "Media Entertainment & Publication",
+   "sector": "Media"
+  },
+  "PGEL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "PGIL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Textiles",
+   "sector": "Consumer"
+  },
+  "PHOENIXLTD": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "PICCADIL": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "PIDILITIND": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "PIIND": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "PINELABS": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "PIRAMALFIN": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "PNB": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "PNBHOUSING": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "PNCINFRA": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "PNGJL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "POLICYBZR": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "POLYCAB": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "POLYMED": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "POONAWALLA": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "POWERGRID": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "POWERINDIA": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "POWERMECH": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "PPLPHARMA": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "PRAJIND": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "PREMIERENE": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "PRESTIGE": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "PRICOLLTD": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "PRIVISCL": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "PRSMJOHNSN": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "PRUDENT": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "PSB": {
+   "index": "NIFTYBANK",
+   "industry": "Unclassified",
+   "sector": "Banks"
+  },
+  "PTC": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "PTCIL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "PURVA": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "PVRINOX": {
+   "index": "NIFTYMEDIA",
+   "industry": "Media Entertainment & Publication",
+   "sector": "Media"
+  },
+  "PWL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "QPOWER": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "QUESS": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "RADICO": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "RAILTEL": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "RAIN": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "RAINBOW": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "RALLIS": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "RAMCOCEM": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "RATEGAIN": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "RATNAMANI": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "RAYMONDLSL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Textiles",
+   "sector": "Consumer"
+  },
+  "RBA": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "RBLBANK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "RCF": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "RECLTD": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "REDINGTON": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "REDTAPE": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "REFEX": {
+   "index": "NIFTYENERGY",
+   "industry": "Utilities",
+   "sector": "Energy & Power"
+  },
+  "RELAXO": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "RELIANCE": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "RELIGARE": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "RENUKA": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "RHIM": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "RITES": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "RKFORGE": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "ROUTE": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "RPOWER": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "RRKABEL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "RTNINDIA": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "RTNPOWER": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "RUBICON": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "RVNL": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "SAATVIKGL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "SAFARI": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "SAGILITY": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "SAIL": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "SAILIFE": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "SAMHI": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "SAMMAANCAP": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "SANDUMA": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "SANOFICONR": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "SANSERA": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "SAPPHIRE": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "SARDAEN": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "SAREGAMA": {
+   "index": "NIFTYMEDIA",
+   "industry": "Media Entertainment & Publication",
+   "sector": "Media"
+  },
+  "SBFC": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "SBICARD": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "SBILIFE": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "SBIN": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "SCHAEFFLER": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "SCHNEIDER": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "SCI": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "SENCO": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "SFL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "SHAILY": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "SHAKTIPUMP": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "SHARDACROP": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "SHAREINDIA": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "SHILPAMED": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "SHREECEM": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "SHRIPISTON": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "SHRIRAMFIN": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "SHYAMMETL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "SIEMENS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "SIGNATURE": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "SJVN": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "SKFINDIA": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "SKFINDUS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "SKIPPER": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "SKYGOLD": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "SMARTWORKS": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "SMLMAH": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "SOBHA": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "SOLARINDS": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "SONACOMS": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "SONATSOFTW": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "SOUTHBANK": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "SPARC": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "SPLPETRO": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "SRF": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "STAR": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "STARCEMENT": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "STARHEALTH": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "STLTECH": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "STYL": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "STYRENIX": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "SUBROS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "SUDARSCHEM": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "SUDEEPPHRM": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "SUMICHEM": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "SUNDARMFIN": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "SUNPHARMA": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "SUNTECK": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "SUNTV": {
+   "index": "NIFTYMEDIA",
+   "industry": "Media Entertainment & Publication",
+   "sector": "Media"
+  },
+  "SUPREMEIND": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "SUPRIYA": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "SURYAROSNI": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "SUZLON": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "SWANCORP": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "SWIGGY": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "SWSOLAR": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "SYNGENE": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "SYRMA": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "TANLA": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "TARC": {
+   "index": "NIFTYREALTY",
+   "industry": "Realty",
+   "sector": "Realty"
+  },
+  "TARIL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "TATACAP": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "TATACHEM": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "TATACOMM": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "TATACONSUM": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "TATAELXSI": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "TATAINVEST": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "TATAPOWER": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "TATASTEEL": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "TATATECH": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "TBOTEK": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "TCS": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "TDPOWERSYS": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "TECHM": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "TECHNOE": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "TEGA": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "TEJASNET": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "TENNIND": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "TEXRAIL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "THANGAMAYL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "THELEELA": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "THERMAX": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "THOMASCOOK": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "THYROCARE": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "TI": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "TIINDIA": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "TIMETECHNO": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "TIMKEN": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "TIPSMUSIC": {
+   "index": "NIFTYMEDIA",
+   "industry": "Media Entertainment & Publication",
+   "sector": "Media"
+  },
+  "TITAGARH": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "TITAN": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "TMB": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "TMCV": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "TMPV": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "TORNTPHARM": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "TORNTPOWER": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "TRANSRAILL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "TRAVELFOOD": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "TRENT": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "TRIDENT": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Textiles",
+   "sector": "Consumer"
+  },
+  "TRITURBINE": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "TRIVENI": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "TSFINV": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "TTML": {
+   "index": "NIFTYINFRA",
+   "industry": "Telecommunication",
+   "sector": "Telecom"
+  },
+  "TVSMOTOR": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "TVSSCS": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "UBL": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "UCOBANK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "UJJIVANSFB": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "ULTRACEMCO": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Construction Materials",
+   "sector": "Chemicals & Materials"
+  },
+  "UNIONBANK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "UNITDSPR": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "UNOMINDA": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "UPL": {
+   "index": "NIFTYCOMMODITIES",
+   "industry": "Chemicals",
+   "sector": "Chemicals & Materials"
+  },
+  "URBANCO": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "USHAMART": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "UTIAMC": {
+   "index": "FINNIFTY",
+   "industry": "Financial Services",
+   "sector": "Financial Services"
+  },
+  "UTLSOLAR": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "V2RETAIL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "VAIBHAVGBL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "VAML": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "VARROC": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "VBL": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  },
+  "VEDL": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "VEDPOWER": {
+   "index": "NIFTYENERGY",
+   "industry": "Power",
+   "sector": "Energy & Power"
+  },
+  "VGUARD": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "VIJAYA": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "VIKRAMSOLR": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "VIPIND": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "VISL": {
+   "index": "NIFTYMETAL",
+   "industry": "Metals & Mining",
+   "sector": "Metals & Mining"
+  },
+  "VIYASH": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "VMART": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "VMM": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "VOGL": {
+   "index": "NIFTYENERGY",
+   "industry": "Oil Gas & Consumable Fuels",
+   "sector": "Energy & Power"
+  },
+  "VOLTAMP": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "VOLTAS": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "VTL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Textiles",
+   "sector": "Consumer"
+  },
+  "WAAREEENER": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "WAAREERTL": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "WABAG": {
+   "index": "NIFTYENERGY",
+   "industry": "Utilities",
+   "sector": "Energy & Power"
+  },
+  "WAKEFIT": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "WEBELSOLAR": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "WELCORP": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "WELENT": {
+   "index": "NIFTYINFRA",
+   "industry": "Construction",
+   "sector": "Capital Goods & Infra"
+  },
+  "WELSPUNLIV": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Textiles",
+   "sector": "Consumer"
+  },
+  "WESTLIFE": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Services",
+   "sector": "Consumer"
+  },
+  "WEWORK": {
+   "index": "NIFTYINFRA",
+   "industry": "Services",
+   "sector": "Capital Goods & Infra"
+  },
+  "WHIRLPOOL": {
+   "index": "NIFTYCONSUMPTION",
+   "industry": "Consumer Durables",
+   "sector": "Consumer"
+  },
+  "WIPRO": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "WOCKPHARMA": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "YATHARTH": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "YESBANK": {
+   "index": "NIFTYBANK",
+   "industry": "Financial Services",
+   "sector": "Banks"
+  },
+  "ZAGGLE": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "ZEEL": {
+   "index": "NIFTYMEDIA",
+   "industry": "Media Entertainment & Publication",
+   "sector": "Media"
+  },
+  "ZENSARTECH": {
+   "index": "NIFTYIT",
+   "industry": "Information Technology",
+   "sector": "IT"
+  },
+  "ZENTEC": {
+   "index": "NIFTYINFRA",
+   "industry": "Capital Goods",
+   "sector": "Capital Goods & Infra"
+  },
+  "ZFCVINDIA": {
+   "index": "NIFTYAUTO",
+   "industry": "Automobile and Auto Components",
+   "sector": "Auto"
+  },
+  "ZYDUSLIFE": {
+   "index": "NIFTYPHARMA",
+   "industry": "Healthcare",
+   "sector": "Healthcare"
+  },
+  "ZYDUSWELL": {
+   "index": "NIFTYFMCG",
+   "industry": "Fast Moving Consumer Goods",
+   "sector": "FMCG"
+  }
+ },
+ "unmapped": [
+  [
+   "20MICRONS",
+   "Unclassified"
+  ],
+  [
+   "21STCENMGM",
+   "Unclassified"
+  ],
+  [
+   "3BBLACKBIO",
+   "Unclassified"
+  ],
+  [
+   "3PLAND",
+   "Unclassified"
+  ],
+  [
+   "5PAISA",
+   "Unclassified"
+  ],
+  [
+   "63MOONS",
+   "Unclassified"
+  ],
+  [
+   "A2ZINFRA",
+   "Unclassified"
+  ],
+  [
+   "AAATECH",
+   "Unclassified"
+  ],
+  [
+   "AAKASH",
+   "Unclassified"
+  ],
+  [
+   "AAREYDRUGS",
+   "Unclassified"
+  ],
+  [
+   "AARON",
+   "Unclassified"
+  ],
+  [
+   "AARVI",
+   "Unclassified"
+  ],
+  [
+   "AASTHA",
+   "Unclassified"
+  ],
+  [
+   "ABANSENT",
+   "Unclassified"
+  ],
+  [
+   "ABCOTS",
+   "Unclassified"
+  ],
+  [
+   "ABMKNO",
+   "Unclassified"
+  ],
+  [
+   "ACCELYA",
+   "Unclassified"
+  ],
+  [
+   "ACEINTEG",
+   "Unclassified"
+  ],
+  [
+   "ACGL",
+   "Unclassified"
+  ],
+  [
+   "ACL",
+   "Unclassified"
+  ],
+  [
+   "ADDIND",
+   "Unclassified"
+  ],
+  [
+   "ADFFOODS",
+   "Unclassified"
+  ],
+  [
+   "ADL",
+   "Unclassified"
+  ],
+  [
+   "ADOR",
+   "Unclassified"
+  ],
+  [
+   "ADROITINFO",
+   "Unclassified"
+  ],
+  [
+   "ADSL",
+   "Unclassified"
+  ],
+  [
+   "ADVAIT",
+   "Unclassified"
+  ],
+  [
+   "ADVANCE",
+   "Unclassified"
+  ],
+  [
+   "ADVANIHOTR",
+   "Unclassified"
+  ],
+  [
+   "ADVENTHTL",
+   "Unclassified"
+  ],
+  [
+   "ADVIKCA",
+   "Unclassified"
+  ],
+  [
+   "AEPL",
+   "Unclassified"
+  ],
+  [
+   "AEROENTER",
+   "Unclassified"
+  ],
+  [
+   "AEROFLEX",
+   "Unclassified"
+  ],
+  [
+   "AERONEU",
+   "Unclassified"
+  ],
+  [
+   "AEROPLANE",
+   "Unclassified"
+  ],
+  [
+   "AFFORDABLE",
+   "Unclassified"
+  ],
+  [
+   "AFIL",
+   "Unclassified"
+  ],
+  [
+   "AFSL",
+   "Unclassified"
+  ],
+  [
+   "AGARIND",
+   "Unclassified"
+  ],
+  [
+   "AGI",
+   "Unclassified"
+  ],
+  [
+   "AGIIL",
+   "Unclassified"
+  ],
+  [
+   "AGL",
+   "Unclassified"
+  ],
+  [
+   "AGRITECH",
+   "Unclassified"
+  ],
+  [
+   "AGROPHOS",
+   "Unclassified"
+  ],
+  [
+   "AHCL",
+   "Unclassified"
+  ],
+  [
+   "AHLADA",
+   "Unclassified"
+  ],
+  [
+   "AHLEAST",
+   "Unclassified"
+  ],
+  [
+   "AIRAN",
+   "Unclassified"
+  ],
+  [
+   "AIROLAM",
+   "Unclassified"
+  ],
+  [
+   "AJAXENGG",
+   "Unclassified"
+  ],
+  [
+   "AJMERA",
+   "Unclassified"
+  ],
+  [
+   "AJOONI",
+   "Unclassified"
+  ],
+  [
+   "AKASH",
+   "Unclassified"
+  ],
+  [
+   "AKCAPIT",
+   "Unclassified"
+  ],
+  [
+   "AKG",
+   "Unclassified"
+  ],
+  [
+   "AKSHAR",
+   "Unclassified"
+  ],
+  [
+   "ALANKIT",
+   "Unclassified"
+  ],
+  [
+   "ALBERTDAVD",
+   "Unclassified"
+  ],
+  [
+   "ALEMBICLTD",
+   "Unclassified"
+  ],
+  [
+   "ALFREDHE",
+   "Unclassified"
+  ],
+  [
+   "ALGOQUANT",
+   "Unclassified"
+  ],
+  [
+   "ALICON",
+   "Unclassified"
+  ],
+  [
+   "ALLCARGO",
+   "Unclassified"
+  ],
+  [
+   "ALLDIGI",
+   "Unclassified"
+  ],
+  [
+   "ALLTIME",
+   "Unclassified"
+  ],
+  [
+   "ALMONDZ",
+   "Unclassified"
+  ],
+  [
+   "ALPA",
+   "Unclassified"
+  ],
+  [
+   "ALPINETEX",
+   "Unclassified"
+  ],
+  [
+   "ALUFLUOR",
+   "Unclassified"
+  ],
+  [
+   "AMAGI",
+   "Unclassified"
+  ],
+  [
+   "AMAL",
+   "Unclassified"
+  ],
+  [
+   "AMARJOTHI",
+   "Unclassified"
+  ],
+  [
+   "AMBICAAGAR",
+   "Unclassified"
+  ],
+  [
+   "AMBIKCO",
+   "Unclassified"
+  ],
+  [
+   "AMJLAND",
+   "Unclassified"
+  ],
+  [
+   "AMNPLST",
+   "Unclassified"
+  ],
+  [
+   "AMRUTANJAN",
+   "Unclassified"
+  ],
+  [
+   "ANDHRAPAP",
+   "Unclassified"
+  ],
+  [
+   "ANDHRSUGAR",
+   "Unclassified"
+  ],
+  [
+   "ANDREWYU",
+   "Unclassified"
+  ],
+  [
+   "ANIKINDS",
+   "Unclassified"
+  ],
+  [
+   "ANNAPURNA",
+   "Unclassified"
+  ],
+  [
+   "ANNU",
+   "Unclassified"
+  ],
+  [
+   "ANSALBU",
+   "Unclassified"
+  ],
+  [
+   "ANTELOPUS",
+   "Unclassified"
+  ],
+  [
+   "ANTGRAPHIC",
+   "Unclassified"
+  ],
+  [
+   "ANUHPHR",
+   "Unclassified"
+  ],
+  [
+   "APCL",
+   "Unclassified"
+  ],
+  [
+   "APCOTEXIND",
+   "Unclassified"
+  ],
+  [
+   "APEX",
+   "Unclassified"
+  ],
+  [
+   "APOLLOPIPE",
+   "Unclassified"
+  ],
+  [
+   "APOLSINHOT",
+   "Unclassified"
+  ],
+  [
+   "APOORVA",
+   "Unclassified"
+  ],
+  [
+   "APTECHT",
+   "Unclassified"
+  ],
+  [
+   "AQYLON",
+   "Unclassified"
+  ],
+  [
+   "ARCHIDPLY",
+   "Unclassified"
+  ],
+  [
+   "ARCHIES",
+   "Unclassified"
+  ],
+  [
+   "ARCIL",
+   "Unclassified"
+  ],
+  [
+   "ARCL",
+   "Unclassified"
+  ],
+  [
+   "ARDEE",
+   "Unclassified"
+  ],
+  [
+   "ARENTERP",
+   "Unclassified"
+  ],
+  [
+   "ARFIN",
+   "Unclassified"
+  ],
+  [
+   "ARIHANT",
+   "Unclassified"
+  ],
+  [
+   "ARIHANTCAP",
+   "Unclassified"
+  ],
+  [
+   "ARIHANTSUP",
+   "Unclassified"
+  ],
+  [
+   "ARIS",
+   "Unclassified"
+  ],
+  [
+   "ARKADE",
+   "Unclassified"
+  ],
+  [
+   "ARMANFIN",
+   "Unclassified"
+  ],
+  [
+   "AROGRANITE",
+   "Unclassified"
+  ],
+  [
+   "ARROWGREEN",
+   "Unclassified"
+  ],
+  [
+   "ARSSBL",
+   "Unclassified"
+  ],
+  [
+   "ARTEMISMED",
+   "Unclassified"
+  ],
+  [
+   "ARTNIRMAN",
+   "Unclassified"
+  ],
+  [
+   "ARVEE",
+   "Unclassified"
+  ],
+  [
+   "ARVSMART",
+   "Unclassified"
+  ],
+  [
+   "ARYAMAN",
+   "Unclassified"
+  ],
+  [
+   "ASAL",
+   "Unclassified"
+  ],
+  [
+   "ASALCBR",
+   "Unclassified"
+  ],
+  [
+   "ASHIANA",
+   "Unclassified"
+  ],
+  [
+   "ASHIMASYN",
+   "Unclassified"
+  ],
+  [
+   "ASHOKAMET",
+   "Unclassified"
+  ],
+  [
+   "ASIANENE",
+   "Unclassified"
+  ],
+  [
+   "ASIANHOTNR",
+   "Unclassified"
+  ],
+  [
+   "ASIANTILES",
+   "Unclassified"
+  ],
+  [
+   "ASIANTNE",
+   "Unclassified"
+  ],
+  [
+   "ASMS",
+   "Unclassified"
+  ],
+  [
+   "ASPINWALL",
+   "Unclassified"
+  ],
+  [
+   "ASSAMENT",
+   "Unclassified"
+  ],
+  [
+   "ASTAR",
+   "Unclassified"
+  ],
+  [
+   "ASTEC",
+   "Unclassified"
+  ],
+  [
+   "ASTRAZEN",
+   "Unclassified"
+  ],
+  [
+   "ATALREAL",
+   "Unclassified"
+  ],
+  [
+   "ATAM",
+   "Unclassified"
+  ],
+  [
+   "ATL",
+   "Unclassified"
+  ],
+  [
+   "ATLANTAA",
+   "Unclassified"
+  ],
+  [
+   "ATLASCYCLE",
+   "Unclassified"
+  ],
+  [
+   "ATULAUTO",
+   "Unclassified"
+  ],
+  [
+   "AUGMONT",
+   "Unclassified"
+  ],
+  [
+   "AURUM",
+   "Unclassified"
+  ],
+  [
+   "AURUS",
+   "Unclassified"
+  ],
+  [
+   "AUSOMENT",
+   "Unclassified"
+  ],
+  [
+   "AUSTENG",
+   "Unclassified"
+  ],
+  [
+   "AUTOAXLES",
+   "Unclassified"
+  ],
+  [
+   "AUTOIND",
+   "Unclassified"
+  ],
+  [
+   "AVADHSUGAR",
+   "Unclassified"
+  ],
+  [
+   "AVANCE",
+   "Unclassified"
+  ],
+  [
+   "AVANTEL",
+   "Unclassified"
+  ],
+  [
+   "AVONMORE",
+   "Unclassified"
+  ],
+  [
+   "AVROIND",
+   "Unclassified"
+  ],
+  [
+   "AVTNPL",
+   "Unclassified"
+  ],
+  [
+   "AWHCL",
+   "Unclassified"
+  ],
+  [
+   "AXITA",
+   "Unclassified"
+  ],
+  [
+   "AXTEL",
+   "Unclassified"
+  ],
+  [
+   "AYE",
+   "Unclassified"
+  ],
+  [
+   "AYMSYNTEX",
+   "Unclassified"
+  ],
+  [
+   "AZADIND",
+   "Unclassified"
+  ],
+  [
+   "BAGFILMS",
+   "Unclassified"
+  ],
+  [
+   "BAIDFIN",
+   "Unclassified"
+  ],
+  [
+   "BAJAJCON",
+   "Unclassified"
+  ],
+  [
+   "BAJAJHCARE",
+   "Unclassified"
+  ],
+  [
+   "BAJAJHIND",
+   "Unclassified"
+  ],
+  [
+   "BAJAJINDEF",
+   "Unclassified"
+  ],
+  [
+   "BAJAJST",
+   "Unclassified"
+  ],
+  [
+   "BAJEL",
+   "Unclassified"
+  ],
+  [
+   "BALAJEE",
+   "Unclassified"
+  ],
+  [
+   "BALAJITELE",
+   "Unclassified"
+  ],
+  [
+   "BALAXI",
+   "Unclassified"
+  ],
+  [
+   "BALKRISHNA",
+   "Unclassified"
+  ],
+  [
+   "BALMLAWRIE",
+   "Unclassified"
+  ],
+  [
+   "BALPHARMA",
+   "Unclassified"
+  ],
+  [
+   "BANARBEADS",
+   "Unclassified"
+  ],
+  [
+   "BANARISUG",
+   "Unclassified"
+  ],
+  [
+   "BANG",
+   "Unclassified"
+  ],
+  [
+   "BANKA",
+   "Unclassified"
+  ],
+  [
+   "BANSALWIRE",
+   "Unclassified"
+  ],
+  [
+   "BANSWRAS",
+   "Unclassified"
+  ],
+  [
+   "BASF",
+   "Unclassified"
+  ],
+  [
+   "BATLIBOI",
+   "Unclassified"
+  ],
+  [
+   "BBL",
+   "Unclassified"
+  ],
+  [
+   "BBTCL",
+   "Unclassified"
+  ],
+  [
+   "BCG",
+   "Unclassified"
+  ],
+  [
+   "BCLIND",
+   "Unclassified"
+  ],
+  [
+   "BCONCEPTS",
+   "Unclassified"
+  ],
+  [
+   "BCPL",
+   "Unclassified"
+  ],
+  [
+   "BEARDSELL",
+   "Unclassified"
+  ],
+  [
+   "BEDMUTHA",
+   "Unclassified"
+  ],
+  [
+   "BEEKAY",
+   "Unclassified"
+  ],
+  [
+   "BELLACASA",
+   "Unclassified"
+  ],
+  [
+   "BENARAS",
+   "Unclassified"
+  ],
+  [
+   "BENGALASM",
+   "Unclassified"
+  ],
+  [
+   "BEPL",
+   "Unclassified"
+  ],
+  [
+   "BESTAGRO",
+   "Unclassified"
+  ],
+  [
+   "BETA",
+   "Unclassified"
+  ],
+  [
+   "BFINVEST",
+   "Unclassified"
+  ],
+  [
+   "BFUTILITIE",
+   "Unclassified"
+  ],
+  [
+   "BHAGCHEM",
+   "Unclassified"
+  ],
+  [
+   "BHAGERIA",
+   "Unclassified"
+  ],
+  [
+   "BHAGYANGR",
+   "Unclassified"
+  ],
+  [
+   "BHANDARI",
+   "Unclassified"
+  ],
+  [
+   "BHARATRAS",
+   "Unclassified"
+  ],
+  [
+   "BHARATSE",
+   "Unclassified"
+  ],
+  [
+   "BHARATWIRE",
+   "Unclassified"
+  ],
+  [
+   "BIGBLOC",
+   "Unclassified"
+  ],
+  [
+   "BIL",
+   "Unclassified"
+  ],
+  [
+   "BIMETAL",
+   "Unclassified"
+  ],
+  [
+   "BIOFILCHEM",
+   "Unclassified"
+  ],
+  [
+   "BIRLACABLE",
+   "Unclassified"
+  ],
+  [
+   "BIRLAMONEY",
+   "Unclassified"
+  ],
+  [
+   "BIRLANU",
+   "Unclassified"
+  ],
+  [
+   "BLAL",
+   "Unclassified"
+  ],
+  [
+   "BLBLIMITED",
+   "Unclassified"
+  ],
+  [
+   "BLEL",
+   "Unclassified"
+  ],
+  [
+   "BLIL",
+   "Unclassified"
+  ],
+  [
+   "BLKASHYAP",
+   "Unclassified"
+  ],
+  [
+   "BLSE",
+   "Unclassified"
+  ],
+  [
+   "BLUECLOUDS",
+   "Unclassified"
+  ],
+  [
+   "BLUECOAST",
+   "Unclassified"
+  ],
+  [
+   "BLUSPRING",
+   "Unclassified"
+  ],
+  [
+   "BMWVENTLTD",
+   "Unclassified"
+  ],
+  [
+   "BNAGROCHEM",
+   "Unclassified"
+  ],
+  [
+   "BODALCHEM",
+   "Unclassified"
+  ],
+  [
+   "BOHRAIND",
+   "Unclassified"
+  ],
+  [
+   "BOMDYEING",
+   "Unclassified"
+  ],
+  [
+   "BONLON",
+   "Unclassified"
+  ],
+  [
+   "BORANA",
+   "Unclassified"
+  ],
+  [
+   "BOROLTD",
+   "Unclassified"
+  ],
+  [
+   "BOROSCI",
+   "Unclassified"
+  ],
+  [
+   "BOSCH-HCIL",
+   "Unclassified"
+  ],
+  [
+   "BPL",
+   "Unclassified"
+  ],
+  [
+   "BPLPHARMA",
+   "Unclassified"
+  ],
+  [
+   "BRAHMINFRA",
+   "Unclassified"
+  ],
+  [
+   "BRIGHOTEL",
+   "Unclassified"
+  ],
+  [
+   "BRIGHTBR",
+   "Unclassified"
+  ],
+  [
+   "BRNL",
+   "Unclassified"
+  ],
+  [
+   "BROOKS",
+   "Unclassified"
+  ],
+  [
+   "BSHSL",
+   "Unclassified"
+  ],
+  [
+   "BSL",
+   "Unclassified"
+  ],
+  [
+   "BTML",
+   "Unclassified"
+  ],
+  [
+   "BUILDPRO",
+   "Unclassified"
+  ],
+  [
+   "BUTTERFLY",
+   "Unclassified"
+  ],
+  [
+   "BVCL",
+   "Unclassified"
+  ],
+  [
+   "BYKE",
+   "Unclassified"
+  ],
+  [
+   "CAMLINFINE",
+   "Unclassified"
+  ],
+  [
+   "CANTABIL",
+   "Unclassified"
+  ],
+  [
+   "CAPACITE",
+   "Unclassified"
+  ],
+  [
+   "CAPITALSFB",
+   "Unclassified"
+  ],
+  [
+   "CARERATING",
+   "Unclassified"
+  ],
+  [
+   "CARRARO",
+   "Unclassified"
+  ],
+  [
+   "CARYSIL",
+   "Unclassified"
+  ],
+  [
+   "CCCL",
+   "Unclassified"
+  ],
+  [
+   "CCHHL",
+   "Unclassified"
+  ],
+  [
+   "CEIGALL",
+   "Unclassified"
+  ],
+  [
+   "CEINSYS",
+   "Unclassified"
+  ],
+  [
+   "CELEBRITY",
+   "Unclassified"
+  ],
+  [
+   "CENTENKA",
+   "Unclassified"
+  ],
+  [
+   "CENTEXT",
+   "Unclassified"
+  ],
+  [
+   "CENTRUM",
+   "Unclassified"
+  ],
+  [
+   "CENTUM",
+   "Unclassified"
+  ],
+  [
+   "CEWATER",
+   "Unclassified"
+  ],
+  [
+   "CGVAK",
+   "Unclassified"
+  ],
+  [
+   "CHEMBOND",
+   "Unclassified"
+  ],
+  [
+   "CHEMCRUX",
+   "Unclassified"
+  ],
+  [
+   "CHEMFAB",
+   "Unclassified"
+  ],
+  [
+   "CHEMPLASTS",
+   "Unclassified"
+  ],
+  [
+   "CHEVIOT",
+   "Unclassified"
+  ],
+  [
+   "CIFL",
+   "Unclassified"
+  ],
+  [
+   "CINELINE",
+   "Unclassified"
+  ],
+  [
+   "CINEVISTA",
+   "Unclassified"
+  ],
+  [
+   "CLEDUCATE",
+   "Unclassified"
+  ],
+  [
+   "CLSEL",
+   "Unclassified"
+  ],
+  [
+   "CMLL",
+   "Unclassified"
+  ],
+  [
+   "CMRGREEN",
+   "Unclassified"
+  ],
+  [
+   "CNL",
+   "Unclassified"
+  ],
+  [
+   "COASTCORP",
+   "Unclassified"
+  ],
+  [
+   "COCKERILL",
+   "Unclassified"
+  ],
+  [
+   "COFFEEDAY",
+   "Unclassified"
+  ],
+  [
+   "COMFINTE",
+   "Unclassified"
+  ],
+  [
+   "COMPEAU",
+   "Unclassified"
+  ],
+  [
+   "COMPUSOFT",
+   "Unclassified"
+  ],
+  [
+   "COMSYN",
+   "Unclassified"
+  ],
+  [
+   "CONFIPET",
+   "Unclassified"
+  ],
+  [
+   "CONTROLPR",
+   "Unclassified"
+  ],
+  [
+   "CORALFINAC",
+   "Unclassified"
+  ],
+  [
+   "CORDELIA",
+   "Unclassified"
+  ],
+  [
+   "COSMOFIRST",
+   "Unclassified"
+  ],
+  [
+   "CPCAP",
+   "Unclassified"
+  ],
+  [
+   "CPEDU",
+   "Unclassified"
+  ],
+  [
+   "CPL",
+   "Unclassified"
+  ],
+  [
+   "CRAVATEX",
+   "Unclassified"
+  ],
+  [
+   "CREATIVEYE",
+   "Unclassified"
+  ],
+  [
+   "CREST",
+   "Unclassified"
+  ],
+  [
+   "CRESTO",
+   "Unclassified"
+  ],
+  [
+   "CROWN",
+   "Unclassified"
+  ],
+  [
+   "CSLFINANCE",
+   "Unclassified"
+  ],
+  [
+   "CSM",
+   "Unclassified"
+  ],
+  [
+   "CUBEXTUB",
+   "Unclassified"
+  ],
+  [
+   "CYIENTDLM",
+   "Unclassified"
+  ],
+  [
+   "DALMIASUG",
+   "Unclassified"
+  ],
+  [
+   "DAMCAPITAL",
+   "Unclassified"
+  ],
+  [
+   "DANGEE",
+   "Unclassified"
+  ],
+  [
+   "DAVANGERE",
+   "Unclassified"
+  ],
+  [
+   "DBCORP",
+   "Unclassified"
+  ],
+  [
+   "DBEIL",
+   "Unclassified"
+  ],
+  [
+   "DBOL",
+   "Unclassified"
+  ],
+  [
+   "DCAL",
+   "Unclassified"
+  ],
+  [
+   "DCI",
+   "Unclassified"
+  ],
+  [
+   "DCM",
+   "Unclassified"
+  ],
+  [
+   "DCMFINSERV",
+   "Unclassified"
+  ],
+  [
+   "DCMNVL",
+   "Unclassified"
+  ],
+  [
+   "DCMSIL",
+   "Unclassified"
+  ],
+  [
+   "DCMSRIND",
+   "Unclassified"
+  ],
+  [
+   "DCW",
+   "Unclassified"
+  ],
+  [
+   "DCXINDIA",
+   "Unclassified"
+  ],
+  [
+   "DDEVPLSTIK",
+   "Unclassified"
+  ],
+  [
+   "DECCANCE",
+   "Unclassified"
+  ],
+  [
+   "DECNGOLD",
+   "Unclassified"
+  ],
+  [
+   "DEEDEV",
+   "Unclassified"
+  ],
+  [
+   "DEEPA",
+   "Unclassified"
+  ],
+  [
+   "DEEPINDS",
+   "Unclassified"
+  ],
+  [
+   "DELTACORP",
+   "Unclassified"
+  ],
+  [
+   "DELTAMAGNT",
+   "Unclassified"
+  ],
+  [
+   "DEN",
+   "Unclassified"
+  ],
+  [
+   "DENORA",
+   "Unclassified"
+  ],
+  [
+   "DENTA",
+   "Unclassified"
+  ],
+  [
+   "DEVIT",
+   "Unclassified"
+  ],
+  [
+   "DEVX",
+   "Unclassified"
+  ],
+  [
+   "DGCONTENT",
+   "Unclassified"
+  ],
+  [
+   "DHAMPURSUG",
+   "Unclassified"
+  ],
+  [
+   "DHANBANK",
+   "Unclassified"
+  ],
+  [
+   "DHANUKA",
+   "Unclassified"
+  ],
+  [
+   "DHARMAJ",
+   "Unclassified"
+  ],
+  [
+   "DHATRE",
+   "Unclassified"
+  ],
+  [
+   "DHOOTTRANS",
+   "Unclassified"
+  ],
+  [
+   "DHRUV",
+   "Unclassified"
+  ],
+  [
+   "DHUNINV",
+   "Unclassified"
+  ],
+  [
+   "DIAMINESQ",
+   "Unclassified"
+  ],
+  [
+   "DIAMONDYD",
+   "Unclassified"
+  ],
+  [
+   "DICIND",
+   "Unclassified"
+  ],
+  [
+   "DIFFNKG",
+   "Unclassified"
+  ],
+  [
+   "DIGIDRIVE",
+   "Unclassified"
+  ],
+  [
+   "DIGISPICE",
+   "Unclassified"
+  ],
+  [
+   "DIGITIDE",
+   "Unclassified"
+  ],
+  [
+   "DISAQ",
+   "Unclassified"
+  ],
+  [
+   "DISHTV",
+   "Unclassified"
+  ],
+  [
+   "DIVGIITTS",
+   "Unclassified"
+  ],
+  [
+   "DJML",
+   "Unclassified"
+  ],
+  [
+   "DLINKINDIA",
+   "Unclassified"
+  ],
+  [
+   "DMCC",
+   "Unclassified"
+  ],
+  [
+   "DNAMEDIA",
+   "Unclassified"
+  ],
+  [
+   "DODLA",
+   "Unclassified"
+  ],
+  [
+   "DOLATALGO",
+   "Unclassified"
+  ],
+  [
+   "DOLLAR",
+   "Unclassified"
+  ],
+  [
+   "DOLLEX",
+   "Unclassified"
+  ],
+  [
+   "DOLPHIN",
+   "Unclassified"
+  ],
+  [
+   "DONEAR",
+   "Unclassified"
+  ],
+  [
+   "DPABHUSHAN",
+   "Unclassified"
+  ],
+  [
+   "DRAGARWQ",
+   "Unclassified"
+  ],
+  [
+   "DRCSYSTEMS",
+   "Unclassified"
+  ],
+  [
+   "DREAMFOLKS",
+   "Unclassified"
+  ],
+  [
+   "DREDGECORP",
+   "Unclassified"
+  ],
+  [
+   "DSFCL",
+   "Unclassified"
+  ],
+  [
+   "DSSL",
+   "Unclassified"
+  ],
+  [
+   "DUCON",
+   "Unclassified"
+  ],
+  [
+   "DVL",
+   "Unclassified"
+  ],
+  [
+   "DWARKESH",
+   "Unclassified"
+  ],
+  [
+   "DYCL",
+   "Unclassified"
+  ],
+  [
+   "DYNPRO",
+   "Unclassified"
+  ],
+  [
+   "EASEMYTRIP",
+   "Unclassified"
+  ],
+  [
+   "EASTWEST",
+   "Unclassified"
+  ],
+  [
+   "EBGNG",
+   "Unclassified"
+  ],
+  [
+   "ECORECO",
+   "Unclassified"
+  ],
+  [
+   "ECOSMOBLTY",
+   "Unclassified"
+  ],
+  [
+   "EFCIL",
+   "Unclassified"
+  ],
+  [
+   "EIHAHOTELS",
+   "Unclassified"
+  ],
+  [
+   "EIMCOELECO",
+   "Unclassified"
+  ],
+  [
+   "EKC",
+   "Unclassified"
+  ],
+  [
+   "EKI",
+   "Unclassified"
+  ],
+  [
+   "ELANTAS",
+   "Unclassified"
+  ],
+  [
+   "ELCIDIN",
+   "Unclassified"
+  ],
+  [
+   "ELDEHSG",
+   "Unclassified"
+  ],
+  [
+   "ELECTHERM",
+   "Unclassified"
+  ],
+  [
+   "ELGIRUBCO",
+   "Unclassified"
+  ],
+  [
+   "ELIN",
+   "Unclassified"
+  ],
+  [
+   "ELITECON",
+   "Unclassified"
+  ],
+  [
+   "ELPROINTL",
+   "Unclassified"
+  ],
+  [
+   "EMAMIREAL",
+   "Unclassified"
+  ],
+  [
+   "EMKAY",
+   "Unclassified"
+  ],
+  [
+   "EMPIND",
+   "Unclassified"
+  ],
+  [
+   "EMPOWER",
+   "Unclassified"
+  ],
+  [
+   "EMSLIMITED",
+   "Unclassified"
+  ],
+  [
+   "EMUDHRA",
+   "Unclassified"
+  ],
+  [
+   "ENERGYDEV",
+   "Unclassified"
+  ],
+  [
+   "ENIL",
+   "Unclassified"
+  ],
+  [
+   "ENKEIWHEL",
+   "Unclassified"
+  ],
+  [
+   "EPACK",
+   "Unclassified"
+  ],
+  [
+   "EPACKPEB",
+   "Unclassified"
+  ],
+  [
+   "EPIGRAL",
+   "Unclassified"
+  ],
+  [
+   "ESABINDIA",
+   "Unclassified"
+  ],
+  [
+   "ESDS",
+   "Unclassified"
+  ],
+  [
+   "ESSARSHPNG",
+   "Unclassified"
+  ],
+  [
+   "ESSENTIA",
+   "Unclassified"
+  ],
+  [
+   "ESTER",
+   "Unclassified"
+  ],
+  [
+   "EUROBOND",
+   "Unclassified"
+  ],
+  [
+   "EUROPRATIK",
+   "Unclassified"
+  ],
+  [
+   "EVEREADY",
+   "Unclassified"
+  ],
+  [
+   "EXCELINDUS",
+   "Unclassified"
+  ],
+  [
+   "EXCELSOFT",
+   "Unclassified"
+  ],
+  [
+   "EXICOM",
+   "Unclassified"
+  ],
+  [
+   "EXPLEOSOL",
+   "Unclassified"
+  ],
+  [
+   "EXXARO",
+   "Unclassified"
+  ],
+  [
+   "FABTECH",
+   "Unclassified"
+  ],
+  [
+   "FAZE3Q",
+   "Unclassified"
+  ],
+  [
+   "FCL",
+   "Unclassified"
+  ],
+  [
+   "FCSSOFT",
+   "Unclassified"
+  ],
+  [
+   "FDC",
+   "Unclassified"
+  ],
+  [
+   "FEDDERSHOL",
+   "Unclassified"
+  ],
+  [
+   "FERMENTA",
+   "Unclassified"
+  ],
+  [
+   "FIBERWEB",
+   "Unclassified"
+  ],
+  [
+   "FILATEX",
+   "Unclassified"
+  ],
+  [
+   "FILATFASH",
+   "Unclassified"
+  ],
+  [
+   "FINEORG",
+   "Unclassified"
+  ],
+  [
+   "FINKURVE",
+   "Unclassified"
+  ],
+  [
+   "FINOPB",
+   "Unclassified"
+  ],
+  [
+   "FISCHER",
+   "Unclassified"
+  ],
+  [
+   "FLAIR",
+   "Unclassified"
+  ],
+  [
+   "FMGOETZE",
+   "Unclassified"
+  ],
+  [
+   "FMNL",
+   "Unclassified"
+  ],
+  [
+   "FOODSIN",
+   "Unclassified"
+  ],
+  [
+   "FOSECOIND",
+   "Unclassified"
+  ],
+  [
+   "FREDUN",
+   "Unclassified"
+  ],
+  [
+   "FRONTSP",
+   "Unclassified"
+  ],
+  [
+   "FUSION",
+   "Unclassified"
+  ],
+  [
+   "GAJA",
+   "Unclassified"
+  ],
+  [
+   "GALAPREC",
+   "Unclassified"
+  ],
+  [
+   "GALAXYSURF",
+   "Unclassified"
+  ],
+  [
+   "GANDHAR",
+   "Unclassified"
+  ],
+  [
+   "GANDHITUBE",
+   "Unclassified"
+  ],
+  [
+   "GANECOS",
+   "Unclassified"
+  ],
+  [
+   "GANESHCP",
+   "Unclassified"
+  ],
+  [
+   "GANESHHOU",
+   "Unclassified"
+  ],
+  [
+   "GANGAFORGE",
+   "Unclassified"
+  ],
+  [
+   "GANGESSECU",
+   "Unclassified"
+  ],
+  [
+   "GARFIBRES",
+   "Unclassified"
+  ],
+  [
+   "GARUDA",
+   "Unclassified"
+  ],
+  [
+   "GATEWAY",
+   "Unclassified"
+  ],
+  [
+   "GAUDIUMIVF",
+   "Unclassified"
+  ],
+  [
+   "GAYAHWS",
+   "Unclassified"
+  ],
+  [
+   "GAYAPROJ",
+   "Unclassified"
+  ],
+  [
+   "GCSL",
+   "Unclassified"
+  ],
+  [
+   "GEEKAYWIRE",
+   "Unclassified"
+  ],
+  [
+   "GEMAROMA",
+   "Unclassified"
+  ],
+  [
+   "GENCON",
+   "Unclassified"
+  ],
+  [
+   "GENESYS",
+   "Unclassified"
+  ],
+  [
+   "GENUSPAPER",
+   "Unclassified"
+  ],
+  [
+   "GENUSPOWER",
+   "Unclassified"
+  ],
+  [
+   "GEOJITFSL",
+   "Unclassified"
+  ],
+  [
+   "GFLLIMITED",
+   "Unclassified"
+  ],
+  [
+   "GHCLTEXTIL",
+   "Unclassified"
+  ],
+  [
+   "GICHSGFIN",
+   "Unclassified"
+  ],
+  [
+   "GILLANDERS",
+   "Unclassified"
+  ],
+  [
+   "GIPCL",
+   "Unclassified"
+  ],
+  [
+   "GKB",
+   "Unclassified"
+  ],
+  [
+   "GKENERGY",
+   "Unclassified"
+  ],
+  [
+   "GKSL",
+   "Unclassified"
+  ],
+  [
+   "GKWLIMITED",
+   "Unclassified"
+  ],
+  [
+   "GLASSWALL",
+   "Unclassified"
+  ],
+  [
+   "GLFL",
+   "Unclassified"
+  ],
+  [
+   "GLOBAL",
+   "Unclassified"
+  ],
+  [
+   "GLOBALE",
+   "Unclassified"
+  ],
+  [
+   "GLOBALVECT",
+   "Unclassified"
+  ],
+  [
+   "GLOBE",
+   "Unclassified"
+  ],
+  [
+   "GLOBECIVIL",
+   "Unclassified"
+  ],
+  [
+   "GLOBUSSPR",
+   "Unclassified"
+  ],
+  [
+   "GLOSTERLTD",
+   "Unclassified"
+  ],
+  [
+   "GLOTTIS",
+   "Unclassified"
+  ],
+  [
+   "GMBREW",
+   "Unclassified"
+  ],
+  [
+   "GNA",
+   "Unclassified"
+  ],
+  [
+   "GNRL",
+   "Unclassified"
+  ],
+  [
+   "GOACARBON",
+   "Unclassified"
+  ],
+  [
+   "GOCLCORP",
+   "Unclassified"
+  ],
+  [
+   "GOCOLORS",
+   "Unclassified"
+  ],
+  [
+   "GODAVARIB",
+   "Unclassified"
+  ],
+  [
+   "GOKUL",
+   "Unclassified"
+  ],
+  [
+   "GOLDIAM",
+   "Unclassified"
+  ],
+  [
+   "GOODLUCK",
+   "Unclassified"
+  ],
+  [
+   "GOODYEAR",
+   "Unclassified"
+  ],
+  [
+   "GOPAL",
+   "Unclassified"
+  ],
+  [
+   "GOYALALUM",
+   "Unclassified"
+  ],
+  [
+   "GPTHEALTH",
+   "Unclassified"
+  ],
+  [
+   "GPTINFRA",
+   "Unclassified"
+  ],
+  [
+   "GRANDOAK",
+   "Unclassified"
+  ],
+  [
+   "GRAUWEIL",
+   "Unclassified"
+  ],
+  [
+   "GREENLAM",
+   "Unclassified"
+  ],
+  [
+   "GREENPANEL",
+   "Unclassified"
+  ],
+  [
+   "GREENPLY",
+   "Unclassified"
+  ],
+  [
+   "GREENPOWER",
+   "Unclassified"
+  ],
+  [
+   "GRINFRA",
+   "Unclassified"
+  ],
+  [
+   "GRMOVER",
+   "Unclassified"
+  ],
+  [
+   "GROBTEA",
+   "Unclassified"
+  ],
+  [
+   "GRPLTD",
+   "Unclassified"
+  ],
+  [
+   "GSLSU",
+   "Unclassified"
+  ],
+  [
+   "GSPCROP",
+   "Unclassified"
+  ],
+  [
+   "GSS",
+   "Unclassified"
+  ],
+  [
+   "GTECJAINX",
+   "Unclassified"
+  ],
+  [
+   "GTL",
+   "Unclassified"
+  ],
+  [
+   "GTLINFRA",
+   "Unclassified"
+  ],
+  [
+   "GTPL",
+   "Unclassified"
+  ],
+  [
+   "GUFICBIO",
+   "Unclassified"
+  ],
+  [
+   "GUJALKALI",
+   "Unclassified"
+  ],
+  [
+   "GUJAPOLLO",
+   "Unclassified"
+  ],
+  [
+   "GUJENERGY",
+   "Unclassified"
+  ],
+  [
+   "GUJRAFFIA",
+   "Unclassified"
+  ],
+  [
+   "GUJTHEM",
+   "Unclassified"
+  ],
+  [
+   "GULFOILLUB",
+   "Unclassified"
+  ],
+  [
+   "GULPOLY",
+   "Unclassified"
+  ],
+  [
+   "GVPIL",
+   "Unclassified"
+  ],
+  [
+   "GYFTR",
+   "Unclassified"
+  ],
+  [
+   "HALDER",
+   "Unclassified"
+  ],
+  [
+   "HALEOSLABS",
+   "Unclassified"
+  ],
+  [
+   "HAMPTON",
+   "Unclassified"
+  ],
+  [
+   "HAPPYFORGE",
+   "Unclassified"
+  ],
+  [
+   "HARDWYN",
+   "Unclassified"
+  ],
+  [
+   "HARIOMPIPE",
+   "Unclassified"
+  ],
+  [
+   "HARRMALAYA",
+   "Unclassified"
+  ],
+  [
+   "HARSHA",
+   "Unclassified"
+  ],
+  [
+   "HATHWAY",
+   "Unclassified"
+  ],
+  [
+   "HATSUN",
+   "Unclassified"
+  ],
+  [
+   "HAVISHA",
+   "Unclassified"
+  ],
+  [
+   "HAWKINCOOK",
+   "Unclassified"
+  ],
+  [
+   "HAZOOR",
+   "Unclassified"
+  ],
+  [
+   "HBESD",
+   "Unclassified"
+  ],
+  [
+   "HBPOR",
+   "Unclassified"
+  ],
+  [
+   "HBSL",
+   "Unclassified"
+  ],
+  [
+   "HCL-INSYS",
+   "Unclassified"
+  ],
+  [
+   "HEADSUP",
+   "Unclassified"
+  ],
+  [
+   "HEALTHX",
+   "Unclassified"
+  ],
+  [
+   "HECPROJECT",
+   "Unclassified"
+  ],
+  [
+   "HEIDELBERG",
+   "Unclassified"
+  ],
+  [
+   "HERANBA",
+   "Unclassified"
+  ],
+  [
+   "HEROMOTORS",
+   "Unclassified"
+  ],
+  [
+   "HESTERBIO",
+   "Unclassified"
+  ],
+  [
+   "HEXATRADEX",
+   "Unclassified"
+  ],
+  [
+   "HGM",
+   "Unclassified"
+  ],
+  [
+   "HGS",
+   "Unclassified"
+  ],
+  [
+   "HIKAL",
+   "Unclassified"
+  ],
+  [
+   "HILINFRA",
+   "Unclassified"
+  ],
+  [
+   "HILTON",
+   "Unclassified"
+  ],
+  [
+   "HIMATSEIDE",
+   "Unclassified"
+  ],
+  [
+   "HINDADH",
+   "Unclassified"
+  ],
+  [
+   "HINDALUMI",
+   "Unclassified"
+  ],
+  [
+   "HINDCOMPOS",
+   "Unclassified"
+  ],
+  [
+   "HINDCON",
+   "Unclassified"
+  ],
+  [
+   "HINDOILEXP",
+   "Unclassified"
+  ],
+  [
+   "HINDWAREAP",
+   "Unclassified"
+  ],
+  [
+   "HIRECT",
+   "Unclassified"
+  ],
+  [
+   "HISARMETAL",
+   "Unclassified"
+  ],
+  [
+   "HITECH",
+   "Unclassified"
+  ],
+  [
+   "HLEGLAS",
+   "Unclassified"
+  ],
+  [
+   "HLVLTD",
+   "Unclassified"
+  ],
+  [
+   "HMAAGRO",
+   "Unclassified"
+  ],
+  [
+   "HNDFDS",
+   "Unclassified"
+  ],
+  [
+   "HONDAPOWER",
+   "Unclassified"
+  ],
+  [
+   "HORIZONIND",
+   "Unclassified"
+  ],
+  [
+   "HPAL",
+   "Unclassified"
+  ],
+  [
+   "HPIL",
+   "Unclassified"
+  ],
+  [
+   "HPL",
+   "Unclassified"
+  ],
+  [
+   "HRYNSHP",
+   "Unclassified"
+  ],
+  [
+   "HTEL",
+   "Unclassified"
+  ],
+  [
+   "HTMEDIA",
+   "Unclassified"
+  ],
+  [
+   "HUBTOWN",
+   "Unclassified"
+  ],
+  [
+   "HUHTAMAKI",
+   "Unclassified"
+  ],
+  [
+   "IBULLSLTD",
+   "Unclassified"
+  ],
+  [
+   "ICEMAKE",
+   "Unclassified"
+  ],
+  [
+   "ICRA",
+   "Unclassified"
+  ],
+  [
+   "IDEAFORGE",
+   "Unclassified"
+  ],
+  [
+   "IFBAGRO",
+   "Unclassified"
+  ],
+  [
+   "IFGLEXPOR",
+   "Unclassified"
+  ],
+  [
+   "IGARASHI",
+   "Unclassified"
+  ],
+  [
+   "IGCL",
+   "Unclassified"
+  ],
+  [
+   "IGPL",
+   "Unclassified"
+  ],
+  [
+   "IITL",
+   "Unclassified"
+  ],
+  [
+   "IKIO",
+   "Unclassified"
+  ],
+  [
+   "IMAGICAA",
+   "Unclassified"
+  ],
+  [
+   "IMPAL",
+   "Unclassified"
+  ],
+  [
+   "INA",
+   "Unclassified"
+  ],
+  [
+   "INCREDIBLE",
+   "Unclassified"
+  ],
+  [
+   "INDBANK",
+   "Unclassified"
+  ],
+  [
+   "INDIANCARD",
+   "Unclassified"
+  ],
+  [
+   "INDIANHUME",
+   "Unclassified"
+  ],
+  [
+   "INDIQUBE",
+   "Unclassified"
+  ],
+  [
+   "INDNIPPON",
+   "Unclassified"
+  ],
+  [
+   "INDOBORAX",
+   "Unclassified"
+  ],
+  [
+   "INDOCO",
+   "Unclassified"
+  ],
+  [
+   "INDOFARM",
+   "Unclassified"
+  ],
+  [
+   "INDOKEM",
+   "Unclassified"
+  ],
+  [
+   "INDOMIM",
+   "Unclassified"
+  ],
+  [
+   "INDORAMA",
+   "Unclassified"
+  ],
+  [
+   "INDOSTAR",
+   "Unclassified"
+  ],
+  [
+   "INDOTECH",
+   "Unclassified"
+  ],
+  [
+   "INDOTHAI",
+   "Unclassified"
+  ],
+  [
+   "INDOUS",
+   "Unclassified"
+  ],
+  [
+   "INDOWIND",
+   "Unclassified"
+  ],
+  [
+   "INDPRUD",
+   "Unclassified"
+  ],
+  [
+   "INDRAMEDCO",
+   "Unclassified"
+  ],
+  [
+   "INDSWFTLAB",
+   "Unclassified"
+  ],
+  [
+   "INDTERRAIN",
+   "Unclassified"
+  ],
+  [
+   "INFOBEAN",
+   "Unclassified"
+  ],
+  [
+   "INFOMEDIA",
+   "Unclassified"
+  ],
+  [
+   "INGERRAND",
+   "Unclassified"
+  ],
+  [
+   "INNOVACAP",
+   "Unclassified"
+  ],
+  [
+   "INNOVANA",
+   "Unclassified"
+  ],
+  [
+   "INNOVISION",
+   "Unclassified"
+  ],
+  [
+   "INSECTICID",
+   "Unclassified"
+  ],
+  [
+   "INSPIRISYS",
+   "Unclassified"
+  ],
+  [
+   "INTENTECH",
+   "Unclassified"
+  ],
+  [
+   "INTERARCH",
+   "Unclassified"
+  ],
+  [
+   "INTLCONV",
+   "Unclassified"
+  ],
+  [
+   "INVENTURE",
+   "Unclassified"
+  ],
+  [
+   "IOLCP",
+   "Unclassified"
+  ],
+  [
+   "IPL",
+   "Unclassified"
+  ],
+  [
+   "IPRINGLTD",
+   "Unclassified"
+  ],
+  [
+   "IRIS",
+   "Unclassified"
+  ],
+  [
+   "IRISDOREME",
+   "Unclassified"
+  ],
+  [
+   "IRMENERGY",
+   "Unclassified"
+  ],
+  [
+   "ISFT",
+   "Unclassified"
+  ],
+  [
+   "ISGEC",
+   "Unclassified"
+  ],
+  [
+   "ISHANCH",
+   "Unclassified"
+  ],
+  [
+   "ISTLTD",
+   "Unclassified"
+  ],
+  [
+   "ITDC",
+   "Unclassified"
+  ],
+  [
+   "ITL",
+   "Unclassified"
+  ],
+  [
+   "IVALUE",
+   "Unclassified"
+  ],
+  [
+   "IVC",
+   "Unclassified"
+  ],
+  [
+   "IWP",
+   "Unclassified"
+  ],
+  [
+   "IZMO",
+   "Unclassified"
+  ],
+  [
+   "JAGRAN",
+   "Unclassified"
+  ],
+  [
+   "JAGSNPHARM",
+   "Unclassified"
+  ],
+  [
+   "JAICORPLTD",
+   "Unclassified"
+  ],
+  [
+   "JAIPURKURT",
+   "Unclassified"
+  ],
+  [
+   "JARO",
+   "Unclassified"
+  ],
+  [
+   "JASH",
+   "Unclassified"
+  ],
+  [
+   "JAYAGROGN",
+   "Unclassified"
+  ],
+  [
+   "JAYBARMARU",
+   "Unclassified"
+  ],
+  [
+   "JAYKAY",
+   "Unclassified"
+  ],
+  [
+   "JAYSREETEA",
+   "Unclassified"
+  ],
+  [
+   "JENBURPH",
+   "Unclassified"
+  ],
+  [
+   "JETFREIGHT",
+   "Unclassified"
+  ],
+  [
+   "JGCHEM",
+   "Unclassified"
+  ],
+  [
+   "JHS",
+   "Unclassified"
+  ],
+  [
+   "JINDALPHOT",
+   "Unclassified"
+  ],
+  [
+   "JINDALPOLY",
+   "Unclassified"
+  ],
+  [
+   "JINDRILL",
+   "Unclassified"
+  ],
+  [
+   "JINDWORLD",
+   "Unclassified"
+  ],
+  [
+   "JISLDVREQS",
+   "Unclassified"
+  ],
+  [
+   "JISLJALEQS",
+   "Unclassified"
+  ],
+  [
+   "JITFINFRA",
+   "Unclassified"
+  ],
+  [
+   "JKIL",
+   "Unclassified"
+  ],
+  [
+   "JKIPL",
+   "Unclassified"
+  ],
+  [
+   "JMA",
+   "Unclassified"
+  ],
+  [
+   "JNKINDIA",
+   "Unclassified"
+  ],
+  [
+   "JNPR",
+   "Unclassified"
+  ],
+  [
+   "JOCIL",
+   "Unclassified"
+  ],
+  [
+   "JPOLYINVST",
+   "Unclassified"
+  ],
+  [
+   "JSWHL",
+   "Unclassified"
+  ],
+  [
+   "JTEKTINDIA",
+   "Unclassified"
+  ],
+  [
+   "JTLIND",
+   "Unclassified"
+  ],
+  [
+   "JUBLCPL",
+   "Unclassified"
+  ],
+  [
+   "JUNIPER",
+   "Unclassified"
+  ],
+  [
+   "JYOTIRES",
+   "Unclassified"
+  ],
+  [
+   "JYOTISTRUC",
+   "Unclassified"
+  ],
+  [
+   "KABRAEXTRU",
+   "Unclassified"
+  ],
+  [
+   "KAKATCEM",
+   "Unclassified"
+  ],
+  [
+   "KALAMANDIR",
+   "Unclassified"
+  ],
+  [
+   "KALPATARU",
+   "Unclassified"
+  ],
+  [
+   "KAMAHOLD",
+   "Unclassified"
+  ],
+  [
+   "KAMANWALA",
+   "Unclassified"
+  ],
+  [
+   "KAMATHOTEL",
+   "Unclassified"
+  ],
+  [
+   "KAMDHENU",
+   "Unclassified"
+  ],
+  [
+   "KAMOPAINTS",
+   "Unclassified"
+  ],
+  [
+   "KANANIIND",
+   "Unclassified"
+  ],
+  [
+   "KANCHI",
+   "Unclassified"
+  ],
+  [
+   "KANCOTEA",
+   "Unclassified"
+  ],
+  [
+   "KANOHAR",
+   "Unclassified"
+  ],
+  [
+   "KANPRPLA",
+   "Unclassified"
+  ],
+  [
+   "KAPSTON",
+   "Unclassified"
+  ],
+  [
+   "KARAMTARA",
+   "Unclassified"
+  ],
+  [
+   "KARMAENG",
+   "Unclassified"
+  ],
+  [
+   "KCP",
+   "Unclassified"
+  ],
+  [
+   "KDDL",
+   "Unclassified"
+  ],
+  [
+   "KDGREEN",
+   "Unclassified"
+  ],
+  [
+   "KECL",
+   "Unclassified"
+  ],
+  [
+   "KEEPLEARN",
+   "Unclassified"
+  ],
+  [
+   "KELLTONTEC",
+   "Unclassified"
+  ],
+  [
+   "KENNAMET",
+   "Unclassified"
+  ],
+  [
+   "KERNEX",
+   "Unclassified"
+  ],
+  [
+   "KEYFINSERV",
+   "Unclassified"
+  ],
+  [
+   "KHAICHEM",
+   "Unclassified"
+  ],
+  [
+   "KHAITANLTD",
+   "Unclassified"
+  ],
+  [
+   "KHANDSE",
+   "Unclassified"
+  ],
+  [
+   "KICL",
+   "Unclassified"
+  ],
+  [
+   "KINGFA",
+   "Unclassified"
+  ],
+  [
+   "KIOCL",
+   "Unclassified"
+  ],
+  [
+   "KIRANVYPAR",
+   "Unclassified"
+  ],
+  [
+   "KIRIINDUS",
+   "Unclassified"
+  ],
+  [
+   "KIRLFER",
+   "Unclassified"
+  ],
+  [
+   "KIRLOSIND",
+   "Unclassified"
+  ],
+  [
+   "KISSHT",
+   "Unclassified"
+  ],
+  [
+   "KJMCFIN",
+   "Unclassified"
+  ],
+  [
+   "KKCL",
+   "Unclassified"
+  ],
+  [
+   "KLBRENG-B",
+   "Unclassified"
+  ],
+  [
+   "KMCSHIL",
+   "Unclassified"
+  ],
+  [
+   "KMEW",
+   "Unclassified"
+  ],
+  [
+   "KMSUGAR",
+   "Unclassified"
+  ],
+  [
+   "KNACK",
+   "Unclassified"
+  ],
+  [
+   "KNAGRI",
+   "Unclassified"
+  ],
+  [
+   "KOHINOOR",
+   "Unclassified"
+  ],
+  [
+   "KOKUYOCMLN",
+   "Unclassified"
+  ],
+  [
+   "KOLTEPATIL",
+   "Unclassified"
+  ],
+  [
+   "KOPRAN",
+   "Unclassified"
+  ],
+  [
+   "KOTHARIPET",
+   "Unclassified"
+  ],
+  [
+   "KOTHARIPRO",
+   "Unclassified"
+  ],
+  [
+   "KOTIC",
+   "Unclassified"
+  ],
+  [
+   "KOVAI",
+   "Unclassified"
+  ],
+  [
+   "KPEL",
+   "Unclassified"
+  ],
+  [
+   "KPL",
+   "Unclassified"
+  ],
+  [
+   "KREBSBIO",
+   "Unclassified"
+  ],
+  [
+   "KRIDHANINF",
+   "Unclassified"
+  ],
+  [
+   "KRISHANA",
+   "Unclassified"
+  ],
+  [
+   "KRISHIVAL",
+   "Unclassified"
+  ],
+  [
+   "KRISHNADEF",
+   "Unclassified"
+  ],
+  [
+   "KRITI",
+   "Unclassified"
+  ],
+  [
+   "KRITIKA",
+   "Unclassified"
+  ],
+  [
+   "KRITINUT",
+   "Unclassified"
+  ],
+  [
+   "KROSS",
+   "Unclassified"
+  ],
+  [
+   "KRSNAA",
+   "Unclassified"
+  ],
+  [
+   "KRYSTAL",
+   "Unclassified"
+  ],
+  [
+   "KSE",
+   "Unclassified"
+  ],
+  [
+   "KSHINTL",
+   "Unclassified"
+  ],
+  [
+   "KSHITIJPOL",
+   "Unclassified"
+  ],
+  [
+   "KSL",
+   "Unclassified"
+  ],
+  [
+   "KSOLVES",
+   "Unclassified"
+  ],
+  [
+   "KUANTUM",
+   "Unclassified"
+  ],
+  [
+   "KUSUMGAR",
+   "Unclassified"
+  ],
+  [
+   "KWIL",
+   "Unclassified"
+  ],
+  [
+   "LAGNAM",
+   "Unclassified"
+  ],
+  [
+   "LAHOTIOV",
+   "Unclassified"
+  ],
+  [
+   "LAKSHMIMIL",
+   "Unclassified"
+  ],
+  [
+   "LAL",
+   "Unclassified"
+  ],
+  [
+   "LALITHAA",
+   "Unclassified"
+  ],
+  [
+   "LAMBODHARA",
+   "Unclassified"
+  ],
+  [
+   "LANCER",
+   "Unclassified"
+  ],
+  [
+   "LANDMARK",
+   "Unclassified"
+  ],
+  [
+   "LANDSMILL",
+   "Unclassified"
+  ],
+  [
+   "LAOPALA",
+   "Unclassified"
+  ],
+  [
+   "LASERPOWER",
+   "Unclassified"
+  ],
+  [
+   "LATTEYS",
+   "Unclassified"
+  ],
+  [
+   "LAXMICOT",
+   "Unclassified"
+  ],
+  [
+   "LAXMIDENTL",
+   "Unclassified"
+  ],
+  [
+   "LAXMIINDIA",
+   "Unclassified"
+  ],
+  [
+   "LCCINFOTEC",
+   "Unclassified"
+  ],
+  [
+   "LCCPROJECT",
+   "Unclassified"
+  ],
+  [
+   "LCL",
+   "Unclassified"
+  ],
+  [
+   "LEAPIND",
+   "Unclassified"
+  ],
+  [
+   "LEMERITE",
+   "Unclassified"
+  ],
+  [
+   "LEXUS",
+   "Unclassified"
+  ],
+  [
+   "LFIC",
+   "Unclassified"
+  ],
+  [
+   "LGBBROSLTD",
+   "Unclassified"
+  ],
+  [
+   "LGHL",
+   "Unclassified"
+  ],
+  [
+   "LIBAS",
+   "Unclassified"
+  ],
+  [
+   "LIBERTSHOE",
+   "Unclassified"
+  ],
+  [
+   "LIKHITHA",
+   "Unclassified"
+  ],
+  [
+   "LINC",
+   "Unclassified"
+  ],
+  [
+   "LINCOLN",
+   "Unclassified"
+  ],
+  [
+   "LKPSEC",
+   "Unclassified"
+  ],
+  [
+   "LMW",
+   "Unclassified"
+  ],
+  [
+   "LOKESHMACH",
+   "Unclassified"
+  ],
+  [
+   "LORDSCHLO",
+   "Unclassified"
+  ],
+  [
+   "LOTUSCHO",
+   "Unclassified"
+  ],
+  [
+   "LOTUSEYE",
+   "Unclassified"
+  ],
+  [
+   "LOVABLE",
+   "Unclassified"
+  ],
+  [
+   "LOYALTEX",
+   "Unclassified"
+  ],
+  [
+   "LPDC",
+   "Unclassified"
+  ],
+  [
+   "LUMAXIND",
+   "Unclassified"
+  ],
+  [
+   "LUMINO",
+   "Unclassified"
+  ],
+  [
+   "LUXIND",
+   "Unclassified"
+  ],
+  [
+   "MAANALU",
+   "Unclassified"
+  ],
+  [
+   "MACPOWER",
+   "Unclassified"
+  ],
+  [
+   "MADHAV",
+   "Unclassified"
+  ],
+  [
+   "MADHAVIPL",
+   "Unclassified"
+  ],
+  [
+   "MADHUCON",
+   "Unclassified"
+  ],
+  [
+   "MADRASFERT",
+   "Unclassified"
+  ],
+  [
+   "MAFATIND",
+   "Unclassified"
+  ],
+  [
+   "MAGADSUGAR",
+   "Unclassified"
+  ],
+  [
+   "MAGNUM",
+   "Unclassified"
+  ],
+  [
+   "MAHAPEXLTD",
+   "Unclassified"
+  ],
+  [
+   "MAHEPC",
+   "Unclassified"
+  ],
+  [
+   "MAHESHWARI",
+   "Unclassified"
+  ],
+  [
+   "MAHLIFE",
+   "Unclassified"
+  ],
+  [
+   "MAHLOG",
+   "Unclassified"
+  ],
+  [
+   "MAITHANALL",
+   "Unclassified"
+  ],
+  [
+   "MAKERSL",
+   "Unclassified"
+  ],
+  [
+   "MALLCOM",
+   "Unclassified"
+  ],
+  [
+   "MALUPAPER",
+   "Unclassified"
+  ],
+  [
+   "MAMATA",
+   "Unclassified"
+  ],
+  [
+   "MANAKALUCO",
+   "Unclassified"
+  ],
+  [
+   "MANAKCOAT",
+   "Unclassified"
+  ],
+  [
+   "MANAKSIA",
+   "Unclassified"
+  ],
+  [
+   "MANALIPETC",
+   "Unclassified"
+  ],
+  [
+   "MANBA",
+   "Unclassified"
+  ],
+  [
+   "MANCREDIT",
+   "Unclassified"
+  ],
+  [
+   "MANGALAM",
+   "Unclassified"
+  ],
+  [
+   "MANGLMCEM",
+   "Unclassified"
+  ],
+  [
+   "MANINDS",
+   "Unclassified"
+  ],
+  [
+   "MANINFRA",
+   "Unclassified"
+  ],
+  [
+   "MANIPALHOS",
+   "Unclassified"
+  ],
+  [
+   "MANOMAY",
+   "Unclassified"
+  ],
+  [
+   "MANORG",
+   "Unclassified"
+  ],
+  [
+   "MANUGRAPH",
+   "Unclassified"
+  ],
+  [
+   "MARALOVER",
+   "Unclassified"
+  ],
+  [
+   "MARATHON",
+   "Unclassified"
+  ],
+  [
+   "MARINE",
+   "Unclassified"
+  ],
+  [
+   "MARKOLINES",
+   "Unclassified"
+  ],
+  [
+   "MARSONS",
+   "Unclassified"
+  ],
+  [
+   "MASFIN",
+   "Unclassified"
+  ],
+  [
+   "MASKINVEST",
+   "Unclassified"
+  ],
+  [
+   "MASTERTR",
+   "Unclassified"
+  ],
+  [
+   "MATRIMONY",
+   "Unclassified"
+  ],
+  [
+   "MAWANASUG",
+   "Unclassified"
+  ],
+  [
+   "MAXESTATES",
+   "Unclassified"
+  ],
+  [
+   "MAXIND",
+   "Unclassified"
+  ],
+  [
+   "MAYURUNIQ",
+   "Unclassified"
+  ],
+  [
+   "MBAPL",
+   "Unclassified"
+  ],
+  [
+   "MBEL",
+   "Unclassified"
+  ],
+  [
+   "MBLINFRA",
+   "Unclassified"
+  ],
+  [
+   "MCCHRLS-B",
+   "Unclassified"
+  ],
+  [
+   "MCL",
+   "Unclassified"
+  ],
+  [
+   "MCLEODRUSS",
+   "Unclassified"
+  ],
+  [
+   "MCLOUD",
+   "Unclassified"
+  ],
+  [
+   "MEDIASSIST",
+   "Unclassified"
+  ],
+  [
+   "MEDICO",
+   "Unclassified"
+  ],
+  [
+   "MEGASTAR",
+   "Unclassified"
+  ],
+  [
+   "MEIL",
+   "Unclassified"
+  ],
+  [
+   "MERCANTILE",
+   "Unclassified"
+  ],
+  [
+   "MERCURYEV",
+   "Unclassified"
+  ],
+  [
+   "METROBRAND",
+   "Unclassified"
+  ],
+  [
+   "METROGLOBL",
+   "Unclassified"
+  ],
+  [
+   "MFML",
+   "Unclassified"
+  ],
+  [
+   "MGEL",
+   "Unclassified"
+  ],
+  [
+   "MHRIL",
+   "Unclassified"
+  ],
+  [
+   "MIDWESTLTD",
+   "Unclassified"
+  ],
+  [
+   "MIIL",
+   "Unclassified"
+  ],
+  [
+   "MINDTECK",
+   "Unclassified"
+  ],
+  [
+   "MIRZAINT",
+   "Unclassified"
+  ],
+  [
+   "MITCON",
+   "Unclassified"
+  ],
+  [
+   "MITTAL",
+   "Unclassified"
+  ],
+  [
+   "MKEXIM",
+   "Unclassified"
+  ],
+  [
+   "MKPL",
+   "Unclassified"
+  ],
+  [
+   "MLKFOOD",
+   "Unclassified"
+  ],
+  [
+   "MMFL",
+   "Unclassified"
+  ],
+  [
+   "MMP",
+   "Unclassified"
+  ],
+  [
+   "MMWL",
+   "Unclassified"
+  ],
+  [
+   "MOBIKWIK",
+   "Unclassified"
+  ],
+  [
+   "MODINATUR",
+   "Unclassified"
+  ],
+  [
+   "MODIRUBBER",
+   "Unclassified"
+  ],
+  [
+   "MODIS",
+   "Unclassified"
+  ],
+  [
+   "MODTHREAD",
+   "Unclassified"
+  ],
+  [
+   "MOHITE",
+   "Unclassified"
+  ],
+  [
+   "MOHITIND",
+   "Unclassified"
+  ],
+  [
+   "MOKSH",
+   "Unclassified"
+  ],
+  [
+   "MOL",
+   "Unclassified"
+  ],
+  [
+   "MOLBIO",
+   "Unclassified"
+  ],
+  [
+   "MOLDTKPAC",
+   "Unclassified"
+  ],
+  [
+   "MOMSBELIEF",
+   "Unclassified"
+  ],
+  [
+   "MONARCH",
+   "Unclassified"
+  ],
+  [
+   "MONEYBOXX",
+   "Unclassified"
+  ],
+  [
+   "MONTECARLO",
+   "Unclassified"
+  ],
+  [
+   "MOREPENLAB",
+   "Unclassified"
+  ],
+  [
+   "MOSCHIP",
+   "Unclassified"
+  ],
+  [
+   "MOTISONS",
+   "Unclassified"
+  ],
+  [
+   "MOTOGENFIN",
+   "Unclassified"
+  ],
+  [
+   "MPIMANIPAL",
+   "Unclassified"
+  ],
+  [
+   "MPSLTD",
+   "Unclassified"
+  ],
+  [
+   "MSL",
+   "Unclassified"
+  ],
+  [
+   "MSPL",
+   "Unclassified"
+  ],
+  [
+   "MTNL",
+   "Unclassified"
+  ],
+  [
+   "MUFIN",
+   "Unclassified"
+  ],
+  [
+   "MUFTI",
+   "Unclassified"
+  ],
+  [
+   "MUKANDLTD",
+   "Unclassified"
+  ],
+  [
+   "MUKESHB",
+   "Unclassified"
+  ],
+  [
+   "MUNJALAU",
+   "Unclassified"
+  ],
+  [
+   "MUNJALSHOW",
+   "Unclassified"
+  ],
+  [
+   "MURUDCERA",
+   "Unclassified"
+  ],
+  [
+   "MUTHOOTCAP",
+   "Unclassified"
+  ],
+  [
+   "MUTHOOTMF",
+   "Unclassified"
+  ],
+  [
+   "MVELECTRO",
+   "Unclassified"
+  ],
+  [
+   "MVGJL",
+   "Unclassified"
+  ],
+  [
+   "MWL",
+   "Unclassified"
+  ],
+  [
+   "NACLIND",
+   "Unclassified"
+  ],
+  [
+   "NAGREEKCAP",
+   "Unclassified"
+  ],
+  [
+   "NAGREEKEXP",
+   "Unclassified"
+  ],
+  [
+   "NAHARCAP",
+   "Unclassified"
+  ],
+  [
+   "NAHARINDUS",
+   "Unclassified"
+  ],
+  [
+   "NAHARPOLY",
+   "Unclassified"
+  ],
+  [
+   "NAHARSPING",
+   "Unclassified"
+  ],
+  [
+   "NARMADA",
+   "Unclassified"
+  ],
+  [
+   "NATHBIOGEN",
+   "Unclassified"
+  ],
+  [
+   "NATIONSTD",
+   "Unclassified"
+  ],
+  [
+   "NAVKARCORP",
+   "Unclassified"
+  ],
+  [
+   "NAVKARURB",
+   "Unclassified"
+  ],
+  [
+   "NAVNETEDUL",
+   "Unclassified"
+  ],
+  [
+   "NBIFIN",
+   "Unclassified"
+  ],
+  [
+   "NCLIND",
+   "Unclassified"
+  ],
+  [
+   "NDGL",
+   "Unclassified"
+  ],
+  [
+   "NDL",
+   "Unclassified"
+  ],
+  [
+   "NDLVENTURE",
+   "Unclassified"
+  ],
+  [
+   "NDRAUTO",
+   "Unclassified"
+  ],
+  [
+   "NDTV",
+   "Unclassified"
+  ],
+  [
+   "NEAGI",
+   "Unclassified"
+  ],
+  [
+   "NECLIFE",
+   "Unclassified"
+  ],
+  [
+   "NELCAST",
+   "Unclassified"
+  ],
+  [
+   "NELCO",
+   "Unclassified"
+  ],
+  [
+   "NEPHROPLUS",
+   "Unclassified"
+  ],
+  [
+   "NEXTMEDIA",
+   "Unclassified"
+  ],
+  [
+   "NGIL",
+   "Unclassified"
+  ],
+  [
+   "NGLFINE",
+   "Unclassified"
+  ],
+  [
+   "NIBE",
+   "Unclassified"
+  ],
+  [
+   "NIBL",
+   "Unclassified"
+  ],
+  [
+   "NICCOPAR",
+   "Unclassified"
+  ],
+  [
+   "NIITLTD",
+   "Unclassified"
+  ],
+  [
+   "NIITMTS",
+   "Unclassified"
+  ],
+  [
+   "NILAINFRA",
+   "Unclassified"
+  ],
+  [
+   "NILASPACES",
+   "Unclassified"
+  ],
+  [
+   "NILE",
+   "Unclassified"
+  ],
+  [
+   "NILKAMAL",
+   "Unclassified"
+  ],
+  [
+   "NIMBSPROJ",
+   "Unclassified"
+  ],
+  [
+   "NINSYS",
+   "Unclassified"
+  ],
+  [
+   "NIPPOBATRY",
+   "Unclassified"
+  ],
+  [
+   "NIRAJ",
+   "Unclassified"
+  ],
+  [
+   "NIRLON",
+   "Unclassified"
+  ],
+  [
+   "NITCO",
+   "Unclassified"
+  ],
+  [
+   "NITINSPIN",
+   "Unclassified"
+  ],
+  [
+   "NITIRAJ",
+   "Unclassified"
+  ],
+  [
+   "NITTAGELA",
+   "Unclassified"
+  ],
+  [
+   "NKIND",
+   "Unclassified"
+  ],
+  [
+   "NOCIL",
+   "Unclassified"
+  ],
+  [
+   "NOIDATOLL",
+   "Unclassified"
+  ],
+  [
+   "NORBTEAEXP",
+   "Unclassified"
+  ],
+  [
+   "NORTHARC",
+   "Unclassified"
+  ],
+  [
+   "NOVAAGRI",
+   "Unclassified"
+  ],
+  [
+   "NOVARTIND",
+   "Unclassified"
+  ],
+  [
+   "NPST",
+   "Unclassified"
+  ],
+  [
+   "NRAIL",
+   "Unclassified"
+  ],
+  [
+   "NRBBEARING",
+   "Unclassified"
+  ],
+  [
+   "NSIL",
+   "Unclassified"
+  ],
+  [
+   "NTCIND",
+   "Unclassified"
+  ],
+  [
+   "NUCLEUS",
+   "Unclassified"
+  ],
+  [
+   "OAL",
+   "Unclassified"
+  ],
+  [
+   "OBCL",
+   "Unclassified"
+  ],
+  [
+   "ODIGMA",
+   "Unclassified"
+  ],
+  [
+   "ODYCORP",
+   "Unclassified"
+  ],
+  [
+   "OMAXAUTO",
+   "Unclassified"
+  ],
+  [
+   "OMAXE",
+   "Unclassified"
+  ],
+  [
+   "OMINFRAL",
+   "Unclassified"
+  ],
+  [
+   "OMNI",
+   "Unclassified"
+  ],
+  [
+   "OMPOWER",
+   "Unclassified"
+  ],
+  [
+   "ONEGLOBAL",
+   "Unclassified"
+  ],
+  [
+   "ONEPOINT",
+   "Unclassified"
+  ],
+  [
+   "ONIDA",
+   "Unclassified"
+  ],
+  [
+   "ONIXSOLAR",
+   "Unclassified"
+  ],
+  [
+   "ONWARDTEC",
+   "Unclassified"
+  ],
+  [
+   "OPTIFIN",
+   "Unclassified"
+  ],
+  [
+   "ORCHASP",
+   "Unclassified"
+  ],
+  [
+   "ORCHPHARMA",
+   "Unclassified"
+  ],
+  [
+   "ORICONENT",
+   "Unclassified"
+  ],
+  [
+   "ORIENTALTL",
+   "Unclassified"
+  ],
+  [
+   "ORIENTBELL",
+   "Unclassified"
+  ],
+  [
+   "ORIENTCER",
+   "Unclassified"
+  ],
+  [
+   "ORIENTELEC",
+   "Unclassified"
+  ],
+  [
+   "ORIENTHOT",
+   "Unclassified"
+  ],
+  [
+   "ORIENTPPR",
+   "Unclassified"
+  ],
+  [
+   "ORIENTTECH",
+   "Unclassified"
+  ],
+  [
+   "ORIRAIL",
+   "Unclassified"
+  ],
+  [
+   "ORISSAMINE",
+   "Unclassified"
+  ],
+  [
+   "ORTINGLOBE",
+   "Unclassified"
+  ],
+  [
+   "OSWALAGRO",
+   "Unclassified"
+  ],
+  [
+   "OSWALGREEN",
+   "Unclassified"
+  ],
+  [
+   "OSWALSEEDS",
+   "Unclassified"
+  ],
+  [
+   "PACEDIGITK",
+   "Unclassified"
+  ],
+  [
+   "PACIFICI",
+   "Unclassified"
+  ],
+  [
+   "PAISALO",
+   "Unclassified"
+  ],
+  [
+   "PAKKA",
+   "Unclassified"
+  ],
+  [
+   "PALASHSECU",
+   "Unclassified"
+  ],
+  [
+   "PALREDTEC",
+   "Unclassified"
+  ],
+  [
+   "PANACEABIO",
+   "Unclassified"
+  ],
+  [
+   "PANAMAPET",
+   "Unclassified"
+  ],
+  [
+   "PANCHMAHQ",
+   "Unclassified"
+  ],
+  [
+   "PANORAMA",
+   "Unclassified"
+  ],
+  [
+   "PANSARI",
+   "Unclassified"
+  ],
+  [
+   "PARACABLES",
+   "Unclassified"
+  ],
+  [
+   "PARAGMILK",
+   "Unclassified"
+  ],
+  [
+   "PARASPETRO",
+   "Unclassified"
+  ],
+  [
+   "PARIN",
+   "Unclassified"
+  ],
+  [
+   "PARKHOTELS",
+   "Unclassified"
+  ],
+  [
+   "PARNAXLAB",
+   "Unclassified"
+  ],
+  [
+   "PASHUPATI",
+   "Unclassified"
+  ],
+  [
+   "PASUPTAC",
+   "Unclassified"
+  ],
+  [
+   "PATELENG",
+   "Unclassified"
+  ],
+  [
+   "PATELRMART",
+   "Unclassified"
+  ],
+  [
+   "PATINTLOG",
+   "Unclassified"
+  ],
+  [
+   "PAUSHAKLTD",
+   "Unclassified"
+  ],
+  [
+   "PAVNAIND",
+   "Unclassified"
+  ],
+  [
+   "PBMPOLY",
+   "Unclassified"
+  ],
+  [
+   "PDMJEPAPER",
+   "Unclassified"
+  ],
+  [
+   "PDSL",
+   "Unclassified"
+  ],
+  [
+   "PEARLPOLY",
+   "Unclassified"
+  ],
+  [
+   "PENIND",
+   "Unclassified"
+  ],
+  [
+   "PENINLAND",
+   "Unclassified"
+  ],
+  [
+   "PERMAGN",
+   "Unclassified"
+  ],
+  [
+   "PERNIASPOP",
+   "Unclassified"
+  ],
+  [
+   "PFS",
+   "Unclassified"
+  ],
+  [
+   "PGHH",
+   "Unclassified"
+  ],
+  [
+   "PGHL",
+   "Unclassified"
+  ],
+  [
+   "PHOENXINTL",
+   "Unclassified"
+  ],
+  [
+   "PIGL",
+   "Unclassified"
+  ],
+  [
+   "PILANIINVS",
+   "Unclassified"
+  ],
+  [
+   "PILITA",
+   "Unclassified"
+  ],
+  [
+   "PIONEEREMB",
+   "Unclassified"
+  ],
+  [
+   "PITTIENG",
+   "Unclassified"
+  ],
+  [
+   "PIXTRANS",
+   "Unclassified"
+  ],
+  [
+   "PLASTIBLEN",
+   "Unclassified"
+  ],
+  [
+   "PLATIND",
+   "Unclassified"
+  ],
+  [
+   "PLAZACABLE",
+   "Unclassified"
+  ],
+  [
+   "PML",
+   "Unclassified"
+  ],
+  [
+   "PNBGILTS",
+   "Unclassified"
+  ],
+  [
+   "PNC",
+   "Unclassified"
+  ],
+  [
+   "PNGSREVA",
+   "Unclassified"
+  ],
+  [
+   "POCL",
+   "Unclassified"
+  ],
+  [
+   "PODDARMENT",
+   "Unclassified"
+  ],
+  [
+   "POEL",
+   "Unclassified"
+  ],
+  [
+   "POKARNA",
+   "Unclassified"
+  ],
+  [
+   "POLYPLEX",
+   "Unclassified"
+  ],
+  [
+   "POLYSPIN",
+   "Unclassified"
+  ],
+  [
+   "PONNIERODE",
+   "Unclassified"
+  ],
+  [
+   "POWERICA",
+   "Unclassified"
+  ],
+  [
+   "PRABHA",
+   "Unclassified"
+  ],
+  [
+   "PRAENG",
+   "Unclassified"
+  ],
+  [
+   "PRAKASH",
+   "Unclassified"
+  ],
+  [
+   "PRAKASHSTL",
+   "Unclassified"
+  ],
+  [
+   "PRANAV",
+   "Unclassified"
+  ],
+  [
+   "PRASOLCHEM",
+   "Unclassified"
+  ],
+  [
+   "PRAVEG",
+   "Unclassified"
+  ],
+  [
+   "PRAXIS",
+   "Unclassified"
+  ],
+  [
+   "PRECAM",
+   "Unclassified"
+  ],
+  [
+   "PRECOT",
+   "Unclassified"
+  ],
+  [
+   "PRECWIRE",
+   "Unclassified"
+  ],
+  [
+   "PREMCO",
+   "Unclassified"
+  ],
+  [
+   "PREMEXPLN",
+   "Unclassified"
+  ],
+  [
+   "PREMIERPOL",
+   "Unclassified"
+  ],
+  [
+   "PRIMESECU",
+   "Unclassified"
+  ],
+  [
+   "PRIMO",
+   "Unclassified"
+  ],
+  [
+   "PRINCEPIPE",
+   "Unclassified"
+  ],
+  [
+   "PRIORITY",
+   "Unclassified"
+  ],
+  [
+   "PRISMX",
+   "Unclassified"
+  ],
+  [
+   "PRITI",
+   "Unclassified"
+  ],
+  [
+   "PROSTARM",
+   "Unclassified"
+  ],
+  [
+   "PROTEAN",
+   "Unclassified"
+  ],
+  [
+   "PROZONER",
+   "Unclassified"
+  ],
+  [
+   "PRUDMOULI",
+   "Unclassified"
+  ],
+  [
+   "PSPPROJECT",
+   "Unclassified"
+  ],
+  [
+   "PTL",
+   "Unclassified"
+  ],
+  [
+   "PUNJABCHEM",
+   "Unclassified"
+  ],
+  [
+   "PVP",
+   "Unclassified"
+  ],
+  [
+   "PVSL",
+   "Unclassified"
+  ],
+  [
+   "PYRAMID",
+   "Unclassified"
+  ],
+  [
+   "QUADFUTURE",
+   "Unclassified"
+  ],
+  [
+   "QUICKHEAL",
+   "Unclassified"
+  ],
+  [
+   "RACE",
+   "Unclassified"
+  ],
+  [
+   "RACLGEAR",
+   "Unclassified"
+  ],
+  [
+   "RADAAN",
+   "Unclassified"
+  ],
+  [
+   "RADIANTCMS",
+   "Unclassified"
+  ],
+  [
+   "RADIOCITY",
+   "Unclassified"
+  ],
+  [
+   "RAJMET",
+   "Unclassified"
+  ],
+  [
+   "RAJPALAYAM",
+   "Unclassified"
+  ],
+  [
+   "RAJRATAN",
+   "Unclassified"
+  ],
+  [
+   "RAJSREESUG",
+   "Unclassified"
+  ],
+  [
+   "RAJTV",
+   "Unclassified"
+  ],
+  [
+   "RAMANEWS",
+   "Unclassified"
+  ],
+  [
+   "RAMAPHO",
+   "Unclassified"
+  ],
+  [
+   "RAMBHAJO",
+   "Unclassified"
+  ],
+  [
+   "RAMCOIND",
+   "Unclassified"
+  ],
+  [
+   "RAMCOSYS",
+   "Unclassified"
+  ],
+  [
+   "RAMKY",
+   "Unclassified"
+  ],
+  [
+   "RAMRAT",
+   "Unclassified"
+  ],
+  [
+   "RANASUG",
+   "Unclassified"
+  ],
+  [
+   "RANEHOLDIN",
+   "Unclassified"
+  ],
+  [
+   "RATNAVEER",
+   "Unclassified"
+  ],
+  [
+   "RAYMOND",
+   "Unclassified"
+  ],
+  [
+   "RAYMONDREL",
+   "Unclassified"
+  ],
+  [
+   "REGAAL",
+   "Unclassified"
+  ],
+  [
+   "REGENCERAM",
+   "Unclassified"
+  ],
+  [
+   "RELCHEMQ",
+   "Unclassified"
+  ],
+  [
+   "RELIABLE",
+   "Unclassified"
+  ],
+  [
+   "RELTD",
+   "Unclassified"
+  ],
+  [
+   "REMSONSIND",
+   "Unclassified"
+  ],
+  [
+   "RENTOMOJO",
+   "Unclassified"
+  ],
+  [
+   "REPCOHOME",
+   "Unclassified"
+  ],
+  [
+   "REPL",
+   "Unclassified"
+  ],
+  [
+   "REPRO",
+   "Unclassified"
+  ],
+  [
+   "RESPONIND",
+   "Unclassified"
+  ],
+  [
+   "RETAIL",
+   "Unclassified"
+  ],
+  [
+   "RGL",
+   "Unclassified"
+  ],
+  [
+   "RHETAN",
+   "Unclassified"
+  ],
+  [
+   "RHL",
+   "Unclassified"
+  ],
+  [
+   "RICOAUTO",
+   "Unclassified"
+  ],
+  [
+   "RIIL",
+   "Unclassified"
+  ],
+  [
+   "RIR",
+   "Unclassified"
+  ],
+  [
+   "RISHABH",
+   "Unclassified"
+  ],
+  [
+   "RITCO",
+   "Unclassified"
+  ],
+  [
+   "RKDL",
+   "Unclassified"
+  ],
+  [
+   "RKEC",
+   "Unclassified"
+  ],
+  [
+   "RKSWAMY",
+   "Unclassified"
+  ],
+  [
+   "RMC",
+   "Unclassified"
+  ],
+  [
+   "RML",
+   "Unclassified"
+  ],
+  [
+   "ROHLTD",
+   "Unclassified"
+  ],
+  [
+   "ROLEXRINGS",
+   "Unclassified"
+  ],
+  [
+   "ROML",
+   "Unclassified"
+  ],
+  [
+   "ROSSARI",
+   "Unclassified"
+  ],
+  [
+   "ROSSELLIND",
+   "Unclassified"
+  ],
+  [
+   "ROSSTECH",
+   "Unclassified"
+  ],
+  [
+   "ROTO",
+   "Unclassified"
+  ],
+  [
+   "RPEL",
+   "Unclassified"
+  ],
+  [
+   "RPGLIFE",
+   "Unclassified"
+  ],
+  [
+   "RPPINFRA",
+   "Unclassified"
+  ],
+  [
+   "RPSGVENT",
+   "Unclassified"
+  ],
+  [
+   "RPTECH",
+   "Unclassified"
+  ],
+  [
+   "RRECL",
+   "Unclassified"
+  ],
+  [
+   "RRIL",
+   "Unclassified"
+  ],
+  [
+   "RSL",
+   "Unclassified"
+  ],
+  [
+   "RSSOFTWARE",
+   "Unclassified"
+  ],
+  [
+   "RSWM",
+   "Unclassified"
+  ],
+  [
+   "RSYSTEMS",
+   "Unclassified"
+  ],
+  [
+   "RTSPOWR",
+   "Unclassified"
+  ],
+  [
+   "RUBFILA",
+   "Unclassified"
+  ],
+  [
+   "RUBYMILLS",
+   "Unclassified"
+  ],
+  [
+   "RUCHINFRA",
+   "Unclassified"
+  ],
+  [
+   "RUCHIRA",
+   "Unclassified"
+  ],
+  [
+   "RUDRA",
+   "Unclassified"
+  ],
+  [
+   "RUPA",
+   "Unclassified"
+  ],
+  [
+   "RUSHIL",
+   "Unclassified"
+  ],
+  [
+   "RUSTOMJEE",
+   "Unclassified"
+  ],
+  [
+   "RVHL",
+   "Unclassified"
+  ],
+  [
+   "RVTH",
+   "Unclassified"
+  ],
+  [
+   "S&SPOWER",
+   "Unclassified"
+  ],
+  [
+   "SAB",
+   "Unclassified"
+  ],
+  [
+   "SADBHAV",
+   "Unclassified"
+  ],
+  [
+   "SADBHIN",
+   "Unclassified"
+  ],
+  [
+   "SAGARDEEP",
+   "Unclassified"
+  ],
+  [
+   "SAGCEM",
+   "Unclassified"
+  ],
+  [
+   "SAHLIBHFI",
+   "Unclassified"
+  ],
+  [
+   "SAHYADRI",
+   "Unclassified"
+  ],
+  [
+   "SAICAPI",
+   "Unclassified"
+  ],
+  [
+   "SAIPARENT",
+   "Unclassified"
+  ],
+  [
+   "SAKAR",
+   "Unclassified"
+  ],
+  [
+   "SAKHTISUG",
+   "Unclassified"
+  ],
+  [
+   "SAKSOFT",
+   "Unclassified"
+  ],
+  [
+   "SAKUMA",
+   "Unclassified"
+  ],
+  [
+   "SALASAR",
+   "Unclassified"
+  ],
+  [
+   "SALONA",
+   "Unclassified"
+  ],
+  [
+   "SALSTEEL",
+   "Unclassified"
+  ],
+  [
+   "SALZERELEC",
+   "Unclassified"
+  ],
+  [
+   "SAMBANDAM",
+   "Unclassified"
+  ],
+  [
+   "SAMBHAAV",
+   "Unclassified"
+  ],
+  [
+   "SAMBHV",
+   "Unclassified"
+  ],
+  [
+   "SAMPANN",
+   "Unclassified"
+  ],
+  [
+   "SANATHAN",
+   "Unclassified"
+  ],
+  [
+   "SANDESH",
+   "Unclassified"
+  ],
+  [
+   "SANDHAR",
+   "Unclassified"
+  ],
+  [
+   "SANGAMIND",
+   "Unclassified"
+  ],
+  [
+   "SANGHVIMOV",
+   "Unclassified"
+  ],
+  [
+   "SANOFI",
+   "Unclassified"
+  ],
+  [
+   "SANSTAR",
+   "Unclassified"
+  ],
+  [
+   "SAPPL",
+   "Unclassified"
+  ],
+  [
+   "SARLAPOLY",
+   "Unclassified"
+  ],
+  [
+   "SARVESHWAR",
+   "Unclassified"
+  ],
+  [
+   "SASKEN",
+   "Unclassified"
+  ],
+  [
+   "SATIA",
+   "Unclassified"
+  ],
+  [
+   "SATIN",
+   "Unclassified"
+  ],
+  [
+   "SAURASHCEM",
+   "Unclassified"
+  ],
+  [
+   "SAYAJIHOTL",
+   "Unclassified"
+  ],
+  [
+   "SAYAJIIND",
+   "Unclassified"
+  ],
+  [
+   "SBC",
+   "Unclassified"
+  ],
+  [
+   "SBCL",
+   "Unclassified"
+  ],
+  [
+   "SBGLP",
+   "Unclassified"
+  ],
+  [
+   "SBIFUNDS",
+   "Unclassified"
+  ],
+  [
+   "SCHAND",
+   "Unclassified"
+  ],
+  [
+   "SCILAL",
+   "Unclassified"
+  ],
+  [
+   "SCODATUBES",
+   "Unclassified"
+  ],
+  [
+   "SDBL",
+   "Unclassified"
+  ],
+  [
+   "SEAMECLTD",
+   "Unclassified"
+  ],
+  [
+   "SECMARK",
+   "Unclassified"
+  ],
+  [
+   "SECURKLOUD",
+   "Unclassified"
+  ],
+  [
+   "SEDEMAC",
+   "Unclassified"
+  ],
+  [
+   "SEIL",
+   "Unclassified"
+  ],
+  [
+   "SEJALLTD",
+   "Unclassified"
+  ],
+  [
+   "SEKURITIND",
+   "Unclassified"
+  ],
+  [
+   "SEMAC",
+   "Unclassified"
+  ],
+  [
+   "SENORES",
+   "Unclassified"
+  ],
+  [
+   "SEPC",
+   "Unclassified"
+  ],
+  [
+   "SERVOTECH",
+   "Unclassified"
+  ],
+  [
+   "SESHAPAPER",
+   "Unclassified"
+  ],
+  [
+   "SETL",
+   "Unclassified"
+  ],
+  [
+   "SGFIN",
+   "Unclassified"
+  ],
+  [
+   "SGIL",
+   "Unclassified"
+  ],
+  [
+   "SGL",
+   "Unclassified"
+  ],
+  [
+   "SGLRES",
+   "Unclassified"
+  ],
+  [
+   "SGMART",
+   "Unclassified"
+  ],
+  [
+   "SGRL",
+   "Unclassified"
+  ],
+  [
+   "SHADOWFAX",
+   "Unclassified"
+  ],
+  [
+   "SHAH",
+   "Unclassified"
+  ],
+  [
+   "SHALBY",
+   "Unclassified"
+  ],
+  [
+   "SHANKARA",
+   "Unclassified"
+  ],
+  [
+   "SHANKESH",
+   "Unclassified"
+  ],
+  [
+   "SHANTI",
+   "Unclassified"
+  ],
+  [
+   "SHANTIGEAR",
+   "Unclassified"
+  ],
+  [
+   "SHANTIGOLD",
+   "Unclassified"
+  ],
+  [
+   "SHARDAMOTR",
+   "Unclassified"
+  ],
+  [
+   "SHBAJRG",
+   "Unclassified"
+  ],
+  [
+   "SHERVANI",
+   "Unclassified"
+  ],
+  [
+   "SHILCTECH",
+   "Unclassified"
+  ],
+  [
+   "SHILGRAVQ",
+   "Unclassified"
+  ],
+  [
+   "SHINDL",
+   "Unclassified"
+  ],
+  [
+   "SHIPROCKET",
+   "Unclassified"
+  ],
+  [
+   "SHIVAAGRO",
+   "Unclassified"
+  ],
+  [
+   "SHIVACEM",
+   "Unclassified"
+  ],
+  [
+   "SHIVALIK",
+   "Unclassified"
+  ],
+  [
+   "SHIVAMAUTO",
+   "Unclassified"
+  ],
+  [
+   "SHIVAMILLS",
+   "Unclassified"
+  ],
+  [
+   "SHIVATEX",
+   "Unclassified"
+  ],
+  [
+   "SHIVAUM",
+   "Unclassified"
+  ],
+  [
+   "SHK",
+   "Unclassified"
+  ],
+  [
+   "SHOPERSTOP",
+   "Unclassified"
+  ],
+  [
+   "SHRADDHA",
+   "Unclassified"
+  ],
+  [
+   "SHRADHA",
+   "Unclassified"
+  ],
+  [
+   "SHREDIGCEM",
+   "Unclassified"
+  ],
+  [
+   "SHREEJISPG",
+   "Unclassified"
+  ],
+  [
+   "SHREEPUSHK",
+   "Unclassified"
+  ],
+  [
+   "SHREERAMA",
+   "Unclassified"
+  ],
+  [
+   "SHREYANIND",
+   "Unclassified"
+  ],
+  [
+   "SHRIKRISH",
+   "Unclassified"
+  ],
+  [
+   "SHRINGARMS",
+   "Unclassified"
+  ],
+  [
+   "SHRIRAMPPS",
+   "Unclassified"
+  ],
+  [
+   "SHRJAGP",
+   "Unclassified"
+  ],
+  [
+   "SHUKRAPHAR",
+   "Unclassified"
+  ],
+  [
+   "SHYAMTEL",
+   "Unclassified"
+  ],
+  [
+   "SICAGEN",
+   "Unclassified"
+  ],
+  [
+   "SIEL",
+   "Unclassified"
+  ],
+  [
+   "SIGACHI",
+   "Unclassified"
+  ],
+  [
+   "SIGMA",
+   "Unclassified"
+  ],
+  [
+   "SIGNPOST",
+   "Unclassified"
+  ],
+  [
+   "SIKA",
+   "Unclassified"
+  ],
+  [
+   "SIL",
+   "Unclassified"
+  ],
+  [
+   "SILGO",
+   "Unclassified"
+  ],
+  [
+   "SILINV",
+   "Unclassified"
+  ],
+  [
+   "SILVERTUC",
+   "Unclassified"
+  ],
+  [
+   "SIMPLEXINF",
+   "Unclassified"
+  ],
+  [
+   "SIMPLXREA",
+   "Unclassified"
+  ],
+  [
+   "SINCLAIR",
+   "Unclassified"
+  ],
+  [
+   "SINDHUTRAD",
+   "Unclassified"
+  ],
+  [
+   "SINGERIND",
+   "Unclassified"
+  ],
+  [
+   "SINTERCOM",
+   "Unclassified"
+  ],
+  [
+   "SIRCA",
+   "Unclassified"
+  ],
+  [
+   "SIS",
+   "Unclassified"
+  ],
+  [
+   "SIYSIL",
+   "Unclassified"
+  ],
+  [
+   "SJS",
+   "Unclassified"
+  ],
+  [
+   "SKMEGGPROD",
+   "Unclassified"
+  ],
+  [
+   "SKYWAYS",
+   "Unclassified"
+  ],
+  [
+   "SMCGLOBAL",
+   "Unclassified"
+  ],
+  [
+   "SMLT",
+   "Unclassified"
+  ],
+  [
+   "SMSPHARMA",
+   "Unclassified"
+  ],
+  [
+   "SNOWMAN",
+   "Unclassified"
+  ],
+  [
+   "SOFTTECH",
+   "Unclassified"
+  ],
+  [
+   "SOLARA",
+   "Unclassified"
+  ],
+  [
+   "SOLARWORLD",
+   "Unclassified"
+  ],
+  [
+   "SOLEX",
+   "Unclassified"
+  ],
+  [
+   "SOMANYCERA",
+   "Unclassified"
+  ],
+  [
+   "SOMATEX",
+   "Unclassified"
+  ],
+  [
+   "SOMICONVEY",
+   "Unclassified"
+  ],
+  [
+   "SONAL",
+   "Unclassified"
+  ],
+  [
+   "SOTL",
+   "Unclassified"
+  ],
+  [
+   "SOUTHWEST",
+   "Unclassified"
+  ],
+  [
+   "SPAL",
+   "Unclassified"
+  ],
+  [
+   "SPANDANA",
+   "Unclassified"
+  ],
+  [
+   "SPCENET",
+   "Unclassified"
+  ],
+  [
+   "SPENCERS",
+   "Unclassified"
+  ],
+  [
+   "SPIC",
+   "Unclassified"
+  ],
+  [
+   "SPLIL",
+   "Unclassified"
+  ],
+  [
+   "SPMLINFRA",
+   "Unclassified"
+  ],
+  [
+   "SPORTKING",
+   "Unclassified"
+  ],
+  [
+   "SRD",
+   "Unclassified"
+  ],
+  [
+   "SRGHFL",
+   "Unclassified"
+  ],
+  [
+   "SRHHYPOLTD",
+   "Unclassified"
+  ],
+  [
+   "SRM",
+   "Unclassified"
+  ],
+  [
+   "SRTL",
+   "Unclassified"
+  ],
+  [
+   "SSDL",
+   "Unclassified"
+  ],
+  [
+   "SSRETAIL",
+   "Unclassified"
+  ],
+  [
+   "SSWL",
+   "Unclassified"
+  ],
+  [
+   "STANLEY",
+   "Unclassified"
+  ],
+  [
+   "STARPAPER",
+   "Unclassified"
+  ],
+  [
+   "STARTECK",
+   "Unclassified"
+  ],
+  [
+   "STCINDIA",
+   "Unclassified"
+  ],
+  [
+   "STEAMHOUSE",
+   "Unclassified"
+  ],
+  [
+   "STEELCAS",
+   "Unclassified"
+  ],
+  [
+   "STEELCITY",
+   "Unclassified"
+  ],
+  [
+   "STEELXIND",
+   "Unclassified"
+  ],
+  [
+   "STEL",
+   "Unclassified"
+  ],
+  [
+   "STLNETWORK",
+   "Unclassified"
+  ],
+  [
+   "STLSTRINF",
+   "Unclassified"
+  ],
+  [
+   "STOVEKRAFT",
+   "Unclassified"
+  ],
+  [
+   "STUDDS",
+   "Unclassified"
+  ],
+  [
+   "STYLAMIND",
+   "Unclassified"
+  ],
+  [
+   "STYLEBAAZA",
+   "Unclassified"
+  ],
+  [
+   "SUBEXLTD",
+   "Unclassified"
+  ],
+  [
+   "SUDARCOLOR",
+   "Unclassified"
+  ],
+  [
+   "SUKHJITS",
+   "Unclassified"
+  ],
+  [
+   "SULA",
+   "Unclassified"
+  ],
+  [
+   "SUMEDHA",
+   "Unclassified"
+  ],
+  [
+   "SUMEETINDS",
+   "Unclassified"
+  ],
+  [
+   "SUMIT",
+   "Unclassified"
+  ],
+  [
+   "SUMMITSEC",
+   "Unclassified"
+  ],
+  [
+   "SUNCLAY",
+   "Unclassified"
+  ],
+  [
+   "SUNDARAM",
+   "Unclassified"
+  ],
+  [
+   "SUNDRMFAST",
+   "Unclassified"
+  ],
+  [
+   "SUNDROP",
+   "Unclassified"
+  ],
+  [
+   "SUNFLAG",
+   "Unclassified"
+  ],
+  [
+   "SUNLOC",
+   "Unclassified"
+  ],
+  [
+   "SUNRAKSHAK",
+   "Unclassified"
+  ],
+  [
+   "SUNSHIEL",
+   "Unclassified"
+  ],
+  [
+   "SUNSHINE",
+   "Unclassified"
+  ],
+  [
+   "SUPERHOUSE",
+   "Unclassified"
+  ],
+  [
+   "SUPRAJIT",
+   "Unclassified"
+  ],
+  [
+   "SUPREME",
+   "Unclassified"
+  ],
+  [
+   "SUPREMEINF",
+   "Unclassified"
+  ],
+  [
+   "SURAJEST",
+   "Unclassified"
+  ],
+  [
+   "SURAJLTD",
+   "Unclassified"
+  ],
+  [
+   "SURAKSHA",
+   "Unclassified"
+  ],
+  [
+   "SURANASOL",
+   "Unclassified"
+  ],
+  [
+   "SURANAT&P",
+   "Unclassified"
+  ],
+  [
+   "SURYALA",
+   "Unclassified"
+  ],
+  [
+   "SURYALAXMI",
+   "Unclassified"
+  ],
+  [
+   "SURYODAY",
+   "Unclassified"
+  ],
+  [
+   "SUVEN",
+   "Unclassified"
+  ],
+  [
+   "SUVIDHAA",
+   "Unclassified"
+  ],
+  [
+   "SUYOG",
+   "Unclassified"
+  ],
+  [
+   "SVGLOBAL",
+   "Unclassified"
+  ],
+  [
+   "SVLL",
+   "Unclassified"
+  ],
+  [
+   "SVPGLOB",
+   "Unclassified"
+  ],
+  [
+   "SWARAJENG",
+   "Unclassified"
+  ],
+  [
+   "SWARNSAR",
+   "Unclassified"
+  ],
+  [
+   "SWELECTES",
+   "Unclassified"
+  ],
+  [
+   "SYMBIOTEC",
+   "Unclassified"
+  ],
+  [
+   "SYMPHONY",
+   "Unclassified"
+  ],
+  [
+   "SYNCOMF",
+   "Unclassified"
+  ],
+  [
+   "TAALTECH",
+   "Unclassified"
+  ],
+  [
+   "TAINWALCHM",
+   "Unclassified"
+  ],
+  [
+   "TAJGVK",
+   "Unclassified"
+  ],
+  [
+   "TAKE",
+   "Unclassified"
+  ],
+  [
+   "TALBROAUTO",
+   "Unclassified"
+  ],
+  [
+   "TANAA",
+   "Unclassified"
+  ],
+  [
+   "TARACHAND",
+   "Unclassified"
+  ],
+  [
+   "TARAPUR",
+   "Unclassified"
+  ],
+  [
+   "TARMAT",
+   "Unclassified"
+  ],
+  [
+   "TARSONS",
+   "Unclassified"
+  ],
+  [
+   "TASTYBITE",
+   "Unclassified"
+  ],
+  [
+   "TATVA",
+   "Unclassified"
+  ],
+  [
+   "TCC",
+   "Unclassified"
+  ],
+  [
+   "TCI",
+   "Unclassified"
+  ],
+  [
+   "TCIEXP",
+   "Unclassified"
+  ],
+  [
+   "TCIFINANCE",
+   "Unclassified"
+  ],
+  [
+   "TCPLPACK",
+   "Unclassified"
+  ],
+  [
+   "TEAMGTY",
+   "Unclassified"
+  ],
+  [
+   "TEAMLEASE",
+   "Unclassified"
+  ],
+  [
+   "TECHNOCRAF",
+   "Unclassified"
+  ],
+  [
+   "TECHNVISN",
+   "Unclassified"
+  ],
+  [
+   "TECILCHEM",
+   "Unclassified"
+  ],
+  [
+   "TEMBO",
+   "Unclassified"
+  ],
+  [
+   "TEMPSENS",
+   "Unclassified"
+  ],
+  [
+   "TERAI",
+   "Unclassified"
+  ],
+  [
+   "TERASOFT",
+   "Unclassified"
+  ],
+  [
+   "TEXINFRA",
+   "Unclassified"
+  ],
+  [
+   "TEXMOPIPES",
+   "Unclassified"
+  ],
+  [
+   "TFCILTD",
+   "Unclassified"
+  ],
+  [
+   "TFL",
+   "Unclassified"
+  ],
+  [
+   "TGBHOTELS",
+   "Unclassified"
+  ],
+  [
+   "TGVSL",
+   "Unclassified"
+  ],
+  [
+   "THACKER",
+   "Unclassified"
+  ],
+  [
+   "THAKDEV",
+   "Unclassified"
+  ],
+  [
+   "THEINVEST",
+   "Unclassified"
+  ],
+  [
+   "THEJO",
+   "Unclassified"
+  ],
+  [
+   "THEMISMED",
+   "Unclassified"
+  ],
+  [
+   "THOMASCOTT",
+   "Unclassified"
+  ],
+  [
+   "TIGERLOGS",
+   "Unclassified"
+  ],
+  [
+   "TIIL",
+   "Unclassified"
+  ],
+  [
+   "TIMEX",
+   "Unclassified"
+  ],
+  [
+   "TINNARUBR",
+   "Unclassified"
+  ],
+  [
+   "TIPSFILMS",
+   "Unclassified"
+  ],
+  [
+   "TIRUMALCHM",
+   "Unclassified"
+  ],
+  [
+   "TNPETRO",
+   "Unclassified"
+  ],
+  [
+   "TNPL",
+   "Unclassified"
+  ],
+  [
+   "TNTELE",
+   "Unclassified"
+  ],
+  [
+   "TOKYOPLAST",
+   "Unclassified"
+  ],
+  [
+   "TOLINS",
+   "Unclassified"
+  ],
+  [
+   "TOUCHWOOD",
+   "Unclassified"
+  ],
+  [
+   "TOYAMSL",
+   "Unclassified"
+  ],
+  [
+   "TPLPLASTEH",
+   "Unclassified"
+  ],
+  [
+   "TRACXN",
+   "Unclassified"
+  ],
+  [
+   "TRANSCOR",
+   "Unclassified"
+  ],
+  [
+   "TREEHOUSE",
+   "Unclassified"
+  ],
+  [
+   "TREJHARA",
+   "Unclassified"
+  ],
+  [
+   "TREL",
+   "Unclassified"
+  ],
+  [
+   "TRF",
+   "Unclassified"
+  ],
+  [
+   "TRIGYN",
+   "Unclassified"
+  ],
+  [
+   "TRITONV",
+   "Unclassified"
+  ],
+  [
+   "TRU",
+   "Unclassified"
+  ],
+  [
+   "TRUALT",
+   "Unclassified"
+  ],
+  [
+   "TTKHLTCARE",
+   "Unclassified"
+  ],
+  [
+   "TTKPRESTIG",
+   "Unclassified"
+  ],
+  [
+   "TTL",
+   "Unclassified"
+  ],
+  [
+   "TURTLEMINT",
+   "Unclassified"
+  ],
+  [
+   "TUTIALKA",
+   "Unclassified"
+  ],
+  [
+   "TVSELECT",
+   "Unclassified"
+  ],
+  [
+   "TVSHLTD",
+   "Unclassified"
+  ],
+  [
+   "TVSSRICHAK",
+   "Unclassified"
+  ],
+  [
+   "TVTODAY",
+   "Unclassified"
+  ],
+  [
+   "UDAYJEW",
+   "Unclassified"
+  ],
+  [
+   "UDS",
+   "Unclassified"
+  ],
+  [
+   "UEL",
+   "Unclassified"
+  ],
+  [
+   "UFLEX",
+   "Unclassified"
+  ],
+  [
+   "UFO",
+   "Unclassified"
+  ],
+  [
+   "UGARSUGAR",
+   "Unclassified"
+  ],
+  [
+   "UGROCAP",
+   "Unclassified"
+  ],
+  [
+   "ULTRAMAR",
+   "Unclassified"
+  ],
+  [
+   "UMESLTD",
+   "Unclassified"
+  ],
+  [
+   "UMIYA-MRO",
+   "Unclassified"
+  ],
+  [
+   "UNICHEMLAB",
+   "Unclassified"
+  ],
+  [
+   "UNIDT",
+   "Unclassified"
+  ],
+  [
+   "UNIECOM",
+   "Unclassified"
+  ],
+  [
+   "UNIENTER",
+   "Unclassified"
+  ],
+  [
+   "UNIINFO",
+   "Unclassified"
+  ],
+  [
+   "UNIMECH",
+   "Unclassified"
+  ],
+  [
+   "UNIPARTS",
+   "Unclassified"
+  ],
+  [
+   "UNITECH",
+   "Unclassified"
+  ],
+  [
+   "UNITEDPOLY",
+   "Unclassified"
+  ],
+  [
+   "UNITEDTEA",
+   "Unclassified"
+  ],
+  [
+   "UNIVCABLES",
+   "Unclassified"
+  ],
+  [
+   "UPHOT",
+   "Unclassified"
+  ],
+  [
+   "URJA",
+   "Unclassified"
+  ],
+  [
+   "USK",
+   "Unclassified"
+  ],
+  [
+   "UTKARSHBNK",
+   "Unclassified"
+  ],
+  [
+   "UTTAMSUGAR",
+   "Unclassified"
+  ],
+  [
+   "VADILALIND",
+   "Unclassified"
+  ],
+  [
+   "VADILENT",
+   "Unclassified"
+  ],
+  [
+   "VAISHALI",
+   "Unclassified"
+  ],
+  [
+   "VAKRANGEE",
+   "Unclassified"
+  ],
+  [
+   "VALIANTORG",
+   "Unclassified"
+  ],
+  [
+   "VARDMNPOLY",
+   "Unclassified"
+  ],
+  [
+   "VASCONEQ",
+   "Unclassified"
+  ],
+  [
+   "VASUPRADA",
+   "Unclassified"
+  ],
+  [
+   "VASWANI",
+   "Unclassified"
+  ],
+  [
+   "VEDAVAAG",
+   "Unclassified"
+  ],
+  [
+   "VEEDOL",
+   "Unclassified"
+  ],
+  [
+   "VENKEYS",
+   "Unclassified"
+  ],
+  [
+   "VENTIVE",
+   "Unclassified"
+  ],
+  [
+   "VENUSPIPES",
+   "Unclassified"
+  ],
+  [
+   "VENUSREM",
+   "Unclassified"
+  ],
+  [
+   "VERANDA",
+   "Unclassified"
+  ],
+  [
+   "VERTOZ",
+   "Unclassified"
+  ],
+  [
+   "VESUVIUS",
+   "Unclassified"
+  ],
+  [
+   "VETO",
+   "Unclassified"
+  ],
+  [
+   "VGCL",
+   "Unclassified"
+  ],
+  [
+   "VGL",
+   "Unclassified"
+  ],
+  [
+   "VHL",
+   "Unclassified"
+  ],
+  [
+   "VIDHIING",
+   "Unclassified"
+  ],
+  [
+   "VIDYAWIRES",
+   "Unclassified"
+  ],
+  [
+   "VIJSOLX",
+   "Unclassified"
+  ],
+  [
+   "VIKASECO",
+   "Unclassified"
+  ],
+  [
+   "VIKASLIFE",
+   "Unclassified"
+  ],
+  [
+   "VIKRAN",
+   "Unclassified"
+  ],
+  [
+   "VIMTALABS",
+   "Unclassified"
+  ],
+  [
+   "VINATIORGA",
+   "Unclassified"
+  ],
+  [
+   "VINCOFE",
+   "Unclassified"
+  ],
+  [
+   "VINDHYATEL",
+   "Unclassified"
+  ],
+  [
+   "VINEETLAB",
+   "Unclassified"
+  ],
+  [
+   "VINNY",
+   "Unclassified"
+  ],
+  [
+   "VINYLINDIA",
+   "Unclassified"
+  ],
+  [
+   "VIPCLOTHNG",
+   "Unclassified"
+  ],
+  [
+   "VIRAT",
+   "Unclassified"
+  ],
+  [
+   "VIRINCHI",
+   "Unclassified"
+  ],
+  [
+   "VISACHROME",
+   "Unclassified"
+  ],
+  [
+   "VISAKAIND",
+   "Unclassified"
+  ],
+  [
+   "VISHAL",
+   "Unclassified"
+  ],
+  [
+   "VISHNU",
+   "Unclassified"
+  ],
+  [
+   "VISHWARAJ",
+   "Unclassified"
+  ],
+  [
+   "VITAL",
+   "Unclassified"
+  ],
+  [
+   "VIVIANA",
+   "Unclassified"
+  ],
+  [
+   "VIVIDHA",
+   "Unclassified"
+  ],
+  [
+   "VIVOBIOT",
+   "Unclassified"
+  ],
+  [
+   "VLEGOV",
+   "Unclassified"
+  ],
+  [
+   "VLSFINANCE",
+   "Unclassified"
+  ],
+  [
+   "VMSTMT",
+   "Unclassified"
+  ],
+  [
+   "VOEPL",
+   "Unclassified"
+  ],
+  [
+   "VOITHPAPR",
+   "Unclassified"
+  ],
+  [
+   "VPRPL",
+   "Unclassified"
+  ],
+  [
+   "VRAJ",
+   "Unclassified"
+  ],
+  [
+   "VRLLOG",
+   "Unclassified"
+  ],
+  [
+   "VSSL",
+   "Unclassified"
+  ],
+  [
+   "VSTIND",
+   "Unclassified"
+  ],
+  [
+   "VSTL",
+   "Unclassified"
+  ],
+  [
+   "VSTTILLERS",
+   "Unclassified"
+  ],
+  [
+   "VTMLTD",
+   "Unclassified"
+  ],
+  [
+   "WAAREEINDO",
+   "Unclassified"
+  ],
+  [
+   "WALCHANNAG",
+   "Unclassified"
+  ],
+  [
+   "WANBURY",
+   "Unclassified"
+  ],
+  [
+   "WARDINMOBI",
+   "Unclassified"
+  ],
+  [
+   "WATERBASE",
+   "Unclassified"
+  ],
+  [
+   "WCIL",
+   "Unclassified"
+  ],
+  [
+   "WEALTH",
+   "Unclassified"
+  ],
+  [
+   "WEIZMANIND",
+   "Unclassified"
+  ],
+  [
+   "WEL",
+   "Unclassified"
+  ],
+  [
+   "WELSPLSOL",
+   "Unclassified"
+  ],
+  [
+   "WENDT",
+   "Unclassified"
+  ],
+  [
+   "WEWIN",
+   "Unclassified"
+  ],
+  [
+   "WHBRADY",
+   "Unclassified"
+  ],
+  [
+   "WHEELS",
+   "Unclassified"
+  ],
+  [
+   "WILLAMAGOR",
+   "Unclassified"
+  ],
+  [
+   "WINDLAS",
+   "Unclassified"
+  ],
+  [
+   "WINDMACHIN",
+   "Unclassified"
+  ],
+  [
+   "WIPL",
+   "Unclassified"
+  ],
+  [
+   "WONDERLA",
+   "Unclassified"
+  ],
+  [
+   "WORTHPERI",
+   "Unclassified"
+  ],
+  [
+   "WPIL",
+   "Unclassified"
+  ],
+  [
+   "WSI",
+   "Unclassified"
+  ],
+  [
+   "WSTCSTPAPR",
+   "Unclassified"
+  ],
+  [
+   "XCHANGING",
+   "Unclassified"
+  ],
+  [
+   "XELPMOC",
+   "Unclassified"
+  ],
+  [
+   "XPROINDIA",
+   "Unclassified"
+  ],
+  [
+   "XTGLOBAL",
+   "Unclassified"
+  ],
+  [
+   "XTRANET",
+   "Unclassified"
+  ],
+  [
+   "YASHO",
+   "Unclassified"
+  ],
+  [
+   "YATRA",
+   "Unclassified"
+  ],
+  [
+   "YOGI",
+   "Unclassified"
+  ],
+  [
+   "YUKEN",
+   "Unclassified"
+  ],
+  [
+   "ZEELEARN",
+   "Unclassified"
+  ],
+  [
+   "ZEEMEDIA",
+   "Unclassified"
+  ],
+  [
+   "ZENITHEXPO",
+   "Unclassified"
+  ],
+  [
+   "ZENITHSTL",
+   "Unclassified"
+  ],
+  [
+   "ZFSTEERING",
+   "Unclassified"
+  ],
+  [
+   "ZIMLAB",
+   "Unclassified"
+  ],
+  [
+   "ZODIAC",
+   "Unclassified"
+  ],
+  [
+   "ZODIACLOTH",
+   "Unclassified"
+  ],
+  [
+   "ZOTA",
+   "Unclassified"
+  ],
+  [
+   "ZSARACOM",
+   "Unclassified"
+  ],
+  [
+   "ZUARI",
+   "Unclassified"
+  ],
+  [
+   "ZUARIIND",
+   "Unclassified"
+  ]
+ ]
+}

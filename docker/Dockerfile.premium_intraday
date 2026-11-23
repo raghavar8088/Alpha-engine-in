@@ -1,0 +1,24 @@
+# Premium Intraday Strategies paper desk. Build context is the repo root:
+#   docker build -f docker/Dockerfile.premium_intraday -t tradingai-premium-intraday .
+# Same base image as the Premium Strategies desk (python:3.12-slim), so the box adds only this small layer.
+# No broker client is installed. It carries:
+#   premium-intraday-service/            the desk (pis: workflow, strategies, fills, risk, store, scheduler)
+#   shared/tradingai_shared/nse_calendar.py  the app's NSE holiday list (stdlib only), the same days every desk uses
+#   backend/app/services/screener/morning.py the Stock Momentum Trading desk's rules, unchanged, so the imported
+#                                            strategies are followed forward with their own code
+FROM python:3.12-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV MALLOC_ARENA_MAX=2
+
+WORKDIR /app
+COPY premium-intraday-service/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+COPY shared/tradingai_shared/__init__.py /app/shared/tradingai_shared/__init__.py
+COPY shared/tradingai_shared/nse_calendar.py /app/shared/tradingai_shared/nse_calendar.py
+COPY backend/app/services/screener/morning.py /app/vendor/morning.py
+COPY premium-intraday-service/main.py /app/main.py
+COPY premium-intraday-service/pis /app/pis
+
+CMD ["python", "main.py"]

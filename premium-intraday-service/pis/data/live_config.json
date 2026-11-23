@@ -1,0 +1,272 @@
+{
+ "prereg_sha256": "56728b0e94f2a3dda0a06ca9fb3c1baf244b76b5840eab4358551915bb359630",
+ "generated": "2026-11-22",
+ "strategies": [
+  {
+   "sid": "N01",
+   "name": "Sector-confirmed opening-range breakout",
+   "level": "L2",
+   "target_R": 2.0,
+   "sides": [
+    1
+   ],
+   "status": {
+    "LONG": "Rejected"
+   },
+   "reason": {
+    "LONG": "failed: walk-forward folds positive >= 3 of 4; final mean net R > 0; final profit factor >= 1.10; final mean net R at 2x slippage >= 0; pooled day-clustered t >= 2.0; pooled net without the best 5% of days > 0"
+   }
+  },
+  {
+   "sid": "N01",
+   "name": "Sector-confirmed opening-range breakout",
+   "level": "L2",
+   "target_R": 3.0,
+   "sides": [
+    -1
+   ],
+   "status": {
+    "SHORT": "Rejected"
+   },
+   "reason": {
+    "SHORT": "failed: final trades >= 30; final mean net R > 0; final profit factor >= 1.10; final mean net R at 2x slippage >= 0; pooled day-clustered t >= 2.0; pooled net without the best 5% of days > 0"
+   }
+  },
+  {
+   "sid": "N02",
+   "name": "Relative-strength leaders and laggards",
+   "level": "L2",
+   "target_R": 1.5,
+   "sides": [
+    -1
+   ],
+   "status": {
+    "SHORT": "Rejected"
+   },
+   "reason": {
+    "SHORT": "failed: walk-forward mean net R > 0; walk-forward folds positive >= 3 of 4; final mean net R > 0; final profit factor >= 1.10; final mean net R at 2x slippage >= 0; pooled day-clustered t >= 2.0; pooled net without the best 5% of days > 0"
+   }
+  },
+  {
+   "sid": "N02",
+   "name": "Relative-strength leaders and laggards",
+   "level": "L2",
+   "target_R": 2.0,
+   "sides": [
+    1
+   ],
+   "status": {
+    "LONG": "Rejected"
+   },
+   "reason": {
+    "LONG": "failed: walk-forward mean net R > 0; walk-forward folds positive >= 3 of 4; final mean net R > 0; final profit factor >= 1.10; final mean net R at 2x slippage >= 0; pooled day-clustered t >= 2.0; pooled net without the best 5% of days > 0"
+   }
+  },
+  {
+   "sid": "N03",
+   "name": "Trend-day VWAP pullback",
+   "level": "L2",
+   "target_R": 3.0,
+   "sides": [
+    1,
+    -1
+   ],
+   "status": {
+    "LONG": "Rejected",
+    "SHORT": "Rejected"
+   },
+   "reason": {
+    "LONG": "failed: walk-forward trades >= 60; walk-forward mean net R > 0; walk-forward folds positive >= 3 of 4; final trades >= 30; pooled day-clustered t >= 2.0; pooled net without the best 5% of days > 0",
+    "SHORT": "failed: walk-forward trades >= 60; walk-forward mean net R > 0; walk-forward folds positive >= 3 of 4; final trades >= 30; final mean net R > 0; final profit factor >= 1.10; final mean net R at 2x slippage >= 0; pooled day-clustered t >= 2.0; pooled net without the best 5% of days > 0"
+   }
+  },
+  {
+   "sid": "N04",
+   "name": "Failed-gap reversal (no news)",
+   "level": "L2",
+   "target_R": 2.0,
+   "sides": [
+    1,
+    -1
+   ],
+   "status": {
+    "LONG": "Rejected",
+    "SHORT": "Rejected"
+   },
+   "reason": {
+    "LONG": "failed: walk-forward trades >= 60; walk-forward folds positive >= 3 of 4; final trades >= 30; final mean net R > 0; final profit factor >= 1.10; final mean net R at 2x slippage >= 0; pooled day-clustered t >= 2.0; pooled net without the best 5% of days > 0; largest single stock <= 35% of profit",
+    "SHORT": "failed: walk-forward trades >= 60; walk-forward folds positive >= 3 of 4; final trades >= 30; final mean net R > 0; final profit factor >= 1.10; final mean net R at 2x slippage >= 0; pooled day-clustered t >= 2.0; pooled net without the best 5% of days > 0; largest single stock <= 35% of profit"
+   }
+  },
+  {
+   "sid": "N05",
+   "name": "Volatility compression then expansion",
+   "level": "L2",
+   "target_R": 2.0,
+   "sides": [
+    1,
+    -1
+   ],
+   "status": {
+    "LONG": "Rejected",
+    "SHORT": "Rejected"
+   },
+   "reason": {
+    "LONG": "failed: walk-forward trades >= 60; walk-forward mean net R > 0; walk-forward folds positive >= 3 of 4; final trades >= 30; pooled day-clustered t >= 2.0; pooled net without the best 5% of days > 0",
+    "SHORT": "failed: walk-forward mean net R > 0; walk-forward folds positive >= 3 of 4; final mean net R > 0; final profit factor >= 1.10; final mean net R at 2x slippage >= 0; pooled day-clustered t >= 2.0; pooled net without the best 5% of days > 0"
+   }
+  },
+  {
+   "sid": "N06",
+   "name": "News-catalyst continuation",
+   "level": "L3",
+   "target_R": 2.0,
+   "sides": [
+    1,
+    -1
+   ],
+   "status": {
+    "LONG": "Rejected",
+    "SHORT": "Rejected"
+   },
+   "reason": {
+    "LONG": "failed: walk-forward trades >= 60; walk-forward mean net R > 0; walk-forward folds positive >= 3 of 4; final trades >= 30; final profit factor >= 1.10; final mean net R at 2x slippage >= 0; pooled day-clustered t >= 2.0; pooled net without the best 5% of days > 0; largest single stock <= 35% of profit",
+    "SHORT": "failed: walk-forward trades >= 60; walk-forward mean net R > 0; walk-forward folds positive >= 3 of 4; final trades >= 30; final mean net R > 0; final profit factor >= 1.10; final mean net R at 2x slippage >= 0; pooled day-clustered t >= 2.0; pooled net without the best 5% of days > 0; largest single stock <= 35% of profit"
+   }
+  }
+ ],
+ "eligible": {},
+ "imported": {
+  "morning_rules": [
+   "gap_fade",
+   "gap_go",
+   "relative",
+   "vwap",
+   "pullback",
+   "orb15"
+  ],
+  "tournament": [
+   "iv2_gap_go",
+   "iv2_supertrend_1h",
+   "iv2_gap_fade",
+   "iv2_macd_trend_1h",
+   "iv2_or_close_break_1h",
+   "iv2_stoch_range_1h",
+   "iv2_donchian_1h",
+   "iv2_cci_extreme_1h",
+   "iv2_vwap_trend_45m",
+   "iv2_keltner_1h",
+   "iv2_zscore_45m",
+   "iv2_vwap_reversion_45m",
+   "iv2_rsi_momentum_45m",
+   "iv2_rsi2_1h",
+   "iv2_bollinger_snap_1h",
+   "iv2_pdh_pdl_45m",
+   "iv2_ema_pullback_45m",
+   "iv2_adx_dmi_45m",
+   "iv2_orb_inplay_25"
+  ],
+  "status": {
+   "iv2_gap_go": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.081 <= 0; every-signal mean net R -0.049 <= 0; profit factor 0.77 < 1.1; day-clustered t -2.44 < 2.0; negative at 2x slippage"
+   },
+   "iv2_supertrend_1h": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.067 <= 0; every-signal mean net R -0.067 <= 0; profit factor 0.72 < 1.1; day-clustered t -5.57 < 2.0; negative at 2x slippage"
+   },
+   "iv2_gap_fade": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.077 <= 0; every-signal mean net R -0.125 <= 0; profit factor 0.77 < 1.1; day-clustered t -1.86 < 2.0; negative at 2x slippage"
+   },
+   "iv2_macd_trend_1h": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.069 <= 0; every-signal mean net R -0.089 <= 0; profit factor 0.76 < 1.1; day-clustered t -4.87 < 2.0; negative at 2x slippage"
+   },
+   "iv2_or_close_break_1h": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.091 <= 0; every-signal mean net R -0.085 <= 0; profit factor 0.71 < 1.1; day-clustered t -5.84 < 2.0; negative at 2x slippage"
+   },
+   "iv2_stoch_range_1h": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.111 <= 0; every-signal mean net R -0.128 <= 0; profit factor 0.71 < 1.1; day-clustered t -4.48 < 2.0; negative at 2x slippage"
+   },
+   "iv2_donchian_1h": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.080 <= 0; every-signal mean net R -0.088 <= 0; profit factor 0.75 < 1.1; day-clustered t -4.95 < 2.0; negative at 2x slippage"
+   },
+   "iv2_cci_extreme_1h": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.109 <= 0; every-signal mean net R -0.107 <= 0; profit factor 0.60 < 1.1; day-clustered t -8.61 < 2.0; negative at 2x slippage"
+   },
+   "iv2_vwap_trend_45m": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.113 <= 0; every-signal mean net R -0.102 <= 0; profit factor 0.68 < 1.1; day-clustered t -8.02 < 2.0; negative at 2x slippage"
+   },
+   "iv2_keltner_1h": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.088 <= 0; every-signal mean net R -0.088 <= 0; profit factor 0.72 < 1.1; day-clustered t -5.63 < 2.0; negative at 2x slippage"
+   },
+   "iv2_zscore_45m": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.116 <= 0; every-signal mean net R -0.136 <= 0; profit factor 0.68 < 1.1; day-clustered t -5.21 < 2.0; negative at 2x slippage"
+   },
+   "iv2_vwap_reversion_45m": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.192 <= 0; every-signal mean net R -0.176 <= 0; profit factor 0.47 < 1.1; day-clustered t -5.97 < 2.0; negative at 2x slippage"
+   },
+   "iv2_rsi_momentum_45m": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.103 <= 0; every-signal mean net R -0.116 <= 0; profit factor 0.74 < 1.1; day-clustered t -6.09 < 2.0; negative at 2x slippage"
+   },
+   "iv2_rsi2_1h": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.117 <= 0; every-signal mean net R -0.118 <= 0; profit factor 0.61 < 1.1; day-clustered t -8.86 < 2.0; negative at 2x slippage"
+   },
+   "iv2_bollinger_snap_1h": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.100 <= 0; every-signal mean net R -0.120 <= 0; profit factor 0.66 < 1.1; day-clustered t -8.04 < 2.0; negative at 2x slippage"
+   },
+   "iv2_pdh_pdl_45m": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.102 <= 0; every-signal mean net R -0.117 <= 0; profit factor 0.72 < 1.1; day-clustered t -5.38 < 2.0; negative at 2x slippage"
+   },
+   "iv2_ema_pullback_45m": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.102 <= 0; every-signal mean net R -0.135 <= 0; profit factor 0.73 < 1.1; day-clustered t -6.53 < 2.0; negative at 2x slippage"
+   },
+   "iv2_adx_dmi_45m": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.115 <= 0; every-signal mean net R -0.118 <= 0; profit factor 0.66 < 1.1; day-clustered t -7.66 < 2.0; negative at 2x slippage"
+   },
+   "SM:gap_fade": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.206 <= 0; every-signal mean net R -0.212 <= 0; profit factor 0.65 < 1.1; day-clustered t -4.22 < 2.0; negative at 2x slippage"
+   },
+   "SM:gap_go": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.174 <= 0; every-signal mean net R -0.179 <= 0; profit factor 0.72 < 1.1; day-clustered t -4.90 < 2.0; negative at 2x slippage"
+   },
+   "iv2_orb_inplay_25": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.148 <= 0; every-signal mean net R -0.123 <= 0; profit factor 0.73 < 1.1; day-clustered t -4.95 < 2.0; negative at 2x slippage"
+   },
+   "SM:relative": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.293 <= 0; every-signal mean net R -0.246 <= 0; profit factor 0.59 < 1.1; day-clustered t -15.07 < 2.0; negative at 2x slippage"
+   },
+   "SM:vwap": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.306 <= 0; every-signal mean net R -0.254 <= 0; profit factor 0.57 < 1.1; day-clustered t -15.96 < 2.0; negative at 2x slippage"
+   },
+   "SM:pullback": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.297 <= 0; every-signal mean net R -0.255 <= 0; profit factor 0.59 < 1.1; day-clustered t -16.99 < 2.0; negative at 2x slippage"
+   },
+   "SM:orb15": {
+    "status": "Rejected",
+    "reason": "book mean net R -0.252 <= 0; every-signal mean net R -0.221 <= 0; profit factor 0.61 < 1.1; day-clustered t -13.36 < 2.0; negative at 2x slippage"
+   }
+  }
+ }
+}

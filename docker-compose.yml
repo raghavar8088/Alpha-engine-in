@@ -166,6 +166,28 @@ services:
     # stream; when the box is short of CPU the backend wins. Applied live with docker update; this keeps it on recreate.
     cpu_shares: 256
 
+  # Premium Strategies -> Premium Intraday Strategies paper desk (2026-11-22): its own container, scheduler, database
+  # (alpha_engine_premium_intraday on the compose mongodb), paper books, risk limits, logs and switch. It reads the bar
+  # volume READ-ONLY and the backend's read-only /api/premium-intraday/feed routes; it is given no .env, no broker keys,
+  # and contains no broker client. Capped small and weighted below everything else, so it cannot starve the backend.
+  # Remove it with this block, docker/Dockerfile.premium_intraday, premium-intraday-service/, the backend route file
+  # and its include in main.py, and frontend/app/premium-strategies/intraday.
+  premium-intraday:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.premium_intraday
+    environment:
+      FACTORY_MONGO_URL: ${FACTORY_MONGO_URL:-}
+      APP_SHARED_SECRET: ${APP_SHARED_SECRET:-}
+      PIS_BACKEND_URL: http://backend:8080
+    depends_on:
+      - mongodb
+    volumes:
+      - intraday_data:/data/intraday:ro
+    restart: unless-stopped
+    mem_limit: 160m
+    cpu_shares: 128
+
   frontend:
     build:
       context: frontend

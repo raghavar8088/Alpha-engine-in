@@ -1140,6 +1140,13 @@ try:
     app.include_router(_premium_paper_routes.router)
 except Exception:  # noqa: BLE001
     logger.exception("could not mount the Premium Strategies paper API")
+# Premium Strategies -> Premium Intraday Strategies (2026-11-22): read-only feed for its own container and its
+# dashboard's reads; it starts nothing in this process. A failure here must not stop the app.
+try:
+    from app.api.routes import premium_intraday as _premium_intraday_routes
+    app.include_router(_premium_intraday_routes.router)
+except Exception:  # noqa: BLE001
+    logger.exception("could not mount the Premium Intraday Strategies API")
 # AI final gate (2026-11-10): Claude reviews every new position of Intraday Stocks, Commodity Trading, Gold Desk and
 # Premium Strategies; approvals become separate AI positions (an A/B test: no module's own positions change).
 # app/services/ai_gate.py. A failure here must not stop the app.

@@ -1,0 +1,162 @@
+{
+ "feed_route": {
+  "full_universe_ms": 22.6,
+  "full_bytes": 691803,
+  "incremental_ms": 2.59,
+  "incremental_bytes": 47942
+ },
+ "live_day_alone": {
+  "day": "2025-10-31",
+  "prepare_cpu_s": 3.406,
+  "poll_cpu_ms_mean": 9.8,
+  "poll_cpu_ms_max": 46.9,
+  "python_heap_peak_mb": 18.9,
+  "wall_s": 4.2,
+  "db_writes": 436,
+  "journal_rows": 158,
+  "observer_status": [
+   {
+    "state": "board",
+    "signals": 73,
+    "entries": 38,
+    "source": "D:/premium_intraday_data/vendor/morning_origin_2252267e.py",
+    "board": 20
+   },
+   {
+    "state": "source unavailable",
+    "signals": 0,
+    "entries": 0,
+    "why": "no access to the tournament's ledger"
+   }
+  ]
+ },
+ "live_day": {
+  "day": "2025-10-31",
+  "prepare_cpu_s": 3.062,
+  "poll_cpu_ms_mean": 8.5,
+  "poll_cpu_ms_max": 15.6,
+  "python_heap_peak_mb": 18.9,
+  "feed_calls": 75,
+  "positions": 9,
+  "journal_rows": 47
+ },
+ "writes_by_collection": {
+  "days.update_one": 164,
+  "books.update_one": 73,
+  "journal.insert_many": 21,
+  "positions.update_one": 18
+ },
+ "restart_gap_missed_rows": 7,
+ "checks": [
+  {
+   "name": "static: no broker client or order call anywhere in the desk's code",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "static: the image installs only pymongo",
+   "pass": true,
+   "detail": "['pymongo>=4.6,<5']"
+  },
+  {
+   "name": "static: compose gives the desk no .env, no broker keys, the bar volume read-only",
+   "pass": true,
+   "detail": "block found"
+  },
+  {
+   "name": "costs: pis.costs equals origin angel_fees.round_trip on 5,000 random trades",
+   "pass": true,
+   "detail": "max diff Rs 0.0000"
+  },
+  {
+   "name": "duplicate signals: two strategies on one stock at one bar -> one portfolio position (stronger evidence first), the other recorded with its reason, both in their own observation books",
+   "pass": true,
+   "detail": "portfolio entries 1, skips 1, observation entries 2"
+  },
+  {
+   "name": "backend feed route: returns closed bars, leaves the bar store's memory byte-identical, imports no broker",
+   "pass": true,
+   "detail": "219 symbols, 691,803 bytes, 22.6 ms"
+  },
+  {
+   "name": "replay == live on 2025-10-31: same positions in every new-strategy book",
+   "pass": true,
+   "detail": "replay 9 live 9"
+  },
+  {
+   "name": "isolation: every database write goes to alpha_engine_premium_intraday",
+   "pass": true,
+   "detail": "276 writes, foreign []"
+  },
+  {
+   "name": "isolation: the desk calls only its own read-only feed routes",
+   "pass": true,
+   "detail": "77 calls"
+  },
+  {
+   "name": "replay == live on 2026-08-12: same positions in every new-strategy book",
+   "pass": true,
+   "detail": "replay 9 live 9"
+  },
+  {
+   "name": "replay == live on 2025-11-12: same positions in every new-strategy book",
+   "pass": true,
+   "detail": "replay 7 live 7"
+  },
+  {
+   "name": "replay == live on 2024-11-25: same positions in every new-strategy book",
+   "pass": true,
+   "detail": "replay 6 live 6"
+  },
+  {
+   "name": "replay == live on 2026-02-10: same positions in every new-strategy book",
+   "pass": true,
+   "detail": "replay 2 live 2"
+  },
+  {
+   "name": "restart at 11:00 with no gap: identical positions to an uninterrupted day (2025-10-31)",
+   "pass": true,
+   "detail": "9 vs 9"
+  },
+  {
+   "name": "restart after a 45-minute outage: no position entered inside the outage, none duplicated",
+   "pass": true,
+   "detail": "entered in gap 0, triggers recorded as missed while offline 7"
+  },
+  {
+   "name": "missing data: a 20-minute backend outage leaves those bars missing, reported, and the day completes",
+   "pass": true,
+   "detail": "bars seen in the outage [0, 0]"
+  },
+  {
+   "name": "missing data: the stream input is reported unavailable during the outage",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "duplicate bars: every bar delivered twice changes nothing",
+   "pass": true,
+   "detail": "9 vs 9"
+  },
+  {
+   "name": "disable with open positions: OFF stops new entries, open positions are still managed to a flat book by 15:10",
+   "pass": true,
+   "detail": "OFF at bar 8, entries after 0, open at close 0"
+  },
+  {
+   "name": "failed square-off: no price for CANBK from 14:50 -> FAILED EXIT recorded and an alert raised",
+   "pass": true,
+   "detail": "failed 1, alerts 1"
+  },
+  {
+   "name": "failed square-off: no price for MAXHEALTH from 14:50 -> FAILED EXIT recorded and an alert raised",
+   "pass": true,
+   "detail": "failed 1, alerts 1"
+  },
+  {
+   "name": "existing desks: the Stock Momentum rules' 09:30 board and every trigger are identical with the desk running",
+   "pass": true,
+   "detail": "7857 triggers"
+  }
+ ]
+}
