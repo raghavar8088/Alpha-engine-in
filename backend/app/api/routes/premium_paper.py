@@ -12,6 +12,9 @@
   POST /api/premium-paper/live/desk/{desk}/mode, /live/desk/{desk}/flatten   the same controls, per desk
   POST /api/premium-paper/live/pick, /live/desk/{desk}/pick   {"key": "acct|mkt", "contracts", "on", "confirm"}: one
        strategy's own lot size and ON/OFF (raising or switching on needs confirm "REAL MONEY")
+  GET  /api/premium-paper/live/notes/{desk}      each strategy's own note, {"notes": {"acct|mkt": {"text", "at"}}}
+  POST /api/premium-paper/live/notes/{desk}      {"key": "acct|mkt", "text"}: set one (at most NOTE_MAX characters; an empty
+       text removes it). Notes are the owner's words only: kept apart from the desks' state, never read by the engine.
 
 The desk itself runs in its own container (premium-paper-service), because this process sits at its memory cap; its
 records are in the box's second MongoDB (FACTORY_MONGO_URL), never on the near-quota Atlas cluster. Everything above
@@ -216,3 +219,53 @@ async def live_desk_pick(desk: str, payload: dict = Body(...), _user: dict = Dep
     r = await premium_live.set_pick(payload.get("key"), payload.get("contracts"), payload.get("on"), payload.get("pin"),
                                     payload.get("confirm"), desk=desk)
     return {**r, "status": await premium_live.status(desk)}
+
+
+# -- each strategy's own note (24 Nov 2026) ---------------------------------------------------------------------------
+# The owner asked for a note per strategy in the Delta desks' strategies tables. Kept in its own collection of this
+# database (live_strategy_notes, _id "<desk>|<acct>|<mkt>"), apart from the desks' state: the trading engine never reads
+# it, so a note can change nothing a desk does. Only a key of the desk's own strategies is taken.
+NOTE_MAX = 1000
+
+
+def _desk_keys(desk: str) -> set:
+    from app.services import premium_live
+    d = premium_live.DESKS.get(desk)
+    if d is None:
+        raise HTTPException(status_code=404, detail="Not Found")
+    return {f"{p.acct}|{p.mkt}" for p in d.picks}
+
+
+@router.get("/live/notes/{desk}")
+async def live_notes(desk: str, _user: dict = Depends(get_current_user)):
+    _desk_keys(desk)
+    db = _database()
+    if db is None:
+        return {"notes": {}, "max": NOTE_MAX, "configured": False}
+    rows = await db.live_strategy_notes.find({"desk": desk}, {"key": 1, "text": 1, "at": 1}).to_list(1000)
+    return {"notes": {r["key"]: {"text": r["text"], "at": r.get("at")} for r in rows if r.get("key") and r.get("text")},
+            "max": NOTE_MAX, "configured": True}
+
+
+@router.post("/live/notes/{desk}")
+async def live_note_set(desk: str, payload: dict = Body(...), _user: dict = Depends(get_current_user)):
+    keys = _desk_keys(desk)
+    key, text = str(payload.get("key") or ""), payload.get("text")
+    if key not in keys:
+        return {"ok": False, "why": f"{key!r} is not one of this desk's strategies"}
+    if text is not None and not isinstance(text, str):
+        return {"ok": False, "why": "a note is text"}
+    text = (text or "").strip()
+    if len(text) > NOTE_MAX:
+        return {"ok": False, "why": f"a note is at most {NOTE_MAX} characters"}
+    db = _database()
+    if db is None:
+        return {"ok": False, "why": "the paper desk's database is not configured on this server"}
+    _id = f"{desk}|{key}"
+    if not text:                                         # an empty note removes it
+        await db.live_strategy_notes.delete_one({"_id": _id})
+        return {"ok": True, "key": key, "text": "", "at": None}
+    at = time.time()
+    await db.live_strategy_notes.update_one({"_id": _id}, {"$set": {"desk": desk, "key": key, "text": text, "at": at}},
+                                            upsert=True)
+    return {"ok": True, "key": key, "text": text, "at": at}
