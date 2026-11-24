@@ -502,7 +502,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         <div className="ld-tile">
           <span className="ld-k">Signals not taken</span>
           <span className="ld-v">{live.skipped}</span>
-          <span className="ld-s">{`${L.follow_all ? (counts.before ? `mostly paper trades from before their strategy joined (never copyable): ${counts.before} of the last ${counts.all} decisions` : "skipped: closed on paper first, too big or no balance") : "skipped as late, drifted or too big"}${live.errors ? ` · ${live.errors} error${live.errors === 1 ? "" : "s"}` : ""}`}</span>
+          <span className="ld-s">{`${L.follow_all ? (counts.before ? `all time · of the last ${counts.all} decisions, ${counts.before} were paper trades from before their strategy joined (never copyable) and ${counts.skipped} real skips` : "skipped: closed on paper first, too big or no balance") : "skipped as late, drifted or too big"}${live.errors ? ` · ${live.errors} error${live.errors === 1 ? "" : "s"}` : ""}`}</span>
         </div>
         <div className="ld-tile">
           <span className="ld-k">Delta wallet</span>
