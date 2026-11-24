@@ -307,7 +307,8 @@ def fresh(mode="live", btc=69000.0, gold=3885.0, follow=True):
     M.DESKS.clear()
     M.DESKS.update(_REAL_DESKS if follow else {k: replace(v, follow_all=False) for k, v in _REAL_DESKS.items()})
     db = SimpleNamespace(premium_trades=Coll("pt"), premium_meta=Coll("pm"), live_delta_trades=Coll("lt"),
-                         live_delta_state=Coll("ls"), live_crypto_trades=Coll("ct"), live_crypto_state=Coll("cs"))
+                         live_delta_state=Coll("ls"), live_crypto_trades=Coll("ct"), live_crypto_state=Coll("cs"),
+                         live_pgold_state=Coll("gs2"), live_pgold_trades=Coll("gt2"))   # the Premium Gold book (24 Nov)
     db.premium_meta.docs.append({"_id": "status", "segments_at": datetime.fromtimestamp(CLOCK[0], UTC).isoformat()})
     M._db = lambda: db
     # the Gold Desk (the gold desk's second source, 18 Nov): empty and running, unless section 31 says otherwise
@@ -333,7 +334,7 @@ def fresh(mode="live", btc=69000.0, gold=3885.0, follow=True):
 
 
 def st_of(db, desk):
-    coll = db.live_crypto_state if desk == "crypto" else db.live_delta_state
+    coll = {"crypto": db.live_crypto_state, "premium_gold": db.live_pgold_state}.get(desk, db.live_delta_state)
     return coll.docs[0] if coll.docs else {}
 
 
@@ -358,7 +359,8 @@ def own_leg(t, k):
 
 
 def trade(db, tid):
-    return next((d for d in db.live_crypto_trades.docs + db.live_delta_trades.docs if d["_id"] == tid), None)
+    return next((d for d in db.live_crypto_trades.docs + db.live_delta_trades.docs + db.live_pgold_trades.docs
+                 if d["_id"] == tid), None)
 
 
 def heartbeat(db):
@@ -370,7 +372,12 @@ async def cyc(db):
     return await M.cycle()
 
 
+async def _fake_fx():                      # the page's USD/INR (24 Nov 2026): never the network in a test
+    M._FX.update(rate=90.0, asof="test", at=M._now())
+
+
 async def main():
+    M._read_fx = _fake_fx
     BTC, GOLD = 27, 131253
     M.REQUIRE_PIN = True          # sections 1-23 test the PIN when the server requires one; 24 the owner's choice: none
     # ── 1. a live bitcoin entry, sized by risk, with the stop on the venue ─────────────────────────
@@ -1065,7 +1072,8 @@ async def main():
           await M.open_count() == 0 and await SW.state(M.MODULE) == SW.ACTIVE)
     heartbeat(db)
     r = await SW.gated(M.MODULE, M.cycle)
-    check("ON: the gated loop runs both desks as before", set(r) == {"gold", "crypto"}, r)
+    check("ON: the gated loop runs every desk as before (the Premium Gold book too, from 24 Nov)",
+          set(r) == {"gold", "crypto", "premium_gold"}, r)
     held = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
     heartbeat(db)
     await SW.gated(M.MODULE, M.cycle)
@@ -2192,6 +2200,168 @@ async def main():
           and sorted(p["mkt"] for p in c["picks"] if p["acct"] == "DD-04") == ["BTCUSD", "ETHUSD"]
           and len({f"{p['acct']}|{p['mkt']}" for p in c["picks"]}) == 32,
           [(p["acct"], p["mkt"], p["cfg"], bool(p.get("rank"))) for p in new])
+
+
+    # ── 40. 24 Nov evening: the Premium Gold book ─────────────────────────────────────────────────────────────────────
+    section("40. 24 Nov evening: the Premium Gold book - the H1 test's six best beside the gold desk, each signal a second "
+            "real position at the book's own lots")
+    pg = M.DESKS["premium_gold"]
+    check("the book: six H1 templates in the Gold Desk's ranking order on XAUTUSD, every signal copied, its own "
+          "collections, an order-id salt (the gold and bitcoin desks have none), three desks in all",
+          [p.template for p in pg.picks] == ["ema_ribbon", "pivot_break", "donchian_fast", "round_number_break",
+                                             "donchian_slow", "keltner_break"]
+          and all(p.src == M.GOLD_H1 and p.product == "XAUTUSD" and p.picked_at == M.NEW_PICKED_AT_6 for p in pg.picks)
+          and pg.products == ["XAUTUSD"] and pg.follow_all and (pg.state_coll, pg.trades_coll) == ("live_pgold_state",
+                                                                                                   "live_pgold_trades")
+          and pg.cid_salt != "" and M.DESKS["gold"].cid_salt == M.DESKS["crypto"].cid_salt == "" and len(M.DESKS) == 3,
+          [p.template for p in pg.picks])
+    rec40 = {p.acct: (p.trades, p.sum_r, p.t, p.win) for p in pg.picks}
+    check("records at 20:30 IST 24 Nov by the H1 method (re-proven on three frozen H1 records before they were read)",
+          rec40 == {"H1-RIB": (12, 5.57, 1.0, 50), "H1-PIV": (23, 7.22, 0.95, 43), "H1-DCF": (20, 7.02, 1.03, 45),
+                    "H1-RND": (22, 3.99, 0.56, 41), "H1-DCS": (7, 2.34, 0.54, 43), "H1-KLT": (17, 3.98, 0.64, 41)}, rec40)
+    check("the gold desk keeps its seven H1 picks untouched; Prior Session High/Low is not in the new book",
+          [p.acct for p in M.DESKS["gold"].picks if p.src == M.GOLD_H1] == ["H1-RIB", "H1-RND", "H1-DCF", "H1-PIV",
+                                                                             "H1-DCS", "H1-KLT", "H1-PSB"]
+          and "H1-PSB" not in {p.acct for p in pg.picks} and len(M.DESKS["gold"].picks) == 102)
+    ids = {}
+    for k in ("gold", "crypto", "premium_gold"):
+        with M._use(k):
+            ids[k] = (M._cid("H1|abc"), M._cid("H1|abc", "s"))
+    before = (("p5" + hashlib.sha1(b"H1|abc").hexdigest())[:30], ("p5" + hashlib.sha1(b"H1|abc").hexdigest())[:29] + "s")
+    check("order ids: the gold and bitcoin desks' exactly as before this change; the new book's differ for the same "
+          "paper trade, at the same length", ids["gold"] == ids["crypto"] == before
+          and all(a != b for a, b in zip(ids["premium_gold"], before)) and [len(x) for x in ids["premium_gold"]] == [30, 30],
+          ids)
+
+    # end to end, beside a live gold desk
+    db = fresh(gold=3885.0)
+    db.live_delta_state.docs[0].pop("sizing", None)          # the gold desk at its lots (one contract), as it trades
+    db.live_delta_state.docs[0]["wallet_at"] = CLOCK[0]
+    M.D.balance = 400.0
+    un = lambda s: datetime.fromtimestamp(s, UTC).replace(tzinfo=None)   # noqa: E731 - as the Gold Desk stores times
+
+    def h1p(pid, tpl, side, entry, stop, target, ago=30):
+        M._h1_coll().docs.append({"position_id": pid, "venue": "delta", "h1": True, "symbol": "XAUTUSD",
+                                  "strategy_template": tpl, "side": side, "entry_price": entry, "stoploss": stop,
+                                  "target": target, "qty": 0.296, "status": "OPEN", "opened_at": un(CLOCK[0] - ago),
+                                  "exit_price": None, "exit_reason": None})
+        return "H1|" + pid
+
+    def h1x(pid, px):
+        for d in M._h1_coll().docs:
+            if d["position_id"] == pid:
+                d.update(status="CLOSED", exit_reason="exit_signal", exit_price=px, closed_at=un(CLOCK[0]))
+
+    def ptrade(tid):
+        return next((d for d in db.live_pgold_trades.docs if d["_id"] == tid), None)
+
+    def gtrade(tid):
+        return next((d for d in db.live_delta_trades.docs if d["_id"] == tid), None)
+
+    rib = h1p("x1", "ema_ribbon", "BUY", 3885.0, 3870.0, 3915.0)
+    await cyc(db)
+    check("the book starts OFF: the gold desk copies the H1 trade at one contract, the new book places nothing",
+          gtrade(rib) is not None and gtrade(rib)["status"] == "open" and gtrade(rib)["contracts"] == 1
+          and not db.live_pgold_trades.docs and st_of(db, "premium_gold").get("mode") in (None, "off")
+          and M.D.pos[GOLD]["size"] == 1, (gtrade(rib), db.live_pgold_trades.docs))
+    r = await M.set_pick("H1-RIB|XAUTUSD", contracts=10, confirm="REAL MONEY", desk="premium_gold")
+    check("its own lots: 10 on the new book's EMA Ribbon; the gold desk's EMA Ribbon still 1",
+          r["ok"] and st_of(db, "premium_gold")["pick_cfg"]["H1-RIB|XAUTUSD"]["contracts"] == 10
+          and "H1-RIB|XAUTUSD" not in (st_of(db, "gold").get("pick_cfg") or {}), r)
+    n0 = len(M.D.calls)
+    r = await M.set_mode("live", PIN, "REAL MONEY", desk="premium_gold")
+    lev = [c for c in M.D.calls[n0:] if c[1].endswith("/orders/leverage")]
+    check("it arms on its own beside the gold desk's open XAUTUSD trade (the account matches the two books' sum), "
+          "reading XAUTUSD's leverage first and setting 10x only because it was not 10x",
+          r["ok"] and st_of(db, "premium_gold")["mode"] == "live" and M.D.lev[GOLD] == 10
+          and lev[0] == ("GET", f"/v2/products/{GOLD}/orders/leverage") and ("POST", f"/v2/products/{GOLD}/orders/leverage") in lev,
+          (r, lev))
+    st_of(db, "premium_gold")["wallet_at"] = CLOCK[0]
+    advance(30)
+    M._h1_state_coll().docs[0]["last_run_at"] = un(CLOCK[0])
+    await cyc(db)
+    p1, g1 = ptrade(rib), gtrade(rib)
+    check("the same H1 trade is now a SECOND real position: 10 contracts on the new book, the gold desk's one beside it; "
+          "the account holds 11; each has its own stop and target on Delta, with different order ids",
+          p1 is not None and p1["status"] == "open" and p1["contracts"] == 10 and g1["status"] == "open"
+          and M.D.pos[GOLD]["size"] == 11 and own_leg(p1, "stop") is not None and own_leg(p1, "target") is not None
+          and own_leg(p1, "stop")["client_order_id"] != own_leg(g1, "stop")["client_order_id"]
+          and own_leg(p1, "target")["client_order_id"] != own_leg(g1, "target")["client_order_id"]
+          and float(own_leg(p1, "stop")["stop_price"]) == 3870.0, p1 and (p1.get("status"), p1.get("reason")))
+    sg, sp = st_of(db, "gold"), st_of(db, "premium_gold")
+    check("both books reconcile with the account (each counts both): live, no mismatch, no venue error",
+          sg["mode"] == sp["mode"] == "live" and not sg.get("mismatch_checks") and not sp.get("mismatch_checks")
+          and sg["errors_in_row"] == sp["errors_in_row"] == 0, (sg.get("mismatch"), sp.get("mismatch")))
+    check("Main Control's open-position probe counts the new book's trade too", await M.open_count() == 2)
+    advance(600)
+    M.D.set_price("XAUTUSD", 3900.0)
+    h1x("x1", 3900.0)
+    M._h1_state_coll().docs[0]["last_run_at"] = un(CLOCK[0])
+    await cyc(db)
+    p1, g1 = ptrade(rib), gtrade(rib)
+    check("its paper exit closes both, each only its own contracts (10 and 1); the account is flat; both won",
+          p1["status"] == g1["status"] == "closed" and GOLD not in M.D.pos and p1["pnl_usd"] > 0 and g1["pnl_usd"] > 0
+          and p1["close_reason"] == g1["close_reason"] == "paper exit: exit_signal",
+          (p1.get("status"), g1.get("status"), M.D.pos.get(GOLD)))
+    # flattening the new book leaves the gold desk alone
+    advance(60)
+    rib2 = h1p("x2", "ema_ribbon", "SELL", 3900.0, 3915.0, 3870.0)
+    M._h1_state_coll().docs[0]["last_run_at"] = un(CLOCK[0])
+    await cyc(db)
+    check("a short: -1 on the gold desk and -10 on the new book, -11 on the account",
+          gtrade(rib2)["status"] == ptrade(rib2)["status"] == "open" and M.D.pos[GOLD]["size"] == -11,
+          (gtrade(rib2) and gtrade(rib2).get("status"), ptrade(rib2) and ptrade(rib2).get("reason")))
+    r = await M.flatten(PIN, desk="premium_gold")
+    check("flattening the new book closes only its 10 and switches only it off: the gold desk's trade stays open and live",
+          r["ok"] and ptrade(rib2)["status"] == "closed" and gtrade(rib2)["status"] == "open" and M.D.pos[GOLD]["size"] == -1
+          and st_of(db, "premium_gold")["mode"] == "off" and st_of(db, "gold")["mode"] == "live", (r, M.D.pos.get(GOLD)))
+    # one book's lost order answer never switches the other off; an unexplained position still does
+    db.live_pgold_trades.docs.append({"_id": "H1|lost", "acct": "H1-PIV", "mkt": "XAUTUSD", "product": "XAUTUSD",
+                                      "mode": "live", "side": 1, "status": "entering", "contracts": 5,
+                                      "created_at": CLOCK[0], "plan": {"contracts": 5}})
+    M.D.pos[GOLD]["size"] += 5                                  # it filled; its answer was lost
+    for _ in range(4):
+        advance(20)
+        M._h1_state_coll().docs[0]["last_run_at"] = un(CLOCK[0])
+        await M.cycle("gold")
+    check("the new book's entry in flight (+5 the gold desk's records cannot see): the gold desk only waits, four checks "
+          "on, still live, no mismatch counted", st_of(db, "gold")["mode"] == "live" and not st_of(db, "gold").get("mismatch_checks"),
+          (st_of(db, "gold").get("switched_off"), st_of(db, "gold").get("mismatch")))
+    db.live_pgold_trades.docs = [d for d in db.live_pgold_trades.docs if d["_id"] != "H1|lost"]
+    for _ in range(3):
+        advance(20)
+        M._h1_state_coll().docs[0]["last_run_at"] = un(CLOCK[0])
+        await M.cycle("gold")
+    check("... the same +5 with no desk accounting for it: the gold desk switches off after three checks, as always",
+          st_of(db, "gold")["mode"] == "off" and "has not matched" in (st_of(db, "gold").get("switched_off") or ""),
+          st_of(db, "gold").get("switched_off"))
+    # what the page reads
+    c = await M.status("premium_gold")
+    g = await M.status("gold")
+    cc = await M.status("crypto")
+    pr = next(p for p in c["picks"] if p["acct"] == "H1-RIB")
+    check("what the page reads: the book's six, EMA Ribbon at 10 lots, XAUTUSD's price for the lots' money (from the "
+          "gold desk's open trade's mark), USD/INR; the bitcoin desk's prices from Delta's ticker",
+          c["desk"] == "premium_gold" and len(c["picks"]) == 6 and pr["cfg"]["contracts"] == 10
+          and c["quotes"]["XAUTUSD"]["price"] > 0 and g["quotes"]["XAUTUSD"]["price"] == c["quotes"]["XAUTUSD"]["price"]
+          and c["usd_inr"]["rate"] == 90.0 and set(cc["quotes"]) == {"BTCUSD", "ETHUSD"}
+          and all(q["price"] > 0 for q in cc["quotes"].values()) and c["products"] is not None,
+          (c.get("quotes"), c.get("usd_inr"), cc.get("quotes")))
+    old_fx, old_q = dict(M._FX), dict(M._QUOTES)
+    M._FX.update(rate=None, at=0.0)
+
+    async def no_fx():                          # Yahoo gives nothing
+        return None
+    M._read_fx = no_fx
+    M._QUOTES.clear()
+    M.D.fail["ticker"] = "definite"
+    cc = await M.status("crypto")
+    M.D.fail.pop("ticker")
+    check("no price and no rupee rate to be had: the page still reads, just without them",
+          cc["configured_db"] and cc["usd_inr"] is None and "BTCUSD" not in cc["quotes"], (cc.get("quotes"), cc.get("usd_inr")))
+    M._read_fx = _fake_fx
+    M._FX.update(old_fx)
+    M._QUOTES.update(old_q)
 
 
 if __name__ == "__main__":

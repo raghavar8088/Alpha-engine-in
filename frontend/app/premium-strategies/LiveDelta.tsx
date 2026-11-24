@@ -13,6 +13,9 @@
 // 19 Nov 2026: each strategy's own paper side beside the real one (the server's paper view): "Paper now" (in a paper
 // trade, its R now, or waiting) and "Paper so far" in the strategies table, with filters; a table of the strategies'
 // latest paper trades with what the desk did with each (copied, skipped and why, not copied); no t under five trades.
+// 24 Nov 2026 (evening): under each lots stepper, what those lots are worth now (the position's value and the margin it
+// holds, in dollars and rupees), live as it changes; and the Premium Gold book's "Trade size and money" panel (lots or
+// dollars of gold a trade per strategy, a lots-to-money ladder, the book's total).
 // 21 Nov 2026: the strategies table shows each one's REAL-money results from the server (trades, win %, PF, t, net P&L,
 // return % on the most margin it held at once, trading days, avg % a trading day, open now) in place of the record at
 // the pick and the 2-year backtest; one value a cell, so the app-wide sorter sorts them as numbers. Above it, the desk's
@@ -95,7 +98,10 @@ export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boole
   today: { live: number; shadow: number }; totals: { live: Totals; shadow: Totals }; picked_at: string; picks: Pick[];
   open: LiveTrade[]; recent: LiveTrade[]; notes: string[]; desk?: string; title?: string; products?: Record<string, unknown>;
   signals?: Signal[] | null; paper_view?: { at?: number; paper_age_s?: number | null; gold_desk_age_s?: number | null;
-    factory_age_s?: number | null } | null; results?: DeskResults | null };
+    factory_age_s?: number | null } | null; results?: DeskResults | null;
+  // the page's money figures (24 Nov 2026): each product's latest price and USD/INR; absent on an older server
+  desk_products?: string[]; quotes?: Record<string, { price: number; at: number }>;
+  usd_inr?: { rate: number; asof?: string | null; source?: string } | null };
 
 export const usd = (v: number | null | undefined, signed = false) => {
   if (v === null || v === undefined || Number.isNaN(v)) return "—";
@@ -104,6 +110,51 @@ export const usd = (v: number | null | undefined, signed = false) => {
   const a = Math.abs(v);
   return `${sign}$${a > 0 && a < 0.01 ? a.toFixed(4) : a.toFixed(2)}`;
 };
+/** One lot (contract) of each product Delta India trades, for the page's money figures (24 Nov 2026). The server's own
+ *  product spec (status.products) wins; these are its values on 24 Nov, for a server that has not read one yet. */
+const LOT_UNIT: Record<string, { cv: number; unit: string; what: string }> = {
+  BTCUSD: { cv: 0.001, unit: "BTC", what: "bitcoin" }, ETHUSD: { cv: 0.01, unit: "ETH", what: "ether" },
+  XAUTUSD: { cv: 0.001, unit: "XAUT", what: "gold" },
+};
+export type LotMoney = { price: number; cv: number; unit: string; what: string; lev: number; value: number; margin: number;
+  fx: number | null };
+/** The latest price this page knows for a product: the server's quote, else an open trade's mark, else a recent fill. */
+function priceOf(s: LiveStatus, product: string): number | null {
+  const q = s.quotes?.[product]?.price;
+  if (q && q > 0) return q;
+  const t = s.open.find((x) => x.product === product && (x.mark || x.fill));
+  if (t) return Number(t.mark || t.fill) || null;
+  const r = s.recent.find((x) => x.product === product && (x.exit_price || x.fill));
+  return r ? Number(r.exit_price || r.fill) || null : null;
+}
+/** What `lots` contracts of a product are worth now: the position's value (its notional) and the margin it holds at the
+ *  desk's leverage, in dollars, with the page's USD/INR for rupees. Null while no price is known. */
+export function lotMoney(s: LiveStatus, product: string, lots: number): LotMoney | null {
+  const spec = (s.products?.[product] ?? {}) as { contract_value?: number };
+  const u = LOT_UNIT[product];
+  const cv = Number(spec.contract_value) || u?.cv || 0;
+  const price = priceOf(s, product);
+  if (!cv || !price) return null;
+  const lev = s.limits.leverage || 10;
+  const value = lots * cv * price;
+  return { price, cv, unit: u?.unit ?? product, what: u?.what ?? product, lev, value, margin: value / lev,
+    fx: s.usd_inr?.rate ?? null };
+}
+/** Dollars in rupees at the page's rate ("—" without one). */
+export const inr = (dollars: number | null | undefined, fx: number | null | undefined) =>
+  dollars === null || dollars === undefined || !fx ? "—"
+    : `₹${(dollars * fx).toLocaleString("en-IN", { maximumFractionDigits: dollars * fx < 1000 ? 2 : 0 })}`;
+/** " (₹…)" after a dollar figure in a sentence; nothing while no USD/INR rate is known. */
+const inrIn = (dollars: number, fx: number | null | undefined) => (fx ? ` (${inr(dollars, fx)})` : "");
+/** Dollars of a position or its margin: always cents (a gold lot is about $3.6, its margin about 36 cents). */
+const dol = (v: number) => `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+/** The money line under a lots stepper: the lots' value and the margin they hold, in dollars and rupees (dollars only
+ *  while no USD/INR rate is known). LotCtl draws it from data attributes (CSS ::before/::after), so the cell's text stays
+ *  the lots number the app-wide sorter reads. */
+const lotLine = (m: LotMoney | null) => (m ? {
+  value: m.fx ? `${dol(m.value)} · ${inr(m.value, m.fx)} of ${m.what}` : `${dol(m.value)} of ${m.what}`,
+  margin: m.fx ? `margin ${dol(m.margin)} · ${inr(m.margin, m.fx)}` : `margin ${dol(m.margin)}`,
+} : null);
 const sizeLabel = (r: number | "min" | null) => (r === "min" ? "1 contract a trade" : `${usd(r)} a trade`);
 const px = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : v.toLocaleString("en-US", { maximumFractionDigits: v > 1000 ? 1 : 2 });
@@ -231,13 +282,15 @@ const rankTip = (k: Rank) => [
 
 /** A strategy's lots: − and + (or type a number), then Save; Undo puts it back. The visually hidden number keeps the
  *  cell sortable by the app-wide sorter (an input's value is not text). */
-function LotCtl({ value, max, disabled, title, onSave }: { value: number; max: number; disabled: boolean; title: string;
-  onSave: (n: number) => void }) {
+function LotCtl({ value, max, disabled, title, onSave, money }: { value: number; max: number; disabled: boolean;
+  title: string; onSave: (n: number) => void; money?: (n: number) => { value: string; margin: string } | null }) {
   const [draft, setDraft] = useState(value);
   useEffect(() => setDraft(value), [value]);
   const clamp = (n: number) => Math.min(max, Math.max(1, Math.round(n)));
   const dirty = draft !== value;
+  const mm = money ? money(draft) : null;     // what the lots being set are worth now (24 Nov): see .ld-lot-m
   return (
+    <span className="ld-lot-cell">
     <span className={`ld-lot${dirty ? " dirty" : ""}`} title={title}>
       <span className="ld-sr" aria-hidden="true">{draft}</span>
       <button type="button" className="ld-lot-b ld-dec" aria-label="One contract fewer" disabled={disabled || draft <= 1}
@@ -254,6 +307,119 @@ function LotCtl({ value, max, disabled, title, onSave }: { value: number; max: n
         </>
       )}
     </span>
+    {mm ? <span className="ld-lot-m" data-v={mm.value} data-g={mm.margin} /> : null}
+    </span>
+  );
+}
+/** The Premium Gold book's sizes (24 Nov 2026, the owner's ask): what any number of lots is worth in dollars and rupees,
+ *  each strategy's lots set by lots or by dollars of gold a trade (the position's value, turned into whole lots), and the
+ *  book's total if every strategy is in a trade at once. Saving goes through the page's own per-strategy request (the
+ *  same one as the strategies table's stepper: raising asks once). */
+function SizePanel({ s, onPick, busy }: { s: LiveStatus; onPick?: (p: Pick, change: { contracts?: number }) => void;
+  busy: boolean }) {
+  const [want, setWant] = useState<Record<string, string>>({});
+  const product = s.desk_products?.[0] ?? s.picks[0]?.product ?? "XAUTUSD";
+  const one = lotMoney(s, product, 1);
+  const max = s.limits.lots_max?.[product] ?? 1;
+  const cap = s.limits.max_notional_usd;
+  const fx = s.usd_inr?.rate ?? null;
+  // dollars of gold a trade -> whole lots: the nearest, at least 1, at most the product's lots and the notional cap
+  const lotsFor = (d: number) => {
+    if (!one || !(d > 0)) return null;
+    const byCap = cap ? Math.max(1, Math.floor(cap / one.value)) : max;
+    return Math.max(1, Math.min(max, byCap, Math.round(d / one.value)));
+  };
+  const rows = s.picks.map((p) => {
+    const n = p.cfg?.contracts ?? 1;
+    return { p, n, m: lotMoney(s, p.product, n) };
+  });
+  const tot = rows.reduce((a, r) => ({ lots: a.lots + r.n, value: a.value + (r.m?.value ?? 0), margin: a.margin + (r.m?.margin ?? 0) }),
+    { lots: 0, value: 0, margin: 0 });
+  const free = s.wallet?.available ?? null;
+  const ladder = [1, 2, 5, 10, 25, 50, 100, 250].filter((n) => n <= max);
+  if (!ladder.includes(max)) ladder.push(max);
+  const cell = (v: number) => <>{dol(v)}<div className="ld-sub">{inr(v, fx)}</div></>;      // dollars, rupees under them
+  const pair = (v: number) => (fx ? `${dol(v)} · ${inr(v, fx)}` : dol(v));
+  const now = (l: { value: string; margin: string } | null) => (l ? <>{l.value}<div className="ld-sub">{l.margin}</div></> : "—");
+  return (
+    <section className="ld-card ld-sz" aria-label="Trade size and money">
+      <div className="ld-sz-head">
+        <b>Trade size, and what it is in money</b>
+        <span>
+          {one
+            ? `One lot is ${one.cv} ${one.unit} of ${one.what}. At ${dol(one.price)} an ounce, one lot is ${dol(one.value)} of gold${inrIn(one.value, fx)}; at ${one.lev}x leverage it holds ${dol(one.margin)}${inrIn(one.margin, fx)} of margin in the wallet.`
+            : "The gold price is not read yet: the money figures show once it is."}
+          {fx ? ` Rupees at ₹${fx.toFixed(2)} a dollar, from ${s.usd_inr?.source ?? "USD/INR"}.` : " No USD/INR rate yet: rupees show once it is read."}
+        </span>
+      </div>
+      <div className="ld-sz-grid">
+        <div className="ld-sz-block">
+          <h5>Lots in money</h5>
+          <div className="ld-sz-x">
+            <table className="ld-sz-table">
+              <thead><tr><th>Lots</th><th>Gold</th><th>Value</th><th>{`Margin at ${one?.lev ?? s.limits.leverage}x`}</th></tr></thead>
+              <tbody>
+                {ladder.map((n) => {
+                  const m = lotMoney(s, product, n);
+                  return (
+                    <tr key={n}>
+                      <td>{n}</td><td>{m ? `${+(n * m.cv).toFixed(4)} ${m.unit}` : "—"}</td>
+                      <td>{m ? cell(m.value) : "—"}</td><td>{m ? cell(m.margin) : "—"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="ld-sz-note">{`A trade takes 1 to ${max} lots and at most ${dol(cap)} of gold. Value is the gold the trade holds; margin is what the wallet sets aside for it. A trade that hits its stop loses its lots × ${one ? one.cv : 0.001} × the stop's distance in dollars, plus fees (a stop $30 away: about 3 cents a lot).`}</p>
+        </div>
+        <div className="ld-sz-block">
+          <h5>Each strategy&apos;s size</h5>
+          <div className="ld-sz-x">
+            <table className="ld-sz-table">
+              <thead><tr><th className="l">Strategy</th><th>Lots</th><th className="l">Set in dollars a trade</th><th>Now</th></tr></thead>
+              <tbody>
+                {rows.map(({ p, n, m }) => {
+                  const key = pkey(p);
+                  const k = lotsFor(Number(want[key]));
+                  const km = k ? lotMoney(s, p.product, k) : null;
+                  return (
+                    <tr key={key}>
+                      <td className="l"><b>{p.acct}</b><div className="ld-sub">{p.name.replace(/^Gold Desk H1: /, "")}</div></td>
+                      <td>{n}</td>
+                      <td className="l">
+                        <span className="ld-sz-in">
+                          <span aria-hidden="true">$</span>
+                          <input type="number" min={0} step="any" inputMode="decimal" aria-label={`${p.acct}: dollars of gold a trade`}
+                            placeholder={one ? (n * one.value).toFixed(2) : ""} value={want[key] ?? ""} disabled={!onPick || busy}
+                            onChange={(e) => setWant((w) => ({ ...w, [key]: e.target.value }))} />
+                          <button type="button" className="ld-lot-save" disabled={!onPick || busy || !k || k === n}
+                            onClick={() => { if (k) onPick?.(p, { contracts: k }); }}>{k ? `Use ${k} lot${k === 1 ? "" : "s"}` : "Use"}</button>
+                        </span>
+                        {km ? <div className="ld-sub">{`= ${k} lot${k === 1 ? "" : "s"}: ${dol(km.value)} of gold${inrIn(km.value, fx)}, ${dol(km.margin)} of margin${inrIn(km.margin, fx)}`}</div> : null}
+                      </td>
+                      <td>{now(lotLine(m))}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td className="l"><b>{`All ${rows.length}, if all are in a trade at once`}</b></td><td>{tot.lots}</td><td />
+                  <td>{one ? now({ value: `${pair(tot.value)} of gold`, margin: `margin ${pair(tot.margin)}` }) : "—"}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <p className="ld-sz-note">
+            {free !== null
+              ? `The wallet has ${usd(free)} free now${inrIn(free, fx)}, shared with the bitcoin and gold desks${one && tot.margin > free ? ": not enough for all of these at once (a copy then waits for margin)" : ""}. `
+              : "The wallet is read once the book is live. "}
+            {"A new size applies from that strategy's next signal; a trade already open keeps its size. The same lots can be set with − / + in the strategies table below."}
+          </p>
+        </div>
+      </div>
+    </section>
   );
 }
 /** What this desk did with a paper trade, as a badge (the reason goes under it). */
@@ -655,6 +821,8 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         </section>
       )}
 
+      {s.desk === "premium_gold" && <SizePanel s={s} onPick={canPick ? onPick : undefined} busy={!!busy || !!pickBusy} />}
+
       <h4 className="ld-h ld-h-row">
         <span>{`The ${s.picks.length} strategies, real-money results`}</span>
         {(hasPaper || s.picks.length > 1 || pName) && (
@@ -728,7 +896,8 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
                   {hasCfg && (
                     <td className="ld-lots-c">
                       <LotCtl value={c?.contracts ?? 1} max={c?.max ?? 1} disabled={lock || !oneContract} title={lotsNote}
-                        onSave={(n) => onPick?.(p, { contracts: n })} />
+                        onSave={(n) => onPick?.(p, { contracts: n })}
+                        money={oneContract ? (n) => lotLine(lotMoney(s, p.product, n)) : undefined} />
                     </td>
                   )}
                   {hasRank && (
@@ -1142,6 +1311,47 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-mini:focus-visible, .ld .ld-lot-b:focus-visible, .ld .ld-lot-v:focus-visible, .ld .ld-lot-save:focus-visible {
           outline: 2px solid var(--accent); outline-offset: 2px; }
         .ld .ld-lot { position: relative; display: inline-flex; align-items: center; gap: 3px; }
+        /* 24 Nov 2026: under each lots stepper, what the lots being set are worth now; drawn from data attributes so the
+           cell's text stays the lots number the app-wide sorter reads */
+        .ld .ld-lot-cell { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+        .ld .ld-lot-m { display: flex; flex-direction: column; align-items: flex-end; font-size: 10.5px; line-height: 1.35;
+                        color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .ld .ld-lot-m::before { content: attr(data-v); color: var(--text-secondary); font-weight: 700; }
+        .ld .ld-lot-m::after { content: attr(data-g); }
+        .ld .ld-lot.dirty + .ld-lot-m::before { color: var(--warn); }
+        /* the Premium Gold book's "Trade size and money" panel (24 Nov 2026) */
+        .ld .ld-sz { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+        .ld .ld-sz-head { display: flex; flex-direction: column; gap: 4px; }
+        .ld .ld-sz-head b { font-size: 14px; font-weight: 800; color: var(--text); }
+        .ld .ld-sz-head span { font-size: 12px; line-height: 1.55; color: var(--text-muted); }
+        .ld .ld-sz-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 16px 20px; align-items: start; }
+        .ld .ld-sz-block { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+        .ld .ld-sz-block h5 { margin: 0; font-size: 10.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+                              color: var(--text-faint); }
+        .ld .ld-sz-x { overflow-x: auto; border: 1px solid var(--panel-border); border-radius: 10px; }
+        .ld .ld-sz-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+        .ld .ld-sz-table th { font-size: 10px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-faint);
+                              text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--panel-border); white-space: nowrap; }
+        .ld .ld-sz-table td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--border-soft, var(--panel-border));
+                              white-space: nowrap; vertical-align: top; color: var(--text); }
+        .ld .ld-sz-table tbody tr:last-child td { border-bottom: 0; }
+        .ld .ld-sz-table .l { text-align: left; }
+        .ld .ld-sz-table td.l { white-space: normal; min-width: 130px; }
+        .ld .ld-sz-table tfoot td { border-bottom: 0; border-top: 1px solid var(--panel-border); font-weight: 700;
+                                    background: var(--canvas-soft); }
+        .ld .ld-sz-in { display: inline-flex; align-items: center; gap: 4px; color: var(--text-muted); }
+        .ld .ld-sz-in input { width: 84px; height: 24px; padding: 0 6px; border-radius: 6px; border: 1px solid var(--panel-border);
+                              background: var(--panel); color: var(--text); font-family: var(--font-data); font-size: 12px; }
+        .ld .ld-sz-in input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+        .ld .ld-sz-in input:disabled { opacity: 0.6; }
+        .ld .ld-sz-note { margin: 0; font-size: 11.5px; line-height: 1.5; color: var(--text-muted); }
+        @media (max-width: 1300px) { .ld .ld-sz-grid { grid-template-columns: minmax(0, 1fr); } }
+        @media (max-width: 640px) {
+          .ld .ld-sz { padding: 12px; }
+          .ld .ld-sz-table th, .ld .ld-sz-table td { padding: 6px 8px; }
+          .ld .ld-sz-table td.l { min-width: 110px; }
+          .ld .ld-sz-in input { width: 70px; }
+        }
         .ld .ld-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0);
                      white-space: nowrap; border: 0; }
         .ld .ld-lot-b { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--panel-border); background: var(--panel);
@@ -1206,7 +1416,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   );
 }
 
-export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "crypto"; intro?: ReactNode }) {
+export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "crypto" | "premium_gold"; intro?: ReactNode }) {
   // the gold desk keeps the original routes (they work on every server build); other desks use /live/desk/{desk}
   const base = desk === "gold" ? "/api/premium-paper/live" : `/api/premium-paper/live/desk/${desk}`;
   const [s, setS] = useState<LiveStatus | null>(null);
@@ -1391,11 +1601,15 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
       const recentPlan = s.recent.find((t) => t.product === p.product && t.plan?.margin_usd && t.plan?.contracts)?.plan;
       const perMargin = recentPlan ? recentPlan.margin_usd / recentPlan.contracts : null;
       const n = change.contracts ?? cur.contracts;
+      const mm = lotMoney(s, p.product, n);             // what n contracts are now, in dollars and rupees (24 Nov)
       const text = change.on === true
         ? `Switch ${p.acct} (${p.product}) ON? ${inTrade(p) ? "Its paper trade open now is copied to Delta Exchange at once, at the price then, and each"
           : "Its"} next signal places a real order on Delta Exchange, ${n} contract${n === 1 ? "" : "s"} a trade.`
-        : `Trade ${n} contracts a trade on ${p.acct} (${p.product}) with real money? Each new signal then risks ${n} times what one contract `
-          + `loses at its stop${perMargin ? `, and holds about ${usd(perMargin * n)} of margin` : ""}. A trade already open keeps its size.`;
+        : `Trade ${n} contracts a trade on ${p.acct} (${p.product}) with real money? `
+          + (mm ? `That is about ${dol(mm.value)} of ${mm.what} a trade${inrIn(mm.value, mm.fx)}, holding about `
+            + `${dol(mm.margin)}${inrIn(mm.margin, mm.fx)} of margin. ` : "")
+          + `Each new signal then risks ${n} times what one contract `
+          + `loses at its stop${!mm && perMargin ? `, and holds about ${usd(perMargin * n)} of margin` : ""}. A trade already open keeps its size.`;
       if (!window.confirm(text)) return;
     }
     // lowering or OFF only takes risk away: never a PIN (as switching the desk off); none at all when the owner chose so (15 Nov)

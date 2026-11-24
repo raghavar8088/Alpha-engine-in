@@ -153,6 +153,28 @@ unchanged (every signal copied; each new strategy one contract and ON, the pick_
 Records at NEW_PICKED_AT_5 (00:30 IST 24 Nov), by the Premium method above (re-proven on five frozen records first).
 Backtests: TD-03, JR-05 and JR-01 have their own 2-year books (results/backtest.json of youtube_channels20, gold
 on its XAUUSD book as JR-03's); the channels-11 and shortlist strategies were never backtested.
+
+24 NOV 2026 (EVENING): A THIRD BOOK, "PREMIUM GOLD STRATEGIES" (premium_gold). The owner asked for the Gold Desk H1
+test's six best paper records (EMA Ribbon Compression, Pivot R1/S1 Break, Donchian Breakout fast and slow, Round
+Number Break, Keltner Breakout; all 4-hour) to trade in a SEPARATE book beside the gold desk ("a separate second
+book"), each strategy at its own size, set in lots or in dollars of gold per trade on its own tab. The gold desk
+keeps its own copies of the same strategies at its own lots, so each of their signals opens two real positions.
+- Same engine and rules as the gold desk (follow_all: every signal copied, the H1 position's own stop and target on
+  Delta, the 7% stop cap, a copy waits rather than being given up); its own state and trades (live_pgold_*), its own
+  switch (it starts OFF), its own lots per strategy (pick_cfg), its own records and page.
+- Two desks on one product, for the first time. Delta nets an account's position per product, and every desk already
+  checks the account against the sum of EVERY desk's trades (_expected_net), so the books reconcile; a trade never
+  touches another's contracts (it closes only its own size and cancels only its own legs). Added for it:
+  * order ids: both books copy the same H1 position (one paper id), so this book hashes it with its own cid_salt;
+    the two original desks keep cid_salt "", their ids exactly as before;
+  * a mismatch on a product where ANOTHER desk has a trade in flight (entering or closing) only makes entries wait
+    and never counts toward switching this desk off (_in_flight_elsewhere): one book's lost order answer must not
+    switch the other off. The bitcoin and gold desks share no product, so nothing changes for them.
+- Going live reads each product's leverage first and sets it only when it is not already LEVERAGE (the gold desk may
+  hold XAUTUSD positions when this book arms); the end state is the same for every desk.
+- The page converts lots to money: status() carries each product's latest price (_prices: the freshest mark of any
+  desk's open trade, else one public ticker read a minute) and USD/INR (gold_desk.usd_inr, Yahoo INR=X).
+Records at NEW_PICKED_AT_6 (20:30 IST 24 Nov) by the H1 method above (re-proven on three frozen H1 records first).
 """
 
 from __future__ import annotations
@@ -231,6 +253,7 @@ SF_ID = "SF|"                                  # a Strategy Factory tab position
 NEW_PICKED_AT_3 = "2026-11-19T21:29:00+05:30"  # the Factory board's top 20 the owner sent: their records as of this time
 NEW_PICKED_AT_4 = "2026-11-22T14:30:00+05:30"  # the owner's 22 Nov screenshots (both desks): their records as of this time
 NEW_PICKED_AT_5 = "2026-11-24T00:30:00+05:30"  # the owner's 24 Nov screenshots (both desks): their records as of this time
+NEW_PICKED_AT_6 = "2026-11-24T20:30:00+05:30"  # the Premium Gold book's six (24 Nov evening): their records as of this time
 CONFIRM = "REAL MONEY"
 D = Delta()
 
@@ -505,6 +528,17 @@ CRYPTO_PICKS: tuple[Pick, ...] = (
     Pick("BX-01", "ETHUSD", "ETHUSD", "First green Heikin Ashi candle with MFI (14) at 20 or below, out on the first red "
          "one after MFI 80 (long only)", 5, 3.97, 0.83, 60, "never backtested", NEW_PICKED_AT_5),
 )
+# 24 Nov 2026 (evening), the owner's ask: the Gold Desk H1 test's six best paper records as a SEPARATE real-money book,
+# "Premium Gold Strategies", beside the gold desk (which keeps its own copies of them). In the order of the Gold Desk's
+# "Strategy records" ranking; records = their closed H1 positions at NEW_PICKED_AT_6 (20:30 IST), in R.
+PREMIUM_GOLD_PICKS: tuple[Pick, ...] = (
+    _h1("H1-RIB", "ema_ribbon", "EMA Ribbon Compression · 4h", 12, 5.57, 1.00, 50, NEW_PICKED_AT_6),
+    _h1("H1-PIV", "pivot_break", "Pivot R1/S1 Break · 4h", 23, 7.22, 0.95, 43, NEW_PICKED_AT_6),
+    _h1("H1-DCF", "donchian_fast", "Donchian Breakout (fast) · 4h", 20, 7.02, 1.03, 45, NEW_PICKED_AT_6),
+    _h1("H1-RND", "round_number_break", "Round Number Break · 4h", 22, 3.99, 0.56, 41, NEW_PICKED_AT_6),
+    _h1("H1-DCS", "donchian_slow", "Donchian Breakout (slow) · 4h", 7, 2.34, 0.54, 43, NEW_PICKED_AT_6),
+    _h1("H1-KLT", "keltner_break", "Keltner Breakout · 4h", 17, 3.98, 0.64, 41, NEW_PICKED_AT_6),
+)
 GOLD_NOTES = (
     "Real money on 102 unproven gold strategies: five picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, "
     "on 18 Nov seventeen more Premium gold books and six templates of the Gold Desk's H1 test, on 19 Nov the Gold "
@@ -574,6 +608,26 @@ CRYPTO_NOTES = (
     "This desk and the gold desk (beside it on this page, and on Premium Strategies > Real money · Delta gold) share the "
     "Delta account and its keys; each has its own switch.",
 )
+PREMIUM_GOLD_NOTES = (
+    "Real money on six strategies of the Gold Desk's H1 test, picked by the owner on 24 Nov 2026 from its Strategy "
+    "records: EMA Ribbon Compression, Pivot R1/S1 Break, Donchian Breakout (fast and slow), Round Number Break and "
+    "Keltner Breakout, all on 4-hour bars. A separate book: the gold desk copies the same six at its own size, so each "
+    "of their signals opens two real positions on Delta, one a book.",
+    "None is proven: the H1 test's nine templates were tested only as a family (pooled, +12.2 bp a trade net on Delta's "
+    "2026 data, the data they were found in); these six had its best paper records at the pick (7 to 23 trades each).",
+    "Size: each strategy's own lots, 1 until changed in this book's table. One lot is 0.001 XAUT, about $3.6 of gold "
+    "at $3,600 an ounce, and at 10x it holds a tenth of that as margin; the page shows any lots in dollars and rupees. "
+    "Every trade is capped at $2,500 of notional and at the product's most lots a trade.",
+    "EVERY signal becomes a real position, as on the gold desk: an open H1 position of the six is copied however late "
+    "this book sees it, with that position's own stop and target on Delta (a stop more than 7% away is pulled in to 7%). "
+    "A copy waits while the price is not inside its stop and target with room, while the Gold Desk is silent, while Delta "
+    "gives no quote, or while the wallet has too little free margin. No daily loss stop.",
+    "This book starts OFF: its own switch, on this tab, turns it on (one confirmation). The gold desk's switch does not "
+    "move it, nor this one the gold desk.",
+    "Delta shows all of the account's XAUTUSD trades, both books', as one position; each book checks the account against "
+    "the sum of both, and each trade closes only its own contracts. Each trade's stop and target live on Delta itself.",
+    "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
+)
 
 
 @dataclass(frozen=True)
@@ -589,6 +643,7 @@ class Desk:
     notes: tuple[str, ...]
     max_lag_s: int = MAX_LAG_S      # a paper entry seen later than this after its entry time is skipped
     follow_all: bool = False        # True: every open paper trade is copied, however late or far (lag/drift unused)
+    cid_salt: str = ""              # hashed into its client order ids: a desk copying another's paper trades needs one
 
     @property
     def pick(self) -> dict:
@@ -605,9 +660,18 @@ DESKS: dict[str, Desk] = {
     "crypto": Desk("crypto", "Delta Exchange Live Trading", CRYPTO_PICKS, "live_crypto_state", "live_crypto_trades",
                    CRYPTO_RISK_USD, CRYPTO_DAILY_STOP_USD, CRYPTO_PICKED_AT, CRYPTO_NOTES, CRYPTO_MAX_LAG_S,
                    follow_all=True),
+    # 24 Nov 2026: a second gold book beside the gold desk, on the same product (see the module docstring)
+    "premium_gold": Desk("premium_gold", "Premium Gold Strategies", PREMIUM_GOLD_PICKS, "live_pgold_state",
+                         "live_pgold_trades", RISK_USD, DAILY_STOP_USD, NEW_PICKED_AT_6, PREMIUM_GOLD_NOTES,
+                         GOLD_MAX_LAG_S, follow_all=True, cid_salt="pgold|"),
 }
 if set(DESKS["gold"].products) & set(DESKS["crypto"].products):
     raise RuntimeError("two desks may never trade the same product")
+_DESK_LIST = list(DESKS.values())
+for _i, _a in enumerate(_DESK_LIST):                # desks sharing a product (24 Nov) must never share order ids
+    for _b in _DESK_LIST[_i + 1:]:
+        if set(_a.products) & set(_b.products) and _a.cid_salt == _b.cid_salt:
+            raise RuntimeError(f"the {_a.key} and {_b.key} desks share a product, so they need different cid_salt")
 for _k, _desk in DESKS.items():
     if len(_desk.pick) != len(_desk.picks):
         raise RuntimeError(f"the {_k} desk names one book twice")
@@ -679,8 +743,10 @@ def _db():
 
 
 def _cid(trade_id: str, suffix: str = "") -> str:
-    """A client order id Delta keeps beside its own: the paper trade's id, hashed (Delta allows 32 characters)."""
-    return ("p5" + hashlib.sha1(trade_id.encode()).hexdigest())[:30 - len(suffix)] + suffix
+    """A client order id Delta keeps beside its own: the paper trade's id, hashed (Delta allows 32 characters). A desk
+    that copies the same paper trades as another (the Premium Gold book, 24 Nov) salts the hash, so the two books'
+    orders never share an id; the two original desks have no salt, their ids exactly as before."""
+    return ("p5" + hashlib.sha1((_d().cid_salt + trade_id).encode()).hexdigest())[:30 - len(suffix)] + suffix
 
 
 def _side(side: int) -> str:
@@ -1560,11 +1626,29 @@ async def _legacy_products(db) -> set[str]:
     return out
 
 
+async def _in_flight_elsewhere(db) -> set[str]:
+    """This desk's products on which ANOTHER desk has a live trade in flight (entering: its answer lost and being
+    looked for; closing: its close sent, not yet recorded). The account may already differ from every desk's records
+    there, so a mismatch on such a product only makes entries wait (24 Nov 2026, two books on XAUTUSD). Empty for
+    desks that share no product (the bitcoin and gold desks)."""
+    mine = set(_d().products)
+    out: set[str] = set()
+    for d in DESKS.values():
+        if d.key == _d().key or not mine & set(d.products):
+            continue
+        async for t in getattr(db, d.trades_coll).find({"mode": "live", "status": {"$in": ["entering", "closing"]}},
+                                                       {"product": 1}):
+            if t.get("product") in mine:
+                out.add(t["product"])
+    return out
+
+
 async def _check_books(db, st: dict, products: dict, positions: dict) -> dict[str, bool]:
     """Does the account's position on each of this desk's products equal the sum of the desks' trades on it? A
     mismatch can be Delta's lag (its positions can take up to 10 s) or a trade in flight, so new entries just wait;
     seen on three checks in a row (about a minute), the desk switches off and touches nothing: someone looks at Delta."""
     want = await _expected_net(db)
+    flight = await _in_flight_elsewhere(db)        # another desk's trade in flight: wait, never counted (24 Nov)
     out, bad = {}, []
     for sym in _d().products:
         p = products.get(sym)
@@ -1572,7 +1656,7 @@ async def _check_books(db, st: dict, products: dict, positions: dict) -> dict[st
             continue
         have = int((positions.get(p.id) or {}).get("size") or 0)
         out[sym] = have == want.get(sym, 0)
-        if not out[sym]:
+        if not out[sym] and sym not in flight:
             bad.append(f"{sym}: the account holds {have:+d} contracts, the trades {want.get(sym, 0):+d}")
     n = int(st.get("mismatch_checks") or 0) + 1 if bad else 0
     if n != int(st.get("mismatch_checks") or 0):
@@ -2113,10 +2197,12 @@ async def _set_mode_one(mode: str, pin: str | None = None, confirm: str | None =
         positions = await D.positions()
         lev = {}
         for sym, p in products.items():
-            got = await D.set_leverage(p.id, LEVERAGE)
             read = await D.leverage(p.id)
-            if int(round(read or got)) != LEVERAGE:
-                return {"ok": False, "why": f"{sym}: leverage reads {read or got}x, not {LEVERAGE}x"}
+            if not _is_lev(read):        # set only when needed (24 Nov: another book may hold this product's positions)
+                got = await D.set_leverage(p.id, LEVERAGE)
+                read = await D.leverage(p.id) or got
+            if not _is_lev(read):
+                return {"ok": False, "why": f"{sym}: leverage reads {read}x, not {LEVERAGE}x"}
             lev[sym] = LEVERAGE
     except DeltaError as exc:
         return {"ok": False, "why": f"Delta refused the check: {exc}"}
@@ -2481,6 +2567,87 @@ def _rank(picks: list, rs: dict, rows: list) -> dict:
     return out
 
 
+# The page's lot conversions (24 Nov 2026): what one contract of each product is worth now, in dollars and rupees.
+QUOTE_TTL_S = 60          # a product's price is asked of Delta at most once a minute for the page
+QUOTE_WAIT_S = 2.0        # ... and the page never waits longer than this for it (the read goes on in the background)
+MARK_FRESH_S = 600        # an open trade's mark (updated every pass) younger than this is the price
+FX_TTL_S = 600
+_QUOTES: dict[str, tuple[float, float]] = {}     # product -> (price, when)
+_QUOTE_TASKS: dict[str, asyncio.Task] = {}
+_FX: dict = {"rate": None, "asof": None, "at": 0.0}
+_FX_TASK: list = [None]
+
+
+async def _read_quote(sym: str) -> None:
+    try:
+        q = await D.ticker(sym)
+        px = float(q.get("mark") or 0) or (float(q.get("bid") or 0) + float(q.get("ask") or 0)) / 2
+        if px > 0:
+            _QUOTES[sym] = (px, _now())
+    except Exception:  # noqa: BLE001 - a read for the page only
+        logger.debug("[premium live] %s: no quote for the page", sym, exc_info=True)
+
+
+async def _prices(db, products: list[str]) -> dict:
+    """Each product's latest price for the page's lot conversions: the freshest mark of any desk's open real trade on
+    it (updated every pass), else one public ticker read at most every QUOTE_TTL_S, never waited on longer than
+    QUOTE_WAIT_S. A product with neither is left out (the page then shows lots without their money). Never raises."""
+    out: dict = {}
+    for sym in products:
+        best = None
+        try:
+            for d in DESKS.values():
+                async for t in getattr(db, d.trades_coll).find({"product": sym, "status": {"$in": ["open", "closing"]},
+                                                               "mark": {"$gt": 0}}, {"mark": 1, "updated_at": 1}):
+                    at = float(t.get("updated_at") or 0)
+                    if best is None or at > best[1]:
+                        best = (float(t["mark"]), at)
+        except Exception:  # noqa: BLE001
+            best = None
+        if best is None or _now() - best[1] > MARK_FRESH_S:
+            hit = _QUOTES.get(sym)
+            if hit is None or _now() - hit[1] > QUOTE_TTL_S:
+                task = _QUOTE_TASKS.get(sym)
+                if task is None or task.done():
+                    task = _QUOTE_TASKS[sym] = asyncio.create_task(_read_quote(sym))
+                try:
+                    await asyncio.wait_for(asyncio.shield(task), QUOTE_WAIT_S)
+                except Exception:  # noqa: BLE001 - slow or failed: the page goes on without it
+                    pass
+                hit = _QUOTES.get(sym) or hit
+            if hit is not None and (best is None or hit[1] > best[1]):
+                best = hit
+        if best is not None:
+            out[sym] = {"price": round(best[0], 6), "at": round(best[1], 3)}
+    return out
+
+
+async def _read_fx() -> None:
+    try:
+        from app.services import gold_desk
+        rate, asof = await gold_desk.usd_inr()
+        if rate:
+            _FX.update(rate=float(rate), asof=asof, at=_now())
+    except Exception:  # noqa: BLE001 - a read for the page only
+        logger.debug("[premium live] USD/INR unavailable for the page", exc_info=True)
+
+
+async def _usd_inr() -> dict | None:
+    """USD/INR for the page's rupee figures: the Gold Desk's reader (Yahoo INR=X), refreshed every FX_TTL_S in the
+    background and never waited on longer than QUOTE_WAIT_S; None until it has been read once. Never raises."""
+    if not _FX["rate"] or _now() - float(_FX["at"] or 0) > FX_TTL_S:
+        task = _FX_TASK[0]
+        if task is None or task.done():
+            task = _FX_TASK[0] = asyncio.create_task(_read_fx())
+        try:
+            await asyncio.wait_for(asyncio.shield(task), QUOTE_WAIT_S)
+        except Exception:  # noqa: BLE001
+            pass
+    if not _FX["rate"]:
+        return None
+    return {"rate": round(float(_FX["rate"]), 4), "asof": _FX["asof"], "source": "Yahoo INR=X (the Gold Desk's reader)"}
+
+
 async def _status_one() -> dict:
     db = _db()
     if db is None:
@@ -2550,6 +2717,7 @@ async def _status_one() -> dict:
         "signals": None if view is None else view["signals"],
         "paper_view": None if view is None else {k: view[k] for k in ("at", "paper_age_s", "gold_desk_age_s", "factory_age_s")
                                                           if k in view},
+        "quotes": await _prices(db, _d().products), "usd_inr": await _usd_inr(),   # the page's lot conversions (24 Nov)
     }
 
 
