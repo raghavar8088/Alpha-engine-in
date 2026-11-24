@@ -31,6 +31,10 @@
 // 24 Nov 2026 (later): every list that names strategies - the strategies table, the paper trades, the open positions and
 // the decisions - has its own strategy filter (StratFilter), the owner's ask: "a filter option by strategy name, like in
 // trades history" (Live Trading's trade history: All strategies, or one, with its count). The chips then count within it.
+// 24 Nov 2026 (notes): each strategy's own note in the strategies table (NoteCtl), the owner's ask: "+ Note" under its
+// description opens a box; once saved, a note icon beside its name and the note under the description (Edit changes or
+// deletes it). Stored by the server's /api/premium-paper/live/notes/{desk}, apart from the desks' state; a server
+// without those routes shows no note control.
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { apiFetch } from "../../lib/api";
 
@@ -138,6 +142,8 @@ export const MODE: Record<string, { label: string; cls: string; what: string }> 
 export type Ask = null | "live" | "flatten" | "risk" | "pick";
 /** A change to one strategy's own lots or switch (23 Nov), waiting for the PIN when the server asks for one. */
 export type PickChange = { key: string; acct: string; contracts?: number; on?: boolean; raises?: boolean };
+/** A strategy's own note (24 Nov 2026), from GET /api/premium-paper/live/notes/{desk}. */
+export type Note = { text: string; at: number | null };
 const PIN_KEY = "deltaLivePin";
 const readPin = () => { try { return window.localStorage.getItem(PIN_KEY) || ""; } catch { return ""; } };
 const keepPin = (p: string | null) => {
@@ -261,6 +267,44 @@ const DESK_STATE: Record<string, { label: string; cls: string }> = {
   // closed first, unseen by this desk, was missed
   waiting: { label: "Waiting to copy", cls: "open" }, missed: { label: "Not copied", cls: "skipped" },
 };
+const NOTE_SVG = (
+  <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+    <path d="M3 1.5h7l3.5 3.5v9.5H3z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    <path d="M10 1.5V5h3.5M5.5 8.5h5M5.5 11h4" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+  </svg>
+);
+/** A strategy's own note (24 Nov 2026, the owner's ask): "+ Note" opens a box under the strategy's description; a saved
+ *  note shows there (with an icon by the name), Edit changes it, and Delete or an empty note removes it. Ctrl/Cmd+Enter
+ *  saves, Escape cancels. */
+function NoteCtl({ note, max, busy, onSave }: { note?: Note | null; max: number; busy: boolean;
+  onSave: (text: string) => Promise<boolean> }) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState("");
+  const text = note?.text ?? "";
+  const save = async (v: string) => { if (await onSave(v.trim())) setOpen(false); };
+  if (open) {
+    return (
+      <div className="ld-note-ed">
+        <textarea value={draft} maxLength={max} rows={3} autoFocus aria-label="Your note for this strategy"
+          placeholder="Your note for this strategy" onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) save(draft); }} />
+        <div className="ld-note-row">
+          <button type="button" className="ld-lot-save" disabled={busy || draft.trim() === text} onClick={() => save(draft)}>Save</button>
+          {text ? <button type="button" className="ld-note-del" disabled={busy} onClick={() => save("")}>Delete</button> : null}
+          <button type="button" className="ld-note-x" disabled={busy} onClick={() => setOpen(false)}>Cancel</button>
+          <span className="ld-dim">{draft.length}/{max}</span>
+        </div>
+      </div>
+    );
+  }
+  const edit = () => { setDraft(text); setOpen(true); };
+  return text ? (
+    <div className="ld-note-v">{text}<button type="button" className="ld-note-e" onClick={edit}>Edit</button></div>
+  ) : (
+    <button type="button" className="ld-note-add" onClick={edit}>{NOTE_SVG} Note</button>
+  );
+}
+
 /** A card that scrolls sideways, with a second scrollbar above it as well as the one under it (23 Nov 2026, the owner's
  *  ask for the strategies table). The two move together; the top one takes the content's width, hides when nothing
  *  overflows, and sticks to the top of the screen while the card is in view. It is a mirror, so it is kept out of the
@@ -345,7 +389,8 @@ const notCopied = (x: Signal) => ["before", "off", "missed"].includes(x.desk.sta
 
 /** What the page shows, given the desk's status: no state of its own beyond its props (and the trade-log filter). */
 export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, saved, ask, pendingRisk, busy, msg, onToggle,
-  onShadow, onFlatten, onRisk, onSubmitPin, onCancel, onForgetPin, intro, onPick, pickBusy = null, pendingPick = null, pickMsg = null }: {
+  onShadow, onFlatten, onRisk, onSubmitPin, onCancel, onForgetPin, intro, onPick, pickBusy = null, pendingPick = null, pickMsg = null, notes = null, onNote, noteBusy = null,
+  noteMax = 1000 }: {
   s: LiveStatus; now: number; pin: string; setPin: (v: string) => void; remember: boolean; setRemember: (v: boolean) => void;
   saved: boolean; ask: Ask; pendingRisk: number | "min" | null; busy: string | null; msg: string | null; onToggle: () => void;
   onShadow: () => void; onFlatten: () => void; onRisk: (r: number | "min") => void; onSubmitPin: () => void; onCancel: () => void;
@@ -353,6 +398,9 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   // each strategy's own lots and switch (23 Nov): absent, the table shows them read-only
   onPick?: (p: Pick, change: { contracts?: number; on?: boolean }) => void; pickBusy?: string | null; pendingPick?: PickChange | null;
   pickMsg?: string | null;
+  // each strategy's own note (24 Nov): null on a server without the notes routes, and then no note control is shown
+  notes?: Record<string, Note> | null; onNote?: (p: Pick, text: string) => Promise<boolean>; noteBusy?: string | null;
+  noteMax?: number;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
   const isLive = s.mode === "live";
@@ -659,10 +707,12 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
                       {k ? k.pos : "—"}</td>
                   )}
                   <td className="l ld-strat">
-                    <b>{p.acct}</b> <span className="ld-chip">{p.product}</span>
+                    <b>{p.acct}</b>{notes?.[key]?.text ? <span className="ld-note-i" role="img" aria-label="has a note" title={notes[key].text}>{NOTE_SVG}</span> : null}{" "}
+                    <span className="ld-chip">{p.product}</span>
                     {p.src === "gold_h1" ? <span className="ld-chip ld-chip-src">Gold Desk H1</span> : null}
                     {p.src === "gold_sf" ? <span className="ld-chip ld-chip-src">Strategy Factory</span> : null}
                     <div className="ld-sub">{p.name}</div>
+                    {notes && onNote ? <NoteCtl note={notes[key]} max={noteMax} busy={noteBusy === key} onSave={(v) => onNote(p, v)} /> : null}
                   </td>
                   {hasCfg && (
                     <td className="ld-onoff">
@@ -1111,6 +1161,21 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-lot-save:disabled { opacity: 0.5; cursor: not-allowed; }
         .ld .ld-row-off td:not(.ld-onoff):not(.ld-lots-c):not(.ld-rk) { opacity: 0.55; }
         .ld .ld-pickmsg { margin: 0 0 8px; }
+        .ld .ld-note-i { display: inline-flex; vertical-align: -2px; margin-left: 5px; color: var(--warn); cursor: help; }
+        .ld .ld-note-v { margin-top: 6px; padding: 6px 8px; border-left: 3px solid var(--warn-border); background: var(--warn-dim);
+                         border-radius: 0 6px 6px 0; font-size: 12px; line-height: 1.4; color: var(--text); white-space: pre-wrap;
+                         overflow-wrap: anywhere; }
+        .ld .ld-note-add, .ld .ld-note-e { margin-top: 5px; padding: 1px 0; border: 0; background: none; color: var(--text-muted);
+                         font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+        .ld .ld-note-e { margin: 0 0 0 8px; }
+        .ld .ld-note-add:hover, .ld .ld-note-e:hover { color: var(--text); text-decoration: underline; }
+        .ld .ld-note-ed { margin-top: 6px; display: flex; flex-direction: column; gap: 5px; }
+        .ld .ld-note-ed textarea { width: 100%; min-width: 190px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--panel-border);
+                         background: var(--panel); color: var(--text); font: inherit; font-size: 12.5px; resize: vertical; }
+        .ld .ld-note-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11px; }
+        .ld .ld-note-del, .ld .ld-note-x { height: 22px; padding: 0 8px; border-radius: 6px; border: 1px solid var(--panel-border);
+                         background: var(--panel); color: var(--text); font-size: 11.5px; font-weight: 700; cursor: pointer; }
+        .ld .ld-note-del { color: var(--loss); }
         .ld .ld-xtop { position: sticky; top: 0; z-index: 3; overflow-x: auto; overflow-y: hidden; margin: 0 1px;
                        padding-top: 3px; background: var(--canvas); }
         .ld .ld-xtop[hidden] { display: none; }
@@ -1157,6 +1222,11 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   const [pickBusy, setPickBusy] = useState<string | null>(null);      // the strategy whose change is being saved
   const [pendingPick, setPendingPick] = useState<PickChange | null>(null);
   const [pickMsg, setPickMsg] = useState<string | null>(null);   // the last strategy change, shown above its table
+  // each strategy's own note (24 Nov): null until read, and it stays null on a server without the notes routes
+  const [notes, setNotes] = useState<Record<string, Note> | null>(null);
+  const [noteMax, setNoteMax] = useState(1000);
+  const [noteBusy, setNoteBusy] = useState<string | null>(null);
+  const notesUrl = `/api/premium-paper/live/notes/${desk}`;
 
   const load = useCallback(async () => {
     try {
@@ -1172,6 +1242,35 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
     const t = setInterval(load, 15000);
     return () => clearInterval(t);
   }, [load]);
+  const loadNotes = useCallback(async () => {
+    try {
+      const r = await apiFetch(notesUrl);
+      if (r && r.notes && typeof r.notes === "object") { setNotes(r.notes); if (r.max) setNoteMax(r.max); }
+    } catch { /* an older server (no notes routes) or a blip: keep what is shown */ }
+  }, [notesUrl]);
+  useEffect(() => {
+    loadNotes();
+    const t = setInterval(loadNotes, 60000);
+    return () => clearInterval(t);
+  }, [loadNotes]);
+  const onNote = async (p: Pick, text: string) => {
+    const key = pkey(p);
+    setNoteBusy(key);
+    try {
+      const r = await apiFetch(notesUrl, { method: "POST", body: JSON.stringify({ key, text }) });
+      if (r?.ok) {
+        setNotes((m) => { const n = { ...(m ?? {}) }; if (r.text) n[key] = { text: r.text, at: r.at ?? null }; else delete n[key]; return n; });
+        setPickMsg(r.text ? `${p.acct}: note saved.` : `${p.acct}: note deleted.`);
+        return true;
+      }
+      setPickMsg(`${p.acct}: ${r?.why ?? "the note was not saved"}`);
+    } catch (e) {
+      setPickMsg(`${p.acct}: ${e instanceof Error ? e.message : "the note was not saved"}`);
+    } finally {
+      setNoteBusy(null);
+    }
+    return false;
+  };
 
   // a PIN saved on this device (only when the owner ticks "Remember"): the switch then turns ON with one confirmation
   useEffect(() => {
@@ -1321,5 +1420,6 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   return <LiveDeltaView s={s} now={now} pin={pin} setPin={setPin} remember={remember} setRemember={setRemember} saved={saved} ask={ask}
     pendingRisk={pendingRisk} busy={busy} msg={msg} onToggle={onToggle} onShadow={onShadow} onFlatten={onFlatten} onRisk={onRisk}
     onSubmitPin={onSubmitPin} onCancel={onCancel} onForgetPin={onForgetPin} intro={intro}
-    onPick={onPick} pickBusy={pickBusy} pendingPick={pendingPick} pickMsg={pickMsg} />;
+    onPick={onPick} pickBusy={pickBusy} pendingPick={pendingPick} pickMsg={pickMsg}
+    notes={notes} onNote={onNote} noteBusy={noteBusy} noteMax={noteMax} />;
 }
