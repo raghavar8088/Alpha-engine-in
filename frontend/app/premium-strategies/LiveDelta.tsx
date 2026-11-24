@@ -24,6 +24,10 @@
 // An older server without them shows the values read-only.
 // 23 Nov 2026 (later): a second sideways scrollbar ABOVE the strategies table (ScrollX), moving with the one under it; it stays at
 // the top of the screen while the table is in view, so the 99-row gold table scrolls sideways from any row.
+// 24 Nov 2026: the decisions table tells its skips apart by timing (skipKind). Most were never missed trades: when
+// strategies join a desk that copies every paper trade, their paper trades already closed since the desk went live are
+// recorded as skipped. Those now read "Not copyable" under their own filter, "Before it joined"; "Skipped" keeps the
+// real ones, each saying why (closed on paper too fast to copy, or seen late after an outage or a restart).
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { apiFetch } from "../../lib/api";
 
@@ -65,7 +69,8 @@ type Plan = { price: number; contracts: number; risk_usd: number; notional_usd: 
 export type LiveTrade = { id: string; acct: string; mkt: string; product: string; name: string; mode: "live" | "shadow"; status: string;
   reason?: string; side: number; contracts?: number; fill?: number; stop: number; target: number | null; mark?: number;
   unrealised_usd?: number; pnl_usd?: number; fees?: number; exit_price?: number; close_reason?: string; created_at: number;
-  opened_at?: number; closed_at?: number; plan?: Plan; legs?: { stop?: string; stop_limit?: string; target?: string } };
+  opened_at?: number; closed_at?: number; plan?: Plan; legs?: { stop?: string; stop_limit?: string; target?: string };
+  paper_entry_t?: number | null };
 type Totals = { trades: number; wins: number; pnl_usd: number; fees_usd: number; skipped: number; errors: number };
 export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boolean; pin_required?: boolean; mode: "off" | "shadow" | "live"; since?: number;
   armed_at?: number; switched_off?: string | null; last_error?: string | null; last_error_at?: number; errors_in_row?: number;
@@ -149,7 +154,32 @@ const STATE: Record<string, { label: string; cls: string }> = {
   closed: { label: "Closed", cls: "closed" }, skipped: { label: "Skipped", cls: "skipped" }, error: { label: "Error", cls: "error" },
 };
 const why = (t: LiveTrade) => (t.status === "closed" || t.status === "closing" ? t.close_reason : t.reason) ?? "";
-type Filter = "all" | "real" | "skipped" | "error";
+type Filter = "all" | "real" | "skipped" | "before" | "error";
+/** A skipped decision, told apart by its timing (24 Nov 2026). On a desk that copies every paper trade most skips are not
+ *  missed trades: when a strategy joins the desk, the desk goes through its paper trades since the desk went live, copies
+ *  the ones still open and records the ones already closed as "closed on paper before it could be copied".
+ *  before = such a paper trade from BEFORE its strategy joined (never copyable); fast = it opened and closed on paper
+ *  within minutes, faster than a copy can go in; late = the desk saw it long after it opened (an outage or a restart);
+ *  other = any other reason, shown as the server wrote it. */
+type SkipKind = "before" | "fast" | "late" | "other";
+const FAST_S = 10 * 60;
+const skipKind = (t: LiveTrade, joined: Record<string, number>): SkipKind => {
+  if (t.status !== "skipped" || !(t.reason ?? "").startsWith("closed on paper before it could be copied")) return "other";
+  const pe = Number(t.paper_entry_t || 0);
+  if (!pe) return "other";
+  const j = joined[`${t.acct}|${t.mkt}`];
+  if (j && pe < j) return "before";
+  return t.created_at - pe <= FAST_S ? "fast" : "late";
+};
+const lagText = (s: number) => (s < 5400 ? `${Math.max(1, Math.round(s / 60))} min` : s < 172800 ? `${Math.round(s / 3600)} h`
+  : `${Math.round(s / 86400)} days`);
+const skipWhy = (t: LiveTrade, k: SkipKind) => {
+  const lag = t.created_at - Number(t.paper_entry_t || 0);
+  return k === "before" ? `its paper trade (${ist(Number(t.paper_entry_t))}) came before this strategy joined the real-money desk: never copyable, listed when it joined`
+    : k === "fast" ? `opened and closed on paper within ${lagText(lag)}, faster than a copy can go in`
+    : k === "late" ? `seen ${lagText(lag)} after it opened, already closed on paper: the desk could not read it in time (an outage or a restart)`
+    : why(t);
+};
 
 /** What the picks' own backtests said, counted from the data (so it stays true when a desk's picks change). */
 const verdict = (picks: Pick[]) => {
@@ -310,14 +340,20 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   const dayUsed = Math.min(100, Math.max(0, (-s.today.live / (L.daily_stop_usd || 1)) * 100));
   const openPnl = s.open.reduce((a, t) => a + (t.unrealised_usd ?? 0), 0);
   const showShadow = s.mode === "shadow" || s.totals.shadow.trades > 0 || s.totals.shadow.skipped > 0;
+  // when each strategy joined this desk (its record's time), to tell a paper trade from before it apart from a missed one
+  const joined = useMemo(() => Object.fromEntries(s.picks.map((p) => [`${p.acct}|${p.mkt}`,
+    (Date.parse(p.picked_at ?? s.picked_at) || 0) / 1000])), [s.picks, s.picked_at]);
+  const kinds = useMemo(() => new Map(s.recent.map((t) => [t.id, skipKind(t, joined)])), [s.recent, joined]);
   const counts = useMemo(() => ({
     all: s.recent.length,
     real: s.recent.filter((t) => t.status !== "skipped" && t.status !== "error").length,
-    skipped: s.recent.filter((t) => t.status === "skipped").length,
+    skipped: s.recent.filter((t) => t.status === "skipped" && kinds.get(t.id) !== "before").length,
+    before: s.recent.filter((t) => kinds.get(t.id) === "before").length,
     error: s.recent.filter((t) => t.status === "error").length,
-  }), [s.recent]);
+  }), [s.recent, kinds]);
   const shown = s.recent.filter((t) => filter === "all" ? true : filter === "real" ? t.status !== "skipped" && t.status !== "error"
-    : t.status === filter);
+    : filter === "skipped" ? t.status === "skipped" && kinds.get(t.id) !== "before"
+    : filter === "before" ? kinds.get(t.id) === "before" : t.status === filter);
   // the strategies' own paper side (18 Nov): undefined on an older server, null when it could not be read
   const [pf, setPf] = useState<PFilter>("all");
   const [sf, setSf] = useState<SFilter>("all");
@@ -466,7 +502,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         <div className="ld-tile">
           <span className="ld-k">Signals not taken</span>
           <span className="ld-v">{live.skipped}</span>
-          <span className="ld-s">{`${L.follow_all ? "skipped: closed on paper first, too big or no balance" : "skipped as late, drifted or too big"}${live.errors ? ` · ${live.errors} error${live.errors === 1 ? "" : "s"}` : ""}`}</span>
+          <span className="ld-s">{`${L.follow_all ? (counts.before ? `mostly paper trades from before their strategy joined (never copyable): ${counts.before} of the last ${counts.all} decisions` : "skipped: closed on paper first, too big or no balance") : "skipped as late, drifted or too big"}${live.errors ? ` · ${live.errors} error${live.errors === 1 ? "" : "s"}` : ""}`}</span>
         </div>
         <div className="ld-tile">
           <span className="ld-k">Delta wallet</span>
@@ -752,9 +788,12 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
       <h4 className="ld-h ld-h-row">
         <span>Real-money decisions, newest first</span>
         <span className="ld-filters" role="group" aria-label="Show">
-          {([["all", "All"], ["real", "Trades"], ["skipped", "Skipped"], ["error", "Errors"]] as [Filter, string][]).map(([k, label]) => (
+          {([["all", "All", ""], ["real", "Trades", ""],
+            ["skipped", "Skipped", "Real signals that could not be copied: they closed on paper too fast, or the desk could not read them in time"],
+            ["before", "Before it joined", "Paper trades from before their strategy was added to this desk, listed when it joined: never copyable, not missed"],
+            ["error", "Errors", ""]] as [Filter, string, string][]).map(([k, label, tip]) => (
             <button key={k} type="button" className={`ld-fchip${filter === k ? " on" : ""}`} aria-pressed={filter === k}
-              onClick={() => setFilter(k)}>{label} <span>{counts[k]}</span></button>
+              title={tip || undefined} onClick={() => setFilter(k)}>{label} <span>{counts[k]}</span></button>
           ))}
         </span>
       </h4>
@@ -767,13 +806,15 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
             </thead>
             <tbody>
               {shown.map((t) => {
-                const st = STATE[t.status] ?? { label: t.status, cls: "skipped" };
+                const k = kinds.get(t.id) ?? "other";
+                const st = k === "before" ? { label: "Not copyable", cls: "skipped" } : STATE[t.status] ?? { label: t.status, cls: "skipped" };
+                const w = t.status === "skipped" ? skipWhy(t, k) : why(t);
                 return (
                   <tr key={t.id} className={t.status === "skipped" ? "ld-row-dim" : ""}>
                     <td className="l">{ist(t.created_at)}</td>
                     <td className="l"><b>{t.acct}</b> <span className="ld-chip">{t.product}</span>{t.mode === "shadow" ? <span className="ld-chip">shadow</span> : null}</td>
                     <td><span className={`ld-side ${t.side > 0 ? "long" : "short"}`}>{t.side > 0 ? "Long" : "Short"}</span></td>
-                    <td className="l ld-why"><span className={`ld-badge ${st.cls}`}>{st.label}</span>{why(t) ? <div className="ld-sub">{why(t)}</div> : null}</td>
+                    <td className="l ld-why"><span className={`ld-badge ${st.cls}`}>{st.label}</span>{w ? <div className="ld-sub">{w}</div> : null}</td>
                     <td>{t.contracts ?? t.plan?.contracts ?? "—"}</td>
                     <td>{t.fill ? `${px(t.fill)} → ${t.exit_price ? px(t.exit_price) : "…"}` : "—"}</td>
                     <td>{t.fees != null ? usd(t.fees) : "—"}</td>
