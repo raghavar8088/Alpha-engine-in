@@ -28,6 +28,9 @@
 // strategies join a desk that copies every paper trade, their paper trades already closed since the desk went live are
 // recorded as skipped. Those now read "Not copyable" under their own filter, "Before it joined"; "Skipped" keeps the
 // real ones, each saying why (closed on paper too fast to copy, or seen late after an outage or a restart).
+// 24 Nov 2026 (later): every list that names strategies - the strategies table, the paper trades, the open positions and
+// the decisions - has its own strategy filter (StratFilter), the owner's ask: "a filter option by strategy name, like in
+// trades history" (Live Trading's trade history: All strategies, or one, with its count). The chips then count within it.
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { apiFetch } from "../../lib/api";
 
@@ -297,6 +300,45 @@ function ScrollX({ className, children }: { className: string; children: ReactNo
   );
 }
 
+/** A strategy's description for the strategy filters, without the source the tables show as a chip ("Gold Desk H1: ",
+ *  "Gold Desk Strategy Factory: "), cut at a word to fit a dropdown. */
+const shortName = (n: string | null | undefined, max = 56) => {
+  const t = (n ?? "").replace(/^Gold Desk (H1|Strategy Factory):\s*/, "").trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max - 1);
+  const sp = cut.lastIndexOf(" ");
+  return `${(sp > max / 2 ? cut.slice(0, sp) : cut).replace(/[\s,;:·—+/-]+$/, "")}…`;
+};
+type NameOpt = { acct: string; n: number };
+/** Strategy codes A to Z, numbers in order: SF0020 before SF0181, NJ-27 before NJ-43. */
+const byCode = (a: string, b: string) => a.localeCompare(b, "en", { numeric: true });
+/** The strategies among a list's rows, each with its count of rows. */
+const optsOf = (rows: { acct: string }[]): NameOpt[] => {
+  const m = new Map<string, number>();
+  for (const r of rows) m.set(r.acct, (m.get(r.acct) ?? 0) + 1);
+  return [...m.entries()].map(([acct, n]) => ({ acct, n })).sort((a, b) => byCode(a.acct, b.acct));
+};
+/** A list's strategy filter (24 Nov 2026): All strategies, or one of the strategies in its rows with its count, as in Live
+ *  Trading's trade history. Each list keeps its own. A strategy picked earlier whose rows have since gone (its position
+ *  closed, or its decisions are no longer among the latest) stays listed at 0, so the box never reads "All strategies"
+ *  over a filtered list. */
+function StratFilter({ label, value, onChange, opts, descOf, counts = true }: { label: string; value: string;
+  onChange: (v: string) => void; opts: NameOpt[]; descOf: (acct: string) => string; counts?: boolean }) {
+  const list = value && !opts.some((o) => o.acct === value)
+    ? [...opts, { acct: value, n: 0 }].sort((a, b) => byCode(a.acct, b.acct)) : opts;
+  return (
+    <span className={`ld-fsel${value ? " on" : ""}`}>
+      <select value={value} onChange={(e) => onChange(e.target.value)} aria-label={label} title={label}>
+        <option value="">All strategies</option>
+        {list.map((o) => {
+          const d = descOf(o.acct);
+          return <option key={o.acct} value={o.acct}>{`${o.acct}${d ? ` — ${d}` : ""}${counts ? ` (${o.n})` : ""}`}</option>;
+        })}
+      </select>
+    </span>
+  );
+}
+
 type SFilter = "all" | "copied" | "skipped" | "not";
 const copied = (x: Signal) => ["open", "entering", "closing", "closed"].includes(x.desk.status);
 const notCopied = (x: Signal) => ["before", "off", "missed"].includes(x.desk.status);
@@ -321,7 +363,6 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   const risks = L.risk_cap_usd ? [1, 2, 3, 4, 5].filter((r) => r >= (L.risk_min_usd ?? 1) && r <= (L.risk_cap_usd ?? 5)) : [];
   const oneContract = L.sizing === "min";       // one contract a trade, the smallest order (the default from 15 Nov)
   const lotsSet = s.picks.filter((p) => (p.cfg?.contracts ?? 1) > 1).length;     // strategies set above one contract (23 Nov)
-  const offN = s.picks.filter(isOff).length;
   const sizeText = oneContract
     ? (lotsSet ? `each strategy's own lots, 1 contract unless set higher in the strategies table (${lotsSet} ${lotsSet === 1 ? "strategy" : "strategies"} set higher)`
       : "1 contract a trade (the smallest order Delta allows)")
@@ -344,36 +385,61 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   const joined = useMemo(() => Object.fromEntries(s.picks.map((p) => [`${p.acct}|${p.mkt}`,
     (Date.parse(p.picked_at ?? s.picked_at) || 0) / 1000])), [s.picks, s.picked_at]);
   const kinds = useMemo(() => new Map(s.recent.map((t) => [t.id, skipKind(t, joined)])), [s.recent, joined]);
-  const counts = useMemo(() => ({
-    all: s.recent.length,
-    real: s.recent.filter((t) => t.status !== "skipped" && t.status !== "error").length,
-    skipped: s.recent.filter((t) => t.status === "skipped" && kinds.get(t.id) !== "before").length,
-    before: s.recent.filter((t) => kinds.get(t.id) === "before").length,
-    error: s.recent.filter((t) => t.status === "error").length,
-  }), [s.recent, kinds]);
-  const shown = s.recent.filter((t) => filter === "all" ? true : filter === "real" ? t.status !== "skipped" && t.status !== "error"
+  const decCounts = (rows: LiveTrade[]) => ({
+    all: rows.length,
+    real: rows.filter((t) => t.status !== "skipped" && t.status !== "error").length,
+    skipped: rows.filter((t) => t.status === "skipped" && kinds.get(t.id) !== "before").length,
+    before: rows.filter((t) => kinds.get(t.id) === "before").length,
+    error: rows.filter((t) => t.status === "error").length,
+  });
+  const counts = decCounts(s.recent);                  // every latest decision: the "Signals not taken" tile
+  // each list's own strategy filter (24 Nov, StratFilter): "" = all strategies; the chips then count within it
+  const [dName, setDName] = useState("");
+  const [pName, setPName] = useState("");
+  const [sName, setSName] = useState("");
+  const [oName, setOName] = useState("");
+  // each strategy's description for the filters' lists: its pick's, else a trade's own (a strategy no longer picked)
+  const descs = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const p of s.picks) if (!m.has(p.acct)) m.set(p.acct, shortName(p.name));
+    for (const t of [...s.open, ...s.recent]) if (!m.has(t.acct) && t.name) m.set(t.acct, shortName(t.name));
+    return m;
+  }, [s.picks, s.open, s.recent]);
+  const descOf = (acct: string) => descs.get(acct) ?? "";
+  const recentN = dName ? s.recent.filter((t) => t.acct === dName) : s.recent;
+  const dCounts = dName ? decCounts(recentN) : counts;
+  const shown = recentN.filter((t) => filter === "all" ? true : filter === "real" ? t.status !== "skipped" && t.status !== "error"
     : filter === "skipped" ? t.status === "skipped" && kinds.get(t.id) !== "before"
     : filter === "before" ? kinds.get(t.id) === "before" : t.status === filter);
   // the strategies' own paper side (18 Nov): undefined on an older server, null when it could not be read
   const [pf, setPf] = useState<PFilter>("all");
   const [sf, setSf] = useState<SFilter>("all");
   const hasPaper = s.picks.some((p) => p.paper !== undefined);
-  const pCounts = {
-    all: s.picks.length, inTrade: s.picks.filter(inTrade).length,
-    real: s.picks.filter((p) => (p.live?.trades ?? 0) + (p.live?.open ?? 0) > 0).length,
-    waiting: s.picks.filter((p) => !inTrade(p)).length, off: offN,
-  };
+  const pickCounts = (ps: Pick[]) => ({
+    all: ps.length, inTrade: ps.filter(inTrade).length,
+    real: ps.filter((p) => (p.live?.trades ?? 0) + (p.live?.open ?? 0) > 0).length,
+    waiting: ps.filter((p) => !inTrade(p)).length, off: ps.filter(isOff).length,
+  });
+  const pCounts = pickCounts(s.picks);                 // the whole desk: the "On paper now" tile
+  const picksN = pName ? s.picks.filter((p) => p.acct === pName) : s.picks;
+  const pfCounts = pName ? pickCounts(picksN) : pCounts;
   const hasRank = s.picks.some((p) => !!p.rank);
   const hasCfg = s.picks.some((p) => p.cfg !== undefined);
   // in rank order when the server ranks them (23 Nov); the app-wide sorter can re-sort by any column
-  const picksShown = s.picks.filter((p) => pf === "all" ? true : pf === "inTrade" ? inTrade(p)
+  const picksShown = picksN.filter((p) => pf === "all" ? true : pf === "inTrade" ? inTrade(p)
     : pf === "real" ? (p.live?.trades ?? 0) + (p.live?.open ?? 0) > 0 : pf === "off" ? isOff(p) : !inTrade(p))
     .slice().sort((a, b) => (a.rank?.pos ?? 1e9) - (b.rank?.pos ?? 1e9));
   const sig = s.signals ?? [];
-  const sCounts = { all: sig.length, copied: sig.filter(copied).length, skipped: sig.filter((x) => x.desk.status === "skipped"
-    || x.desk.status === "error").length, not: sig.filter(notCopied).length };
-  const sigShown = sig.filter((x) => sf === "all" ? true : sf === "copied" ? copied(x)
+  const sOpts = optsOf(sig);
+  const sigN = sName ? sig.filter((x) => x.acct === sName) : sig;
+  const sCounts = { all: sigN.length, copied: sigN.filter(copied).length, skipped: sigN.filter((x) => x.desk.status === "skipped"
+    || x.desk.status === "error").length, not: sigN.filter(notCopied).length };
+  const sigShown = sigN.filter((x) => sf === "all" ? true : sf === "copied" ? copied(x)
     : sf === "skipped" ? x.desk.status === "skipped" || x.desk.status === "error" : notCopied(x));
+  const oOpts = optsOf(s.open);
+  const openShown = oName ? s.open.filter((t) => t.acct === oName) : s.open;
+  const openShownPnl = openShown.reduce((a, t) => a + (t.unrealised_usd ?? 0), 0);
+  const dOpts = optsOf(s.recent);
   const pv = s.paper_view;
   return (
     <div className="ld">
@@ -543,12 +609,14 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
 
       <h4 className="ld-h ld-h-row">
         <span>{`The ${s.picks.length} strategies, real-money results`}</span>
-        {hasPaper && (
+        {(hasPaper || s.picks.length > 1 || pName) && (
           <span className="ld-filters" role="group" aria-label="Show strategies">
-            {([["all", "All"], ["inTrade", "In a paper trade"], ["real", "With real trades"], ["waiting", "Waiting"],
+            {(s.picks.length > 1 || pName) && <StratFilter label="Filter the strategies by name" value={pName} onChange={setPName}
+              opts={optsOf(s.picks)} descOf={descOf} counts={false} />}
+            {hasPaper && ([["all", "All"], ["inTrade", "In a paper trade"], ["real", "With real trades"], ["waiting", "Waiting"],
               ...(hasCfg ? [["off", "Switched off"] as [PFilter, string]] : [])] as [PFilter, string][]).map(([k, label]) => (
               <button key={k} type="button" className={`ld-fchip${pf === k ? " on" : ""}`} aria-pressed={pf === k}
-                onClick={() => setPf(k)}>{label} <span>{pCounts[k]}</span></button>
+                onClick={() => setPf(k)}>{label} <span>{pfCounts[k]}</span></button>
             ))}
           </span>
         )}
@@ -661,7 +729,8 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
             })}
           </tbody>
         </table>
-        {!picksShown.length && <p className="ld-dim ld-pad">None of these strategies is in this state right now.</p>}
+        {!picksShown.length && <p className="ld-dim ld-pad">{!pName ? "None of these strategies is in this state right now."
+          : picksN.length ? `${pName} is not in this state right now.` : `${pName} is no longer one of this desk's strategies.`}</p>}
         <p className="ld-foot">
           Real money only, closed trades, after Delta&apos;s fees. Return % = net P&amp;L ÷ the most margin the strategy held at
           one time{oneMargin ? ` (one contract at ${L.leverage}x holds about ${usd(oneMargin)} now)` : ""}; avg % /
@@ -713,6 +782,8 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
             <span>The strategies&apos; paper trades, newest first, and what this desk did</span>
             {s.signals ? (
               <span className="ld-filters" role="group" aria-label="Show paper trades">
+                {(sOpts.length > 1 || sName) && <StratFilter label="Filter the paper trades by strategy" value={sName}
+                  onChange={setSName} opts={sOpts} descOf={descOf} />}
                 {([["all", "All"], ["copied", "Copied"], ["skipped", "Skipped"], ["not", "Not copied"]] as [SFilter, string][]).map(([k, label]) => (
                   <button key={k} type="button" className={`ld-fchip${sf === k ? " on" : ""}`} aria-pressed={sf === k}
                     onClick={() => setSf(k)}>{label} <span>{sCounts[k]}</span></button>
@@ -754,17 +825,31 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
                 </tbody>
               </table>
             </div>
-          ) : <p className="ld-dim ld-empty">{sig.length ? "Nothing of this kind in the latest paper trades." : "No paper trade from these strategies yet."}</p>}
+          ) : <p className="ld-dim ld-empty">{sName ? (sigN.length ? `None of ${sName}'s latest paper trades is of this kind.`
+            : `No paper trade of ${sName} among the latest ${sig.length}.`)
+            : sig.length ? "Nothing of this kind in the latest paper trades." : "No paper trade from these strategies yet."}</p>}
         </>
       )}
 
       <h4 className="ld-h ld-h-row">
         <span>Real positions open ({s.open.length})</span>
-        {s.open.length ? <span className={`ld-h-aside ${tone(openPnl)}`}>{usd(openPnl, true)} open P&amp;L</span> : null}
+        {s.open.length || oName ? (
+          <span className="ld-filters">
+            {(oOpts.length > 1 || oName) && <StratFilter label="Filter the open positions by strategy" value={oName}
+              onChange={setOName} opts={oOpts} descOf={descOf} />}
+            {s.open.length ? (
+              <span className={`ld-h-aside ${tone(oName ? openShownPnl : openPnl)}`}>
+                {`${oName ? `${openShown.length} of ${s.open.length} · ` : ""}${usd(oName ? openShownPnl : openPnl, true)} open P&L`}
+              </span>
+            ) : null}
+          </span>
+        ) : null}
       </h4>
-      {s.open.length ? (
+      {s.open.length && !openShown.length ? (
+        <p className="ld-dim ld-empty">{`${oName} has no real position open now.`}</p>
+      ) : s.open.length ? (
         <div className="ld-pos-grid">
-          {s.open.map((t) => (
+          {openShown.map((t) => (
             <div key={t.id} className={`ld-card ld-pos ${t.side > 0 ? "long" : "short"}`}>
               <div className="ld-pos-top">
                 <span><b>{t.acct}</b> <span className="ld-chip">{t.product}</span></span>
@@ -788,12 +873,14 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
       <h4 className="ld-h ld-h-row">
         <span>Real-money decisions, newest first</span>
         <span className="ld-filters" role="group" aria-label="Show">
+          {(dOpts.length > 1 || dName) && <StratFilter label="Filter the decisions by strategy" value={dName}
+            onChange={setDName} opts={dOpts} descOf={descOf} />}
           {([["all", "All", ""], ["real", "Trades", ""],
             ["skipped", "Skipped", "Real signals that could not be copied: they closed on paper too fast, or the desk could not read them in time"],
             ["before", "Before it joined", "Paper trades from before their strategy was added to this desk, listed when it joined: never copyable, not missed"],
             ["error", "Errors", ""]] as [Filter, string, string][]).map(([k, label, tip]) => (
             <button key={k} type="button" className={`ld-fchip${filter === k ? " on" : ""}`} aria-pressed={filter === k}
-              title={tip || undefined} onClick={() => setFilter(k)}>{label} <span>{counts[k]}</span></button>
+              title={tip || undefined} onClick={() => setFilter(k)}>{label} <span>{dCounts[k]}</span></button>
           ))}
         </span>
       </h4>
@@ -825,7 +912,9 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
             </tbody>
           </table>
         </div>
-      ) : <p className="ld-dim ld-empty">{s.recent.length ? "Nothing of this kind in the latest decisions." : "No signal from these strategies yet."}</p>}
+      ) : <p className="ld-dim ld-empty">{dName ? (recentN.length ? `None of ${dName}'s latest decisions is of this kind.`
+        : `No decision of ${dName} among the latest ${s.recent.length}.`)
+        : s.recent.length ? "Nothing of this kind in the latest decisions." : "No signal from these strategies yet."}</p>}
 
       <details className="ld-card ld-more-info">
         <summary>How this desk works, and its limits</summary>
@@ -923,7 +1012,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-pos-dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 10px; margin: 0; }
         .ld .ld-pos-dl dt { font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); }
         .ld .ld-pos-dl dd { margin: 0; font-family: var(--font-data); font-size: 12.5px; color: var(--text); overflow-wrap: anywhere; }
-        .ld .ld-filters { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+        .ld .ld-filters { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
         .ld .ld-fchip { font-size: 12px; font-weight: 700; padding: 5px 11px; border-radius: 999px; cursor: pointer; background: var(--panel);
                         border: 1px solid var(--panel-border); color: var(--text-muted); }
         .ld .ld-fchip span { font-family: var(--font-data); margin-left: 3px; color: var(--text-faint); }
@@ -1026,6 +1115,20 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
                        padding-top: 3px; background: var(--canvas); }
         .ld .ld-xtop[hidden] { display: none; }
         .ld .ld-xtop > div { height: 1px; }
+        /* 24 Nov: each list's strategy filter, a dropdown as in Live Trading's trade history */
+        .ld .ld-fsel { position: relative; display: inline-flex; max-width: 100%; }
+        .ld .ld-fsel::after { content: "▾"; position: absolute; right: 11px; top: 50%; transform: translateY(-50%); font-size: 10px;
+                              color: var(--text-faint); pointer-events: none; }
+        .ld .ld-fsel select { appearance: none; -webkit-appearance: none; -moz-appearance: none; width: 140px; max-width: 240px; min-width: 0;
+                              font-family: inherit; font-size: 12px; font-weight: 700; letter-spacing: 0; text-transform: none;
+                              padding: 5px 26px 5px 11px; border-radius: 999px; border: 1px solid var(--panel-border);
+                              background: var(--panel); color: var(--text-muted); cursor: pointer; overflow: hidden;
+                              text-overflow: ellipsis; white-space: nowrap; }
+        .ld .ld-fsel select:hover { border-color: var(--panel-border-hover); }
+        .ld .ld-fsel select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .ld .ld-fsel.on select { width: auto; field-sizing: content; border-color: var(--brand); background: var(--brand-dim); color: var(--brand); }
+        .ld .ld-fsel.on::after { color: var(--brand); }
+        .ld .ld-fsel option { color: var(--text); background: var(--panel); font-weight: 600; }
         @media (max-width: 640px) {
           .ld .ld-v { font-size: 19px; } .ld .ld-ctl input { min-width: 140px; } .ld .ld-seg-b { padding: 7px 10px; }
           .ld .ld-status { padding: 14px; } .ld .ld-pos-dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
