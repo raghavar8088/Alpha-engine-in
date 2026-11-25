@@ -6,7 +6,6 @@ import GlassPanel from "../../components/GlassPanel";
 import DeskHistory from "../../components/DeskHistory";
 import LineChart from "../../components/charts/LineChart";
 import ErrorBanner from "../../components/ErrorBanner";
-import PaperTwin from "./PaperTwin";
 import TradeHistory from "./TradeHistory";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
@@ -38,12 +37,14 @@ const signed = (v: number | null | undefined) =>
 const pct = (v: number | null | undefined) =>
   v === null || v === undefined ? "-" : `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`;
 
-// Since 10 Nov 2026 the desk copies tournament strategies; these fields come with it.
+// Since 25 Nov 2026 the desk copies six Premium Strategies equity-intraday books (the Intraday Stocks
+// tournament's strategies from 10 to 25 Nov); these fields come with it.
 type CopyDesk = {
   copy_notional?: number; mis_leverage?: number; max_open_positions?: number;
-  // Every strategy the desk can copy, with its switch (16 Nov 2026: five sharing one pool).
-  copy_strategies?: { strategy_id: string; name: string; enabled: boolean; override?: string | null }[];
-  // Today's tournament signals and what the desk did with each (since 12 Nov 2026).
+  copy_from?: string; copy_window_s?: number;
+  // Every strategy the desk can copy, with its switch and its paper book (six sharing one pool).
+  copy_strategies?: { strategy_id: string; name: string; enabled: boolean; override?: string | null; category?: string; book?: string }[];
+  // Today's paper signals and what the desk did with each (since 12 Nov 2026).
   copy_today?: {
     at: string | null; symbol: string; side: string; decision: string; parent_id: string;
     strategy_id?: string; strategy_name?: string;
@@ -51,10 +52,11 @@ type CopyDesk = {
 };
 type Overridable = { override?: string | null };
 
-// The switched-on strategies, by name, for the page's sentences ("Selected ORB 15-min" before 16 Nov 2026).
+// The switched-on strategies by code ("YT-23"), for the page's sentences; the table has their full names.
+const codeOf = (name: string) => name.split(" · ")[0];
 const onNames = (desk: (LiveTradingSummary & CopyDesk) | null): string => {
-  const on = (desk?.copy_strategies ?? []).filter((s) => s.enabled).map((s) => s.name);
-  if (!desk?.copy_strategies) return "Selected ORB 15-min";
+  const on = (desk?.copy_strategies ?? []).filter((s) => s.enabled).map((s) => codeOf(s.name));
+  if (!desk?.copy_strategies) return "the strategies switched on below";
   return on.length ? on.join(", ") : "none switched on";
 };
 
@@ -70,9 +72,6 @@ export default function LiveTradingPage() {
   const [equity, setEquity] = useState<LiveTradingEquityPoint[]>([]);
   const [daily, setDaily] = useState<LiveTradingDay[]>([]);
   const [arming, setArming] = useState<LiveTradingArming | null>(null);
-  // Real desk or its paper twin (18 Nov 2026). Always opens on the real desk: a real-money page must
-  // show its own state first, never a paper account left selected from the last visit.
-  const [view, setView] = useState<"real" | "twin">("real");
 
   const load = useCallback(async () => {
     try {
@@ -135,10 +134,11 @@ export default function LiveTradingPage() {
       const desk = summary as LiveTradingSummary & CopyDesk;
       const ok = window.confirm(
         "ARM LIVE TRADING?\n\nThis places REAL orders with real money on your Angel One account: every " +
-          `new position the Intraday Stocks tournament opens in the strategies switched on (${onNames(desk)}) is copied within seconds, ` +
+          `new trade the Premium Strategies paper desk takes in the strategies switched on (${onNames(desk)}) is copied as soon as it ` +
+          "reaches this desk, a few minutes after its paper fill, " +
           `up to ${desk.max_open_positions ?? 5} positions at a time across them (one per stock), about ${inr(desk.copy_notional ?? summary.position_notional)} each on ` +
-          `Angel's ${desk.mis_leverage ?? 5}x intraday (MIS) leverage, and closed at the same stop or target, when the tournament closes it, or ` +
-          "at the session square-off. You can disarm or hit the kill switch at any time.\n\nArm the desk now?",
+          `Angel's ${desk.mis_leverage ?? 5}x intraday (MIS) leverage, and closed at the same stop or target, when the paper trade closes, or ` +
+          "at the session square-off. None of these strategies passed its test. You can disarm or hit the kill switch at any time.\n\nArm the desk now?",
       );
       if (!ok) return;
     }
@@ -196,10 +196,10 @@ export default function LiveTradingPage() {
       // Switching a strategy ON sends real orders from the next signal while the desk is armed.
       const desk = summary as (LiveTradingSummary & CopyDesk) | null;
       const ok = window.confirm(
-        `TURN ON REAL-MONEY TRADING FOR ${s.name}?\n\nWhile the desk is armed, every new ${s.name} position the ` +
-          "Intraday Stocks tournament opens becomes a REAL Angel One order within seconds, sharing the desk's " +
+        `TURN ON REAL-MONEY TRADING FOR ${s.name}?\n\nWhile the desk is armed, every new ${s.name} paper trade ` +
+          "becomes a REAL Angel One order as soon as it reaches this desk, sharing the desk's " +
           `${desk?.max_open_positions ?? 5} positions (about ${inr(desk?.copy_notional ?? desk?.position_notional)} each, one per stock). ` +
-          "No forward test has confirmed it.\n\nTurn it on?",
+          "No test has confirmed it.\n\nTurn it on?",
       );
       if (!ok) return;
     }
@@ -222,24 +222,9 @@ export default function LiveTradingPage() {
         refreshing={isRefreshing}
         crumb="Live Trading"
         title="Live Trading"
-        subtitle={`REAL-MONEY desk: when ARMED, copies the Intraday Stocks tournament's positions in the strategies switched on below (now: ${onNames(summary as (LiveTradingSummary & CopyDesk) | null)}) into real Angel One orders within seconds — up to ${(summary as (LiveTradingSummary & CopyDesk) | null)?.max_open_positions ?? 5} positions at a time across them, one per stock, about ${inr((summary as (LiveTradingSummary & CopyDesk) | null)?.copy_notional ?? summary?.position_notional)} each on ${(summary as (LiveTradingSummary & CopyDesk) | null)?.mis_leverage ?? 5}x intraday (MIS) leverage, closed at the same stop or target, when the tournament closes it, or at the session square-off. Every order is INTRADAY (MIS). The forward-test gate is overridden for these strategies by your decisions of 10 Nov 2026 (Selected ORB 15-min) and 16 Nov 2026 (the four added that day).`}
+        subtitle={`REAL-MONEY desk: when ARMED, copies the Premium Strategies paper desk's Equity intraday trades in the strategies switched on below (now: ${onNames(summary as (LiveTradingSummary & CopyDesk) | null)}) into real Angel One orders, a few minutes after each paper fill (the paper desk sees a 5-minute bar only once it has finished) — up to ${(summary as (LiveTradingSummary & CopyDesk) | null)?.max_open_positions ?? 5} positions at a time across them, one per stock, about ${inr((summary as (LiveTradingSummary & CopyDesk) | null)?.copy_notional ?? summary?.position_notional)} each on ${(summary as (LiveTradingSummary & CopyDesk) | null)?.mis_leverage ?? 5}x intraday (MIS) leverage, closed at the same stop or target, when the paper trade closes, or at the session square-off. Every order is INTRADAY (MIS). The forward-test gate is overridden for these six by your decision of 25 Nov 2026; none of them passed its test.`}
       />
 
-      <div className="view-tabs" role="tablist" aria-label="Real desk or paper twin">
-        <button role="tab" aria-selected={view === "real"} className={`vtab ${view === "real" ? "on" : ""}`}
-                onClick={() => setView("real")}>
-          Real-money desk
-        </button>
-        <button role="tab" aria-selected={view === "twin"} className={`vtab ${view === "twin" ? "on" : ""}`}
-                onClick={() => setView("twin")}>
-          Paper twin · same rules, paper money
-        </button>
-      </div>
-
-      {view === "twin" ? (
-        <PaperTwin realArmed={summary ? armed : null} />
-      ) : (
-      <>
       {error && <ErrorBanner message={error} />}
       {notice && <div className="notice" onClick={() => setNotice(null)}>{notice}</div>}
 
@@ -310,12 +295,12 @@ export default function LiveTradingPage() {
             </ul>
           )}
           <p className="gate-note">
-            A strategy reaches real money by running as a paper strategy in the Intraday Stocks
-            tournament, passing the two-year walk-forward gate, and then confirming its
-            pre-registered expectation over at least 40 forward paper trades. Disable a strategy
-            below to arm without it. The strategies here trade without that confirmation: you
-            overrode the gate for Selected ORB 15-min on 10 Nov 2026 and for the four added on
-            16 Nov 2026 (each only once its switch is on).
+            A strategy reaches real money by running as a paper strategy, passing a walk-forward
+            test, and then confirming its pre-registered expectation over at least 40 forward paper
+            trades. Disable a strategy below to arm without it. The strategies here trade without
+            that confirmation: on 25 Nov 2026 you chose six Premium Strategies Equity intraday books
+            and overrode the gate for them (each only while its switch is on). None of them passed
+            its own test.
           </p>
         </div>
       )}
@@ -495,11 +480,15 @@ export default function LiveTradingPage() {
         <p className="muted pool-note">
           {(() => {
             const desk = summary as (LiveTradingSummary & CopyDesk) | null;
+            const win = Math.round((desk?.copy_window_s ?? 1200) / 60);
             return `All strategies share one pool: at most ${desk?.max_open_positions ?? 5} real positions at a time, ` +
-              `about ${inr(desk?.copy_notional ?? desk?.position_notional)} each, taken in the order the tournament opens them, ` +
-              "and never two in one stock. \"Account\" is that pool plus the strategy's own P&L. The four added on " +
-              "16 Nov 2026 start switched OFF: replayed at this desk's size (6 Oct to 16 Nov 2026), each of them lost " +
-              "money after Angel's charges.";
+              `about ${inr(desk?.copy_notional ?? desk?.position_notional)} each, taken in the order their paper trades entered, ` +
+              "and never two in one stock. \"Account\" is that pool plus the strategy's own P&L. Each strategy is a Premium " +
+              "Strategies paper book (Equity intraday); its real copy keeps the paper trade's side, stop and target and closes " +
+              "when the paper trade closes. A paper trade reaches this desk a few minutes after its fill and is copied while " +
+              `it is under ${win} minutes old and the price is within half the stop distance of the paper fill. ` +
+              "Paper results come from Rs 10 lakh accounts with positions of up to Rs 12.5 lakh: at this desk's size " +
+              "Angel's charges are a much larger share of each trade.";
           })()}
         </p>
         <div className="table-scroll">
@@ -521,7 +510,7 @@ export default function LiveTradingPage() {
               {sortByRank(board, ranks, (s) => s.strategy_id).map((s) => (
                 <tr key={s.strategy_id} className={s.enabled ? "" : "disabled-row"}>
                   {ranks && <RankTd board={ranks} id={s.strategy_id} />}
-                  <td style={{ textAlign: "left" }}>
+                  <td className="stratcell" style={{ textAlign: "left" }}>
                     <span className="sname">
                       {s.is_anti && <span className="anti">ANTI</span>}
                       {s.name}
@@ -564,11 +553,11 @@ export default function LiveTradingPage() {
         const today = (summary as (LiveTradingSummary & CopyDesk) | null)?.copy_today;
         if (!today) return null;
         return (
-          <GlassPanel title={`Today's tournament signals (${today.length})`}>
+          <GlassPanel title={`Today's paper signals (${today.length})`}>
             {today.length === 0 ? (
               <p className="muted">
-                No signal from the switched-on strategies yet today. While the desk is armed, each one is
-                copied within seconds.
+                No paper trade from the switched-on strategies yet today. While the desk is armed, each one is
+                copied as soon as it reaches this desk.
               </p>
             ) : (
               <div className="table-scroll">
@@ -588,7 +577,7 @@ export default function LiveTradingPage() {
                         <td style={{ textAlign: "left" }}>
                           {c.at ? new Date(c.at).toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour12: false }) : "-"}
                         </td>
-                        <td style={{ textAlign: "left" }}>{c.strategy_name ?? "Selected ORB 15-min"}</td>
+                        <td style={{ textAlign: "left" }}>{c.strategy_name ?? c.strategy_id ?? "-"}</td>
                         <td style={{ textAlign: "left" }} className="sym">{c.symbol}</td>
                         <td><span className={c.side === "BUY" ? "side buy" : "side sell"}>{c.side}</span></td>
                         <td style={{ textAlign: "left" }} className={c.decision === "opened" ? "gain" : "muted"}>
@@ -637,7 +626,7 @@ export default function LiveTradingPage() {
                     <td>{inr(p.ltp)}</td>
                     <td className="gain">
                       {p.target === null || p.target === undefined
-                        ? <span className="muted" title="No fixed target: the real position closes when the tournament's paper position closes, at the stop, or at the session square-off">tournament</span>
+                        ? <span className="muted" title="No fixed target: the real position closes when its paper trade closes, at the stop, or at the session square-off">paper</span>
                         : inr(p.target)}
                     </td>
                     <td className="loss">{inr(p.stoploss)}</td>
@@ -654,8 +643,6 @@ export default function LiveTradingPage() {
       <TradeHistory closedCount={summary?.closed_positions} realized={summary?.realized_pnl} />
 
       <DeskHistory deskKey={"live-trading"} />
-      </>
-      )}
 
       <style jsx>{`
         .roi-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
@@ -722,6 +709,7 @@ export default function LiveTradingPage() {
         .data-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--canvas-soft); }
         tr.disabled-row { opacity: 0.5; }
         .sname { font-weight: 600; display: inline-flex; align-items: center; gap: 7px; }
+        .data-table td.stratcell { white-space: normal; min-width: 150px; max-width: 300px; }
         .anti { font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 4px; background: var(--brand-dim); color: var(--brand); }
         .cat { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); }
         .sym { font-weight: 700; }
@@ -746,10 +734,6 @@ export default function LiveTradingPage() {
         .switch.unknown .switch-label { left: 50%; right: auto; transform: translate(-50%, -50%); }
         .switch.unknown .knob { display: none; }
         .broker.unknown { color: var(--text-muted); background: var(--canvas-soft); }
-        .view-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-        .vtab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted);
-                padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
-        .vtab.on { background: var(--brand-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--brand); }
         .gain { color: var(--gain); }
         .loss { color: var(--loss); }
       `}</style>

@@ -240,49 +240,72 @@ def run_stocks(db, now: datetime) -> dict:
     if now.date() < PAPER_START:
         L.set_signature(db, "stocks", sig)
         return {**info, "waiting_for": PAPER_START.isoformat(), "bars_to": panel.days[-1]}
-    pool_books = [(a, mk, v, _from(db, a, mk)) for a, mk, v in C.books_in("stocks") if mk != "VWAP"]
-    yc_ctx = _yc_stock_context(pool_books, panel, now)
-    first = min(b[3] for b in pool_books).isoformat()
-    collected: dict[tuple, list] = {(a.id, mk): [] for a, mk, _, _ in pool_books}
+    n_docs, _touched, errors = _stock_pass(db, now, panel, final)
+    L.set_signature(db, "stocks", sig)
+    return {**info, "trades": n_docs, "final": final, "live_day": panel.live_day, "bars_to": panel.days[-1], "errors": errors}
+
+
+def _stock_pass(db, now: datetime, panel, final: str, only: set | None = None,
+                deadline: float | None = None) -> tuple[int, set, dict]:
+    """The NSE stock books over `panel`, replayed, saved and sized: every one (the stocks pass), or only the books named
+    in `only` ("ACCT|MKT"; the quick pass's books for the real-money Live Trading desk, 25 Nov 2026). Returns (trades
+    written, accounts touched, errors). One body for both passes, so a book computes the same trades in either: its
+    own replay start, the same stocks, the same context and the same slot rule (until 25 Nov this was run_stocks').
+    `deadline` (time.time(), the quick pass only): past it, the stock books stop with TimeoutError before anything is
+    saved, and the VWAP books are left for the next pass; the stocks pass has none."""
+    pool_books = [(a, mk, v, _from(db, a, mk)) for a, mk, v in C.books_in("stocks")
+                  if mk != "VWAP" and (only is None or f"{a.id}|{mk}" in only)]
     errors: dict = {}
-    day_index = {d: j for j, d in enumerate(panel.days)}
-    for i in range(len(panel.names)):
-        m = panel.market(i)
-        if m is None or str(m.date[-1]) < first:
-            continue
-        cache: dict = {}
-        rank = lambda t, i=i: panel.rank_on(day_index[t.date], i)  # noqa: E731
-        for a, mk, v, start in pool_books:
-            try:
-                if _is_yc(a):
-                    tr, _ = R.run_yc(a.id, mk, m, cache, {"ctx": yc_ctx}, since_t=_yc_start(a)[0])
-                else:
-                    tr, _ = R.run_yt(a.id, v, mk, m, cache)
-            except Exception as exc:  # noqa: BLE001
-                errors.setdefault(f"{a.id}|{mk}", str(exc)[:200])
-                continue
-            if tr:
-                to_docs = R.yc_docs if _is_yc(a) else R.docs_from
-                ov = _is_yc(a) and R.is_overnight(a.id, mk)           # AB-04 holds stocks overnight (BTST / swing)
-                collected[(a.id, mk)] += [d for d in to_docs(tr, m, a.id, mk, ov, panel.live_day, rank) if d["date"] >= start.isoformat()]
     n_docs, touched = 0, set()
-    for a, mk, v, start in pool_books:
-        docs = _fresh_only(db, a, mk, R.take_slots(collected[(a.id, mk)], C.MONEY[mk].max_open))
-        n_docs += L.persist(db, a.id, mk, docs, start.isoformat(), final, bool(_is_yc(a) and R.is_overnight(a.id, mk)))
-        touched.add(a.id)
-    vw_books = {a.id: replay_from(db, a.id, "VWAP", False) for a, mk, _ in C.books_in("stocks") if mk == "VWAP"}
-    days = {d for d in panel.days if d >= min(vw_books.values()).isoformat()}
+    if pool_books:
+        yc_ctx = _yc_stock_context(pool_books, panel, now)
+        first = min(b[3] for b in pool_books).isoformat()
+        collected: dict[tuple, list] = {(a.id, mk): [] for a, mk, _, _ in pool_books}
+        day_index = {d: j for j, d in enumerate(panel.days)}
+        for i in range(len(panel.names)):
+            if deadline is not None and time.time() > deadline:
+                raise TimeoutError("out of time before any stock book was saved")
+            m = panel.market(i)
+            if m is None or str(m.date[-1]) < first:
+                continue
+            cache: dict = {}
+            rank = lambda t, i=i: panel.rank_on(day_index[t.date], i)  # noqa: E731
+            for a, mk, v, start in pool_books:
+                try:
+                    if _is_yc(a):
+                        tr, _ = R.run_yc(a.id, mk, m, cache, {"ctx": yc_ctx}, since_t=_yc_start(a)[0])
+                    else:
+                        tr, _ = R.run_yt(a.id, v, mk, m, cache)
+                except Exception as exc:  # noqa: BLE001
+                    errors.setdefault(f"{a.id}|{mk}", str(exc)[:200])
+                    continue
+                if tr:
+                    to_docs = R.yc_docs if _is_yc(a) else R.docs_from
+                    ov = _is_yc(a) and R.is_overnight(a.id, mk)           # AB-04 holds stocks overnight (BTST / swing)
+                    collected[(a.id, mk)] += [d for d in to_docs(tr, m, a.id, mk, ov, panel.live_day, rank) if d["date"] >= start.isoformat()]
+        for a, mk, v, start in pool_books:
+            docs = _fresh_only(db, a, mk, R.take_slots(collected[(a.id, mk)], C.MONEY[mk].max_open))
+            n_docs += L.persist(db, a.id, mk, docs, start.isoformat(), final, bool(_is_yc(a) and R.is_overnight(a.id, mk)))
+            touched.add(a.id)
+    vw_books = {a.id: replay_from(db, a.id, "VWAP", False) for a, mk, _ in C.books_in("stocks")
+                if mk == "VWAP" and (only is None or f"{a.id}|VWAP" in only)}
+    if vw_books and deadline is not None and time.time() > deadline:
+        errors["VWAP"] = "out of time: the VWAP books wait for the next pass"
+        vw_books = {}
+    days = {d for d in panel.days if d >= min(vw_books.values()).isoformat()} if vw_books else set()
     if days:
         out = vwap_run.run(panel, days)
         for setup, docs in out.items():
             acct = vwap_run.ACCOUNT[setup]
+            if acct not in vw_books:
+                continue
             start = vw_books[acct].isoformat()
             docs = R.take_slots([d for d in docs if d["date"] >= start], C.MONEY["VWAP"].max_open)
             n_docs += L.persist(db, acct, "VWAP", docs, start, final, False)
             touched.add(acct)
-    L.update_accounts(db, sorted(touched))
-    L.set_signature(db, "stocks", sig)
-    return {**info, "trades": n_docs, "final": final, "live_day": panel.live_day, "bars_to": panel.days[-1], "errors": errors}
+    if touched:
+        L.update_accounts(db, sorted(touched))
+    return n_docs, touched, errors
 
 
 def _yc_stock_context(pool_books, panel, now: datetime) -> dict:
@@ -468,11 +491,56 @@ def _quick_books(db, errors: dict) -> set:
     return {k for k in want if k not in errors and (btc_ok if k.endswith("|BTCUSD") else gold_ok)}
 
 
+NSE_FIRST_HOURS = ("09:20", "15:40")     # IST: from the session's first finished 5-minute bar until its exits are in
+NSE_BUDGET_S = 75        # the NSE step gives up (saving nothing) once the quick pass has run this long; main.py kills a
+                         # quick pass at 120 s, and the Delta desks' quick work must never wait behind these books
+
+
+def _run_first_nse(db, now: datetime, errors: dict, deadline: float | None = None) -> set:
+    """The NSE stock books the real-money Live Trading desk copies (25 Nov 2026), run and sized in the quick pass once per
+    new finished 5-minute bar, instead of only in the stocks pass (every 15 minutes in the session, and 4-5 minutes long
+    on 25 Nov 2026), so a paper entry reaches that desk a minute or two after its bar. The backend's live_trading_engine
+    names them in premium_meta 'live_priority_nse' ("ACCT|NSE5", "ACCT|NSE15", "VWAP-U4|VWAP"). They run through
+    _stock_pass, as the stocks pass runs them, on the bars the backend holds now; the stocks pass still runs them too.
+    Only in the quick pass ("live"), never between a full pass's books: a full pass already holds its own memory.
+    Returns their account ids; none outside the session, with nothing new, or after a failure."""
+    t0 = time.time()
+    try:
+        want = set((db.premium_meta.find_one({"_id": "live_priority_nse"}) or {}).get("books") or [])
+        hhmm = now.strftime("%H:%M")
+        if not want or now.weekday() >= 5 or not (NSE_FIRST_HOURS[0] <= hhmm <= NSE_FIRST_HOURS[1]) or now.date() < PAPER_START:
+            return set()
+        live = F.today_bars("stocks").get("stocks")
+        if not live:
+            return set()
+        last_live = max((r[-1][0] for r in live.values() if r), default=0)
+        if last_live == (db.premium_meta.find_one({"_id": "sig_first_nse"}) or {}).get("last"):
+            return set()
+        panel = F.Panel(live, now)
+        final = F.nse_final_day(now, panel.disk_last)
+        n, done, errs = _stock_pass(db, now, panel, final, only=want, deadline=deadline)
+        for k, v in errs.items():
+            errors[f"first NSE {k}"] = v
+        db.premium_meta.update_one({"_id": "sig_first_nse"}, {"$set": {"last": last_live, "t": time.time(), "trades": n}},
+                                   upsert=True)
+        log.info("first NSE: %s through the %s IST bar, %d trades, in %.1fs", ",".join(sorted(done)) or "none",
+                 datetime.fromtimestamp(last_live, timezone.utc).astimezone(now.tzinfo).strftime("%H:%M") if last_live else "-",
+                 n, time.time() - t0)
+        return done
+    except Exception as exc:  # noqa: BLE001 - the stocks pass still runs these books where it always did
+        log.exception("first NSE books")
+        errors["first NSE books"] = str(exc)[:200]
+        return set()
+
+
 def run_live(db, now: datetime) -> dict:
-    """The quick pass (15 Nov 2026): every minute between full passes, the quick work (_live_work)."""
+    """The quick pass (15 Nov 2026): every minute between full passes, the quick work (_live_work); since 25 Nov 2026 also
+    the NSE stock books the real-money Live Trading desk copies, once per new finished 5-minute bar (_run_first_nse)."""
+    t0 = time.time()
     new, errors = {}, {}
     first = _live_work(db, errors, new)
-    return {"new": new, "errors": errors, "first": sorted(first)}
+    nse = _run_first_nse(db, now, errors, deadline=t0 + NSE_BUDGET_S)
+    return {"new": new, "errors": errors, "first": sorted(first), **({"first_nse": sorted(nse)} if nse else {})}
 
 
 def run_global(db, now: datetime) -> dict:
