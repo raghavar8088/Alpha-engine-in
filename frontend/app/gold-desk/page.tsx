@@ -51,6 +51,28 @@ const VENUE_ORDER: GoldVenueKey[] = ["delta", "mcx"];
 /** A strategy record with its trading days (2026-11-18): the IST days it closed a trade on, when the venue's book
  *  began, and its own capital. A server not yet updated sends none of them. */
 type GoldStrategyDays = GoldStrategy & { days_traded?: number; started_at?: string | null; capital?: number };
+/** A closed trade with the fields the server counts "days traded" from: its strategy and its IST close day. */
+type GoldPositionDays = GoldPosition & { strategy_template?: string | null; closed_on?: string | null };
+
+/** The leverage columns (the owner's ask, 25 Nov 2026), each right after the figure it multiplies: Total return, Avg /
+ *  day and Avg daily profit, times 10 on gold. They multiply the figure as the table prints it. */
+const LEV_X = 10;
+const LEV_TITLES = {
+  total: `The Total return shown, times ${LEV_X}: a straight multiple`,
+  avg: `The Avg / day shown, times ${LEV_X}: a straight multiple`,
+  profit: "Realised + open P&L ÷ days traded",
+  profitX: `The Avg daily profit shown, times ${LEV_X}: a straight multiple`,
+};
+/** A percentage as pctCell prints it (2 decimals, 3 under 0.1%). */
+const asPrintedPct = (v: number) => {
+  const a = Math.abs(v);
+  return Math.sign(v) * Number(a.toFixed(a > 0 && a < 0.1 ? 3 : 2));
+};
+/** Money as money() prints it (dollars to the cent under $100, whole above; whole rupees). */
+const asPrintedMoney = (v: number, ccy: string) => {
+  const a = Math.abs(v);
+  return Math.sign(v) * Number(a.toFixed(ccy === "USD" && a < 100 ? 2 : 0));
+};
 
 /** Money in the book's OWN currency — the two tabs are never added together. */
 function money(v: number | null | undefined, ccy: string, signed = true): string {
@@ -110,6 +132,26 @@ export default function GoldDeskPage() {
   const rankId = (s: GoldStrategy) => `${s.symbol}-${s.template}-${s.timeframe}`;
   const [open, setOpen] = useState<GoldPosition[]>([]);
   const [closed, setClosed] = useState<GoldPosition[]>([]);
+  // Days traded per strategy, when the server does not send its own count (a server not yet updated): the distinct IST
+  // days one of its trades closed on, the server's rule. Used only when every closed trade of the strategy is in this
+  // list; otherwise unknown ("—").
+  const closedDays = useMemo(() => {
+    const m = new Map<string, { n: number; days: Set<string> }>();
+    (closed as GoldPositionDays[]).forEach((p) => {
+      const day = p.closed_on ? String(p.closed_on).slice(0, 10)
+        : p.closed_at ? new Date(p.closed_at).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }) : "";
+      const k = `${p.strategy_template ?? ""}|${p.timeframe}|${p.symbol}`;
+      const r = m.get(k) ?? { n: 0, days: new Set<string>() };
+      r.n += 1;
+      if (day) r.days.add(day);
+      m.set(k, r);
+    });
+    return m;
+  }, [closed]);
+  const daysFromTrades = (s: GoldStrategy): number | null => {
+    const r = closedDays.get(`${s.template}|${s.timeframe}|${s.symbol}`);
+    return r && s.trades > 0 && r.n === s.trades && r.days.size > 0 ? r.days.size : null;
+  };
   const [basis, setBasis] = useState<GoldBasis | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -576,7 +618,11 @@ export default function GoldDeskPage() {
                 <th title={`${DAY_COL_TITLES.ret} (${sum?.mode === "record" ? "its sleeve of the book" : "the book"})`}>
                   Total return
                 </th>
+                <th title={LEV_TITLES.total}>Leverage {LEV_X}x return</th>
                 <th title={DAY_COL_TITLES.avg}>Avg / day</th>
+                <th title={LEV_TITLES.avg}>Avg / day on leverage {LEV_X}x</th>
+                <th title={LEV_TITLES.profit}>Avg daily profit</th>
+                <th title={LEV_TITLES.profitX}>Avg daily profit on leverage {LEV_X}x</th>
                 <th className="l">Record</th>
               </tr>
             </thead>
@@ -587,7 +633,9 @@ export default function GoldDeskPage() {
                 const x = s as GoldStrategyDays;
                 const cap = x.capital ?? (sum ? (sum.mode === "record" ? sum.capital / Math.max(sum.strategy_count, 1) : sum.capital) : null);
                 const ret = s.trades || s.open_positions ? totalReturnPct(s.realized_pnl, s.unrealized_pnl, cap) : null;
-                const days = x.days_traded ?? null;
+                const days = x.days_traded ?? daysFromTrades(s);
+                const avg = perDayTraded(ret, days);
+                const dayProfit = days && ret !== null ? (s.realized_pnl + (s.unrealized_pnl ?? 0)) / days : null;
                 return (
                 <tr key={`${s.symbol}-${s.template}-${s.timeframe}`}>
                   {ranks && <RankTd board={ranks} id={rankId(s)} />}
@@ -607,7 +655,11 @@ export default function GoldDeskPage() {
                   <td>{dayCell(days)}</td>
                   <td>{dayCell(istDaysSince(x.started_at ?? (sum?.mode === "record" ? sum?.h1?.stored_at : null)))}</td>
                   <td className={`strong ${toneOf(ret)}`}>{pctCell(ret)}</td>
-                  <td className={toneOf(perDayTraded(ret, days))}>{pctCell(perDayTraded(ret, days))}</td>
+                  <td className={toneOf(ret)}>{pctCell(ret === null ? null : asPrintedPct(ret) * LEV_X)}</td>
+                  <td className={toneOf(avg)}>{pctCell(avg)}</td>
+                  <td className={toneOf(avg)}>{pctCell(avg === null ? null : asPrintedPct(avg) * LEV_X)}</td>
+                  <td className={toneOf(dayProfit)}>{dayProfit === null ? "—" : money(dayProfit, ccy)}</td>
+                  <td className={toneOf(dayProfit)}>{dayProfit === null ? "—" : money(asPrintedMoney(dayProfit, ccy) * LEV_X, ccy)}</td>
                   <td className="l">
                     <div className="rec">
                       <span className="verdict record">{s.verdict}</span>
@@ -619,7 +671,7 @@ export default function GoldDeskPage() {
               })}
               {!strats.length && (
                 <tr>
-                  <td className="l empty" colSpan={16}>
+                  <td className="l empty" colSpan={20}>
                     No strategy is enabled on this venue, and none has a record here.
                   </td>
                 </tr>
@@ -627,6 +679,12 @@ export default function GoldDeskPage() {
             </tbody>
           </table>
         </div>
+        <ul className="notes" style={{ margin: "10px 14px 8px" }}>
+          <li>
+            The {LEV_X}x columns are the figures beside them times {LEV_X}: a straight multiple, as if every position, and
+            its costs, were ten times as large. It is not a replay, and a loss grows ten times too.
+          </li>
+        </ul>
       </GlassPanel>
 
       <GlassPanel title="Open positions" note={`${open.length} open`}>
