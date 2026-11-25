@@ -93,6 +93,22 @@ const SEG: Record<SegId, { label: string; feeds: string[]; note: string }> = {
   },
 };
 const MARKET_SEGS: Record<MarketTab, SegId[]> = { indian: ["in_options", "in_equity", "in_equity_daily"], crypto: ["crypto"], gold: ["gold"], global: ["global"] };
+/** A column right after Total return (the owner's ask, 25 Nov 2026): the Total return shown, times a straight multiple,
+ *  5 on Indian equity intraday and 10 on crypto, gold and Forex & US. Options & F&O and Equity daily have none. */
+type Lev = { x: number; label: string; note: string };
+const TEN: Lev = {
+  x: 10, label: "Leverage 10x return",
+  note: "Leverage 10x return is the Total return shown, times 10: as if every position, and its costs, were ten times as large. It is a straight multiple, not a replay, and a loss grows ten times too.",
+};
+const LEV: Partial<Record<SegId, Lev>> = {
+  in_equity: {
+    x: 5, label: "Intraday 5x return",
+    note: "Intraday 5x return is the Total return shown, times 5: as if every position, and its costs, were five times as large. It is a straight multiple, not a replay: these accounts already trade with 5× intraday buying power, and the margin would not always allow five times their positions.",
+  },
+  crypto: TEN, gold: TEN, global: TEN,
+};
+/** The Total return as the table prints it (3 decimals), times x, so the column is always the figure beside it times x. */
+const timesShown = (ret: number, x: number) => Math.sign(ret) * Number(Math.abs(ret).toFixed(3)) * x;
 const FEED_NAME: Record<string, string> = {
   NIFTY: "Nifty 50", BANKNIFTY: "Nifty Bank", NIFTY_D: "Nifty 50 daily", NSE: "NSE stocks", NSED: "NSE stocks daily", BTCUSD: "Bitcoin", ETHUSD: "Ether",
   XAUUSD: "Gold", XAGUSD: "Silver", EURUSD: "EUR/USD", GBPUSD: "GBP/USD", NAS100: "Nasdaq 100", AAPL: "Apple",
@@ -310,6 +326,7 @@ function SegmentView({ seg, summary, now, study, setStudy, initialOpen }: {
   const winRate = tot && tot.closed ? (100 * tot.wins) / tot.closed : null;
   const states = Object.entries(tot?.states ?? {}).sort((a, b) => (STATE[a[0]]?.rank ?? 9) - (STATE[b[0]]?.rank ?? 9));
   const opened = rows.find((r) => `${r.id}|${r.b.mkt}` === openKey) ?? null;
+  const lev = LEV[seg];
 
   return (
     <div className="sg-seg">
@@ -381,7 +398,7 @@ function SegmentView({ seg, summary, now, study, setStudy, initialOpen }: {
           )}
           <ScrollBox className="ps-scroll">
             <table className="ps-table sg-table">
-              <thead><tr><RankTh /><th>Strategy</th><th>Market</th><th>Status</th><th>Trades</th><th>Win rate</th><th>P&amp;L</th><th title="The strategy's own paper account">Capital</th><th title="Net P&L after all costs, closed and open, as a share of the capital">Total return</th><th title="Market trading days since the strategy started, today included, whether or not it traded">Trading days</th><th title="Total return divided by the trading days (arithmetic, not compounded)">Avg daily return</th><th title="Net P&L divided by the trading days">Avg daily profit</th><th>Open</th></tr></thead>
+              <thead><tr><RankTh /><th>Strategy</th><th>Market</th><th>Status</th><th>Trades</th><th>Win rate</th><th>P&amp;L</th><th title="The strategy's own paper account">Capital</th><th title="Net P&L after all costs, closed and open, as a share of the capital">Total return</th>{lev && <th title={`The Total return shown, times ${lev.x}: a straight multiple`}>{lev.label}</th>}<th title="Market trading days since the strategy started, today included, whether or not it traded">Trading days</th><th title="Total return divided by the trading days (arithmetic, not compounded)">Avg daily return</th><th title="Net P&L divided by the trading days">Avg daily profit</th><th>Open</th></tr></thead>
               <tbody>
                 {shown.map(({ acct, id, b }) => {
                   const key = `${id}|${b.mkt}`;
@@ -408,6 +425,7 @@ function SegmentView({ seg, summary, now, study, setStudy, initialOpen }: {
                         return (<>
                           <td>{cap ? rupees(cap) : "N/A"}</td>
                           <td className={tone(f.ret)}>{f.ret == null ? "N/A" : pct(f.ret, 3)}</td>
+                          {lev && <td className={tone(f.ret)}>{f.ret == null ? "N/A" : pct(timesShown(f.ret, lev.x), 3)}</td>}
                           <td>{days ?? "N/A"}</td>
                           <td className={tone(f.avgPct)}>{f.avgPct == null ? "N/A" : pct(f.avgPct, 3)}</td>
                           <td className={tone(f.avgRs)}>{f.avgRs == null ? "N/A" : inr(f.avgRs)}</td>
@@ -420,7 +438,7 @@ function SegmentView({ seg, summary, now, study, setStudy, initialOpen }: {
               </tbody>
             </table>
           </ScrollBox>
-          <p className="ps-foot">{DAYS_NOTE} A strategy that trades several markets shows each market's share of its account here; its whole account is on the All accounts tab.</p>
+          <p className="ps-foot">{DAYS_NOTE} A strategy that trades several markets shows each market's share of its account here; its whole account is on the All accounts tab.{lev ? ` ${lev.note}` : ""}</p>
         </>)}
       </GlassPanel>
 
