@@ -35,6 +35,11 @@ copied, closed and checked against the account like bitcoin; a product that join
 leverage confirmed at 10x (read, set only if needed, read back) before its first entry, its signals waiting meanwhile
 and never sent at another leverage; shadow sends nothing. The harness's desks start as going live leaves them: every
 product's leverage confirmed in their state.
+
+25 Nov 2026 (section 41): Delta's 100 open orders a product. A refusal for that limit skips the signal ("Delta's
+100-order limit full") and the desk stays on; gold trades keep only their stop on Delta and the app closes them at
+their target. Sections 1-40 run with APP_TARGET_PRODUCTS empty: they pin the stop-and-target-on-Delta mechanism
+that bitcoin and ether keep (and gold had until then); section 41 runs the server's own setting, gold only.
 """
 
 import asyncio
@@ -55,6 +60,8 @@ from _harness import Coll, check, finish, section  # noqa: E402
 from app.services import delta_rest as DR  # noqa: E402
 from app.services import premium_live as M  # noqa: E402
 from app.services.delta_rest import Delta, DeltaError  # noqa: E402
+
+PROD_APP_TARGET = M.APP_TARGET_PRODUCTS     # as the server reads it (25 Nov 2026): gold only; section 41
 
 UTC = timezone.utc
 T0 = datetime(2026, 11, 16, 9, 0, tzinfo=UTC).timestamp()      # a Monday, 14:30 IST
@@ -321,6 +328,9 @@ def fresh(mode="live", btc=69000.0, gold=3885.0, follow=True):
     M._sf_coll, M._sf_state_coll = (lambda: sfpos), (lambda: sfstate)
     M._PAPER_CACHE.clear()                  # the page's paper view is cached 30 s a desk: never across scenarios
     M._WAITING.clear()                      # copies a follow_all desk is waiting on (memory only): never across scenarios
+    M._FULL.clear()                         # Delta's 100-order limit seen full (25 Nov; memory only)
+    M._TQ.clear()                           # the target check's quotes (memory only)
+    M._CONVERTED.clear()
     M.D = FakeDelta()
     M.D.mid.update(BTCUSD=btc, XAUTUSD=gold)
     if mode != "off":
@@ -378,6 +388,7 @@ async def _fake_fx():                      # the page's USD/INR (24 Nov 2026): n
 
 async def main():
     M._read_fx = _fake_fx
+    M.APP_TARGET_PRODUCTS = frozenset()   # sections 1-40: both orders on Delta (bitcoin and ether still); 41: gold
     BTC, GOLD = 27, 131253
     M.REQUIRE_PIN = True          # sections 1-23 test the PIN when the server requires one; 24 the owner's choice: none
     # ── 1. a live bitcoin entry, sized by risk, with the stop on the venue ─────────────────────────
@@ -2362,6 +2373,317 @@ async def main():
     M._read_fx = _fake_fx
     M._FX.update(old_fx)
     M._QUOTES.update(old_q)
+
+    # ── 41. 25 Nov: Delta's 100 open orders a product ──────────────────────────────────────────────────────────────────
+    section("41. 25 Nov: Delta's 100 open orders a product - a refusal for it skips the signal and the desk stays on; "
+            "gold trades keep only their stop on Delta and the app closes them at their target")
+    check("as the server reads it: only gold (XAUTUSD) hands its targets to the app; bitcoin and ether keep both orders",
+          PROD_APP_TARGET == frozenset({"XAUTUSD"}), PROD_APP_TARGET)
+    CAPMSG = 'POST /v2/orders: HTTP 400 {"code": "max_orders_count_exceeded", "context": {"limit": 100}}'
+    un = lambda s: datetime.fromtimestamp(s, UTC).replace(tzinfo=None)   # noqa: E731 - as the Gold Desk stores times
+
+    def resting_on(sym):
+        pid = SPECS[sym]["id"]
+        return sum(1 for o in M.D.stops.values() if o["product_id"] == pid and o["state"] == "pending")
+
+    def cap_at(n, only=None):
+        """Delta's limit, scaled down to n: an order on a product is refused while the account holds n resting orders
+        there (`only` "market" or "stop" refuses just that kind, whatever the count, as a race would)."""
+        real = M.D.request
+
+        async def req(method, path, body=None, signed=True):
+            if method == "POST" and path.split("?")[0] == "/v2/orders" and body:
+                kind = "stop" if body.get("stop_order_type") else "market"
+                if (only == kind) or (only is None and resting_on(BY_ID[body["product_id"]]) >= n):
+                    M.D.calls.append(("REFUSED", kind, BY_ID[body["product_id"]]))
+                    raise DeltaError(CAPMSG)
+            return await real(method, path, body, signed)
+        M.D.request = req
+
+    def refused():
+        return [c for c in M.D.calls if c[0] == "REFUSED"]
+
+    def gold_book(db_):
+        db_.live_delta_state.docs[0].pop("sizing", None)      # one contract a trade, as the gold desk trades
+        db_.live_delta_state.docs[0]["wallet_at"] = CLOCK[0]
+
+    gpk = [p for p in M.DESKS["gold"].picks if p.src == M.PREMIUM]
+    tp_gold = lambda: [o for o in M.D.stop_orders if o["product_id"] == GOLD and o["stop_order_type"] == "take_profit_order"]  # noqa: E731
+
+    # a gold trade: only its stop; a bitcoin trade: both, as before
+    M.APP_TARGET_PRODUCTS = PROD_APP_TARGET
+    db = fresh(gold=3885.0)
+    gold_book(db)
+    a = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0)
+    b = paper(db, "TL-04", "BTCUSD", -1, 69000.0, 69400.0, 68400.0, ago=20)
+    await cyc(db)
+    ta, tb = trade(db, a), trade(db, b)
+    check("a new gold trade: only its stop goes on Delta; its target is kept for the app to watch, on the tick; no "
+          "take-profit order is sent", ta["status"] == "open" and own_leg(ta, "stop")["state"] == "pending"
+          and ta["legs"]["target_id"] is None and ta["legs"]["target_app"] == DR.fmt_tick(3895.0, 0.01) == "3895.00"
+          and not tp_gold() and resting_on("XAUTUSD") == 1, ta["legs"])
+    check("a new bitcoin trade: its stop AND its target on Delta, exactly as before", tb["status"] == "open"
+          and own_leg(tb, "stop")["state"] == "pending" and own_leg(tb, "target")["state"] == "pending"
+          and "target_app" not in tb["legs"], tb["legs"])
+    advance(20)
+    M.D.set_price("XAUTUSD", 3894.99)                      # bid 3894.975: a whisker under the target
+    n0 = len(M.D.orders)
+    await cyc(db)
+    check("the bid under its target: it stays open and nothing is sent", trade(db, a)["status"] == "open"
+          and len(M.D.orders) == n0, trade(db, a).get("close_reason"))
+    advance(20)
+    M.D.set_price("XAUTUSD", 3895.2)                       # bid 3895.185: at its target
+    await cyc(db)
+    t = trade(db, a)
+    want = round((M.D.bid("XAUTUSD") - t["fill"]) * 0.001 * t["contracts"] - t["fees"], 4)
+    check("the bid at its target: the app closed it at the market, its stop cancelled FIRST, the result read from the "
+          "fill", t["status"] == "closed" and t["close_reason"] == M.APP_TARGET_WHY == "target reached, closed by the app"
+          and own_leg(t, "stop")["state"] == "cancelled" and M.D.orders[-1]["side"] == "sell" and GOLD not in M.D.pos
+          and abs(t["pnl_usd"] - want) < 1e-6 and t["pnl_usd"] > 0, (t.get("close_reason"), t.get("pnl_usd"), want))
+    check("... and the bitcoin trade beside it carries on, its two orders resting", trade(db, b)["status"] == "open"
+          and own_leg(trade(db, b), "target")["state"] == "pending")
+
+    # a short: its target is reached when the ask is at or under it
+    s1 = paper(db, "CP-23", "XAUUSD", -1, 3895.0, 3900.0, 3885.0, ago=10)
+    advance(20)
+    await cyc(db)
+    ts = trade(db, s1)
+    check("a gold short opened with only its stop on Delta", ts["status"] == "open" and ts["legs"]["target_app"] == "3885.00"
+          and own_leg(ts, "stop")["side"] == "buy" and own_leg(ts, "target") is None, ts["legs"])
+    advance(20)
+    M.D.set_price("XAUTUSD", 3885.0)                       # ask 3885.015: not yet
+    await cyc(db)
+    check("the ask a tick over the short's target: still open", trade(db, s1)["status"] == "open")
+    advance(20)
+    M.D.set_price("XAUTUSD", 3884.98)                      # ask 3884.995: there
+    await cyc(db)
+    ts = trade(db, s1)
+    check("the ask at the short's target: closed by the app with a market BUY at the ask", ts["status"] == "closed"
+          and ts["close_reason"] == M.APP_TARGET_WHY and M.D.orders[-1]["side"] == "buy" and GOLD not in M.D.pos
+          and ts["pnl_usd"] > 0, (ts.get("close_reason"), ts.get("pnl_usd")))
+
+    # trades already open before the change hand their target over, ten a pass
+    db = fresh(gold=3885.0)
+    gold_book(db)
+    M.APP_TARGET_PRODUCTS = frozenset()                    # before the change: both orders on Delta
+    ids = [paper(db, p.acct, p.mkt, 1, 3885.0, 3880.0, 3895.0 + i, ago=60 - i) for i, p in enumerate(gpk[:12])]
+    await cyc(db)
+    check("before: twelve gold trades hold 24 orders on Delta (a stop and a target each)",
+          all(trade(db, i)["status"] == "open" for i in ids) and resting_on("XAUTUSD") == 24, resting_on("XAUTUSD"))
+    M.APP_TARGET_PRODUCTS = PROD_APP_TARGET                # the change, deployed
+    n_mkt = len(M.D.orders)
+    advance(20)
+    await cyc(db)
+    moved = [i for i in ids if trade(db, i)["legs"].get("target_app")]
+    check("the first pass hands ten targets to the app (cancelled on Delta), the other two the next pass",
+          len(moved) == 10 and resting_on("XAUTUSD") == 14, (len(moved), resting_on("XAUTUSD")))
+    advance(20)
+    await cyc(db)
+    tt = [trade(db, i) for i in ids]
+    check("then twelve trades hold twelve orders (their stops); each target kept at its own level; no position "
+          "touched, nothing sent at the market", resting_on("XAUTUSD") == 12 and M.D.pos[GOLD]["size"] == 12
+          and all(t["status"] == "open" and t["legs"]["target_id"] is None
+                  and t["legs"]["target_app"] == DR.fmt_tick(3895.0 + k, 0.01) for k, t in enumerate(tt))
+          and len(M.D.orders) == n_mkt and not tp_gold()[12:], [t["legs"].get("target_app") for t in tt])
+    advance(20)
+    M.D.set_price("XAUTUSD", 3896.5)                       # bid 3896.485: past the first two targets only
+    await cyc(db)
+    done = [i for i in ids if trade(db, i)["status"] == "closed"]
+    check("price through two of the handed-over targets: exactly those two closed by the app",
+          done == ids[:2] and all(trade(db, i)["close_reason"] == M.APP_TARGET_WHY for i in done)
+          and M.D.pos[GOLD]["size"] == 10 and resting_on("XAUTUSD") == 10, done)
+
+    # the handover races a fill, and a target cancelled on Delta by someone else
+    db = fresh(gold=3885.0)
+    gold_book(db)
+    M.APP_TARGET_PRODUCTS = frozenset()
+    r1 = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0, ago=40)
+    r2 = paper(db, "YT-14", "XAUUSD", 1, 3885.0, 3878.0, 3899.0, ago=30)
+    rb = paper(db, "TL-04", "BTCUSD", -1, 69000.0, 69400.0, 68400.0, ago=20)
+    await cyc(db)
+    t1 = trade(db, r1)
+    tid1 = t1["legs"]["target_id"]
+    real = M.D.request
+
+    async def fills_first(method, path, body=None, signed=True):
+        if method == "DELETE" and path.split("?")[0] == "/v2/orders" and str(body.get("id")) == str(tid1):
+            o = M.D.stops[str(tid1)]
+            if o["state"] == "pending":                    # it triggers and fills just before the cancel arrives
+                px = float(o["limit_price"])
+                _, comm = M.D._fill(o["product_id"], o["side"], int(o["size"]), px, False, "leg", order_id=tid1)
+                o.update(state="closed", unfilled_size=0, average_fill_price=f"{px}", paid_commission=f"{comm}")
+            raise DeltaError("DELETE /v2/orders: HTTP 400 {\"code\": \"open_order_not_found\"}")
+        return await real(method, path, body, signed)
+    M.D.request = fills_first
+    M.D.stops[str(trade(db, r2)["legs"]["target_id"])]["state"] = "cancelled"     # someone cancels YT-14's target
+    M.D.stops[str(trade(db, rb)["legs"]["target_id"])]["state"] = "cancelled"     # ... and TL-04's bitcoin target
+    M.APP_TARGET_PRODUCTS = PROD_APP_TARGET
+    n_tp = len([o for o in M.D.stop_orders if o["stop_order_type"] == "take_profit_order"])
+    advance(20)
+    await cyc(db)
+    M.D.request = real
+    t1, t2, tb = trade(db, r1), trade(db, r2), trade(db, rb)
+    check("a target that filled as its handover began: recorded as the venue target at its own fill, the stop "
+          "cancelled, nothing sent at the market", t1["status"] == "closed" and t1["close_reason"] == "venue target"
+          and abs(t1["exit_price"] - 3895.0) < 1e-9 and own_leg(t1, "stop")["state"] == "cancelled"
+          and len(M.D.orders) == 3, (t1.get("close_reason"), t1.get("exit_price"), len(M.D.orders)))
+    check("a gold target cancelled on Delta by someone else: handed to the app, never put back",
+          t2["status"] == "open" and t2["legs"]["target_id"] is None and t2["legs"]["target_app"] == "3899.00"
+          and not t2["legs"].get("target_replaced"), t2["legs"])
+    check("a bitcoin target cancelled the same way: put back on Delta, as before",
+          tb["status"] == "open" and tb["legs"].get("target_replaced") and own_leg(tb, "target")["state"] == "pending"
+          and len([o for o in M.D.stop_orders if o["stop_order_type"] == "take_profit_order"]) == n_tp + 1, tb["legs"])
+
+    # Delta's limit, scaled down to 4 resting orders a product
+    db = fresh(gold=3885.0)
+    gold_book(db)
+    M.APP_TARGET_PRODUCTS = frozenset()
+    cap_at(4)
+    two = [paper(db, p.acct, p.mkt, 1, 3885.0, 3880.0, 3895.0, ago=60 - i) for i, p in enumerate(gpk[:3])]
+    await cyc(db)
+    check("with a stop AND a target on Delta, a limit of 4 holds two trades (the third is refused)",
+          [trade(db, i)["status"] for i in two] == ["open", "open", "skipped"], [trade(db, i)["status"] for i in two])
+    db = fresh(gold=3885.0)
+    gold_book(db)
+    M.APP_TARGET_PRODUCTS = PROD_APP_TARGET
+    cap_at(4)
+    ids = [paper(db, p.acct, p.mkt, 1, 3885.0, 3880.0, 3895.0, ago=60 - i) for i, p in enumerate(gpk[:7])]
+    await cyc(db)
+    sts = [trade(db, i)["status"] for i in ids]
+    sg = st_of(db, "gold")
+    check("with only its stop on Delta, the same limit holds four", sts[:4] == ["open"] * 4 and resting_on("XAUTUSD") == 4,
+          sts)
+    check("the fifth signal: Delta refuses its entry for the limit; it is skipped and recorded as \"Delta's 100-order "
+          "limit full\"", sts[4] == "skipped" and trade(db, ids[4])["reason"] == "Delta's 100-order limit full on XAUTUSD"
+          and len(refused()) == 1, (trade(db, ids[4]).get("reason"), refused()))
+    check("the sixth and seventh in the same pass: skipped the same way WITHOUT being sent", sts[5:] == ["skipped"] * 2
+          and all(trade(db, i)["reason"] == "Delta's 100-order limit full on XAUTUSD" for i in ids[5:])
+          and len(refused()) == 1, refused())
+    check("the desk stays LIVE: not a venue error (no count, no last error); the account matches the four trades",
+          sg["mode"] == "live" and not sg.get("errors_in_row") and "max_orders" not in str(sg.get("last_error") or "")
+          and not sg.get("switched_off") and M.D.pos[GOLD]["size"] == 4, (sg.get("mode"), sg.get("errors_in_row"),
+                                                                           sg.get("last_error")))
+    nxt = paper(db, gpk[7].acct, gpk[7].mkt, 1, 3885.0, 3880.0, 3895.0, ago=5)
+    advance(20)
+    await cyc(db)
+    check("a new signal while nothing has closed: skipped unsent", trade(db, nxt)["status"] == "skipped"
+          and len(refused()) == 1, trade(db, nxt).get("reason"))
+    close_paper(db, ids[0], "exit_signal", 3886.0)
+    nx2 = paper(db, gpk[8].acct, gpk[8].mkt, 1, 3885.0, 3880.0, 3895.0, ago=5)
+    advance(20)
+    await cyc(db)
+    check("a trade closes (its stop cancelled first, so its market close fits under the limit): room again, and the "
+          "next signal goes in in the same pass", trade(db, ids[0])["status"] == "closed"
+          and trade(db, nx2)["status"] == "open" and resting_on("XAUTUSD") == 4 and st_of(db, "gold")["mode"] == "live"
+          and len(refused()) == 1, (trade(db, ids[0]).get("close_reason"), trade(db, nx2).get("reason"), refused()))
+    nx3 = paper(db, gpk[9].acct, gpk[9].mkt, 1, 3885.0, 3880.0, 3895.0, ago=5)
+    advance(20)
+    await cyc(db)
+    check("full again: the next signal is sent, refused, skipped; the desk stays on", trade(db, nx3)["status"] == "skipped"
+          and len(refused()) == 2 and st_of(db, "gold")["mode"] == "live", refused())
+    nx4 = paper(db, gpk[10].acct, gpk[10].mkt, 1, 3885.0, 3880.0, 3895.0, ago=5)
+    advance(M.VENUE_FULL_RETRY_S + 1)
+    await cyc(db)
+    check("two minutes on with nothing closed: the next signal is tried again (refused, skipped)",
+          trade(db, nx4)["status"] == "skipped" and len(refused()) == 3 and st_of(db, "gold")["mode"] == "live", refused())
+
+    # a stop refused for the limit after the fill (a race): out at once, the desk stays on; any other refusal as before
+    db = fresh(gold=3885.0)
+    gold_book(db)
+    cap_at(0, only="stop")
+    rs = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0)
+    await cyc(db)
+    t, sg = trade(db, rs), st_of(db, "gold")
+    check("its stop refused for the limit: the trade is closed at once (never unprotected) and says why; the desk "
+          "stays LIVE", t["status"] == "closed" and t["close_reason"] == "closed at once: Delta's 100-order limit full "
+          "on XAUTUSD, no room for its stop" and GOLD not in M.D.pos and sg["mode"] == "live" and not sg.get("switched_off"),
+          (t.get("close_reason"), sg.get("mode"), sg.get("switched_off")))
+    rs2 = paper(db, "YT-14", "XAUUSD", 1, 3885.0, 3878.0, 3899.0, ago=5)
+    advance(20)
+    await cyc(db)
+    check("... and the next gold signal is skipped unsent until room frees", trade(db, rs2)["status"] == "skipped"
+          and trade(db, rs2)["reason"] == "Delta's 100-order limit full on XAUTUSD", trade(db, rs2).get("reason"))
+    db = fresh(gold=3885.0)
+    gold_book(db)
+    M.D.fail["stop_order"] = "definite"
+    ro = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0)
+    await cyc(db)
+    t, sg = trade(db, ro), st_of(db, "gold")
+    check("any other refusal of its stop: closed at once and the desk switches off, exactly as before",
+          t["status"] == "closed" and "stop or target refused" in t["close_reason"] and sg["mode"] == "off"
+          and "stop or target was refused" in (sg.get("switched_off") or ""), (t.get("close_reason"), sg.get("switched_off")))
+    M.D.fail.pop("stop_order")
+    db = fresh()
+    cap_at(0, only="market")
+    cb = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
+    await cyc(db)
+    sc = st_of(db, "crypto")
+    check("the bitcoin desk too: an entry refused for the limit is skipped and the desk stays on",
+          trade(db, cb)["status"] == "skipped" and trade(db, cb)["reason"] == "Delta's 100-order limit full on BTCUSD"
+          and sc["mode"] == "live" and not sc.get("errors_in_row"), (trade(db, cb).get("reason"), sc.get("mode")))
+
+    # a Gold Desk that cannot be read: its trade's target is still watched
+    db = fresh(gold=3885.0)
+    gold_book(db)
+
+    def h1p(pid, tpl, side, entry, stop, target, ago=30):
+        M._h1_coll().docs.append({"position_id": pid, "venue": "delta", "h1": True, "symbol": "XAUTUSD",
+                                  "strategy_template": tpl, "side": side, "entry_price": entry, "stoploss": stop,
+                                  "target": target, "qty": 0.296, "status": "OPEN", "opened_at": un(CLOCK[0] - ago),
+                                  "exit_price": None, "exit_reason": None})
+        return "H1|" + pid
+    h = h1p("u1", "keltner_break", "BUY", 3885.0, 3880.0, 3895.0)
+    await cyc(db)
+    check("an H1 trade on the gold desk: only its stop on Delta", trade(db, h)["status"] == "open"
+          and trade(db, h)["legs"]["target_app"] == "3895.00" and resting_on("XAUTUSD") == 1, trade(db, h).get("legs"))
+    keep = M._h1_coll
+
+    class _Down41:
+        def find(self, *a, **k):
+            raise RuntimeError("main database down")
+    M._h1_coll = lambda: _Down41()
+    advance(20)
+    M.D.set_price("XAUTUSD", 3895.3)
+    r = await cyc(db)
+    t = trade(db, h)
+    check("the Gold Desk unreadable when the price reaches the target: the app still closes it at the target (the "
+          "stop alone would have waited)", "could not be read" in r["gold"].get("gold_desk", "") and t["status"] == "closed"
+          and t["close_reason"] == M.APP_TARGET_WHY and GOLD not in M.D.pos, (t.get("status"), r["gold"].get("gold_desk")))
+    M._h1_coll = keep
+
+    # both gold books on XAUTUSD
+    db = fresh(gold=3885.0)
+    gold_book(db)
+    r = await M.set_mode("live", PIN, "REAL MONEY", desk="premium_gold")
+    st_of(db, "premium_gold")["wallet_at"] = CLOCK[0]
+    hb = h1p("u2", "ema_ribbon", "BUY", 3885.0, 3880.0, 3895.0)
+    advance(30)
+    M._h1_state_coll().docs[0]["last_run_at"] = un(CLOCK[0])
+    await cyc(db)
+    g2, p2 = trade(db, hb), next((d for d in db.live_pgold_trades.docs if d["_id"] == hb), None)
+    check("the gold desk and the Premium Gold book each copy the H1 signal with only their own stop on Delta: two "
+          "trades, two orders", r["ok"] and g2 and p2 and g2["status"] == p2["status"] == "open"
+          and g2["legs"]["target_app"] == p2["legs"]["target_app"] == "3895.00" and resting_on("XAUTUSD") == 2
+          and M.D.pos[GOLD]["size"] == 2, (r, g2 and g2.get("legs"), p2 and p2.get("legs")))
+    advance(20)
+    M._h1_state_coll().docs[0]["last_run_at"] = un(CLOCK[0])
+    M.D.set_price("XAUTUSD", 3895.2)
+    await cyc(db)
+    g2, p2 = trade(db, hb), next((d for d in db.live_pgold_trades.docs if d["_id"] == hb), None)
+    check("the price at the target: the app closes both, each its own contract; the account is flat and both desks "
+          "stay live", g2["status"] == p2["status"] == "closed" and g2["close_reason"] == p2["close_reason"] == M.APP_TARGET_WHY
+          and GOLD not in M.D.pos and resting_on("XAUTUSD") == 0 and st_of(db, "gold")["mode"] == "live"
+          and st_of(db, "premium_gold")["mode"] == "live", (g2.get("close_reason"), p2.get("close_reason")))
+
+    # what the page tells the owner
+    gn, pn, cn = M.DESKS["gold"].notes, M.DESKS["premium_gold"].notes, M.DESKS["crypto"].notes
+    check("the page's notes: the gold desk and the Premium Gold book say the target is the app's and name Delta's "
+          "100-order limit; the bitcoin desk's notes are unchanged",
+          any("Delta's 100-order limit full" in n for n in gn) and any("Delta's 100-order limit full" in n for n in pn)
+          and not any("stop and target live on Delta" in n for n in gn + pn)
+          and any("Each trade's stop and target live on Delta itself" in n for n in cn)
+          and not any("100-order" in n for n in cn))
+    M.APP_TARGET_PRODUCTS = frozenset()
 
 
 if __name__ == "__main__":

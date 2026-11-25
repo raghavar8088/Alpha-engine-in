@@ -175,6 +175,24 @@ keeps its own copies of the same strategies at its own lots, so each of their si
 - The page converts lots to money: status() carries each product's latest price (_prices: the freshest mark of any
   desk's open trade, else one public ticker read a minute) and USD/INR (gold_desk.usd_inr, Yahoo INR=X).
 Records at NEW_PICKED_AT_6 (20:30 IST 24 Nov) by the H1 method above (re-proven on three frozen H1 records first).
+
+25 NOV 2026: DELTA'S 100 OPEN ORDERS A PRODUCT. Delta refuses any new order on a product once the account holds 100
+open orders there ("max_orders_count_exceeded", limit 100): every resting stop and target counts, and a market order
+being placed is refused too. Each copy kept two orders on Delta, so the gold desk and the Premium Gold book together
+filled XAUTUSD's 100 at about 50 trades, and on 25 Nov the refusals switched the gold desk off six times, 01:41
+to 22:09 IST (three refused entries in a row, or a refused stop or target). The owner chose both of these that night:
+- A refusal for that limit is not a venue error. The signal is skipped and recorded as "Delta's 100-order limit
+  full", and the desk stays on. Until a trade on that product closes (or VENUE_FULL_RETRY_S passes), the product's
+  new signals are skipped the same way without being sent (_FULL, shared by the desks). A copy whose stop is refused
+  for it after the fill is closed at once, as ever (never unprotected), and the desk stays on. Any other refusal is
+  handled as before.
+- On APP_TARGET_PRODUCTS (XAUTUSD) a trade keeps only its stop on Delta. This server closes it at the market once the
+  bid (a long) or the ask (a short) reaches its target (_app_target_hit, every pass, also while its paper source
+  cannot be read), cancelling the stop first, so the close itself always fits under the limit. One order a trade
+  instead of two: room for about 100 trades. Trades already open hand their target over: the resting target is
+  cancelled (CONVERT_PER_PASS a pass a desk) and watched by this server from then on; one found filled, wholly or in
+  part, closes as the venue target. A target cancelled on Delta by anyone else is handed over too, never put back.
+  Bitcoin and ether keep both orders on Delta.
 """
 
 from __future__ import annotations
@@ -224,6 +242,15 @@ MAX_STOP_FRAC = 0.07           # a copy's stop is never farther than this from i
 #                                a position about 9.5% against it, so a farther stop would never be reached (and the
 #                                trade's own stop order, not reduce-only, could later open a position nobody holds)
 MARGIN_BUFFER = 1.25           # free balance needed: margin x this
+# Delta's 100 open orders a product (25 Nov 2026, see 25 NOV 2026 above)
+APP_TARGET_PRODUCTS = frozenset(x.strip().upper() for x in os.getenv("PREMIUM_LIVE_APP_TARGET", "XAUTUSD").split(",")
+                                if x.strip())   # their trades keep only the stop on Delta; this server takes the target
+VENUE_FULL = "Delta's 100-order limit full"
+APP_TARGET_WHY = "target reached, closed by the app"
+VENUE_FULL_RETRY_S = 120       # after that refusal a product's new signals are skipped unsent until a trade on it
+#                                closes, or this long has passed
+CONVERT_PER_PASS = 10          # open trades whose resting target is handed to this server, at most this many a pass
+TARGET_QUOTE_TTL_S = 5         # the target check's quote: one read a product per pass, shared by the desks
 # Each strategy's own size (23 Nov 2026): the contracts a new trade takes in contract sizing, 1 (the default, the size
 # every trade had before) up to its product's cap here - about $700-1,000 of notional at late-November prices.
 LOTS_DEFAULT = 1
@@ -567,11 +594,16 @@ GOLD_NOTES = (
     "Factory strategies' are the positions of the Gold Desk's Strategy Factory tab ($1,111 paper sleeves on closed bars "
     "of 5 minutes to 4 hours); both are copied the same way, and this desk only reads them.",
     "One gold contract is 0.001 XAUT (about $4 of gold), so a trade of one contract loses cents at its stop.",
-    "All 102 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
-    "target on Delta, and Delta shows their sum as one gold position.",
+    "All 102 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop on "
+    "Delta, and Delta shows their sum as one gold position.",
     "This desk trades gold (XAUTUSD) only; the bitcoin desk is beside it on the Delta Exchange Live Trading page. Each "
     "has its own switch.",
-    "Each trade's stop and target live on Delta itself, so it stays protected if this server goes down.",
+    "Each trade's stop lives on Delta itself, so it stays protected if this server goes down. Its target is this "
+    "server's (from 25 Nov): once the price reaches it the trade is closed at the market at the next check (every 20 "
+    "seconds), so each trade holds one open order on Delta, not two.",
+    "Delta allows an account 100 open orders on XAUTUSD, shared with the Premium Gold book. When they are full, a new "
+    "signal is skipped and recorded as \"Delta's 100-order limit full\"; live trading stays on, and new signals go "
+    "through again as trades close.",
     "Leverage is set to 10x on XAUTUSD before going live; positions are capped at $2,500 of notional.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
 )
@@ -619,13 +651,16 @@ PREMIUM_GOLD_NOTES = (
     "at $3,600 an ounce, and at 10x it holds a tenth of that as margin; the page shows any lots in dollars and rupees. "
     "Every trade is capped at $2,500 of notional and at the product's most lots a trade.",
     "EVERY signal becomes a real position, as on the gold desk: an open H1 position of the six is copied however late "
-    "this book sees it, with that position's own stop and target on Delta (a stop more than 7% away is pulled in to 7%). "
+    "this book sees it, with that position's own stop on Delta (a stop more than 7% away is pulled in to 7%) and its "
+    "target closed by this server at the market, as on the gold desk. "
     "A copy waits while the price is not inside its stop and target with room, while the Gold Desk is silent, while Delta "
     "gives no quote, or while the wallet has too little free margin. No daily loss stop.",
     "This book starts OFF: its own switch, on this tab, turns it on (one confirmation). The gold desk's switch does not "
     "move it, nor this one the gold desk.",
     "Delta shows all of the account's XAUTUSD trades, both books', as one position; each book checks the account against "
-    "the sum of both, and each trade closes only its own contracts. Each trade's stop and target live on Delta itself.",
+    "the sum of both, and each trade closes only its own contracts. Each trade's stop lives on Delta itself; its "
+    "target is this server's (25 Nov). The two books share Delta's 100 open orders on XAUTUSD: when they are full, a "
+    "new signal is skipped and recorded as \"Delta's 100-order limit full\", and the book stays on.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
 )
 
@@ -847,6 +882,26 @@ async def _switch_off(db, st: dict, why: str) -> None:
     st["mode"] = "off"
     await _set_state(db, mode="off", switched_off=why, last_error=why, last_error_at=_now())
     logger.error("[premium live %s] switched off: %s", _d().key, why)
+
+
+_FULL: dict[str, float] = {}       # product -> when Delta last refused an order there for its 100-order limit
+_TQ: dict[str, dict] = {}          # product -> its last quote for the target check (TARGET_QUOTE_TTL_S)
+_CONVERTED: dict[str, int] = {}    # desk -> targets handed to this server this pass (CONVERT_PER_PASS)
+
+
+def _cap_refusal(exc: BaseException) -> bool:
+    """Delta's refusal once the account holds 100 open orders on the product (seen 24-25 Nov 2026)."""
+    return "max_orders_count_exceeded" in str(exc)
+
+
+def _venue_full(sym: str) -> bool:
+    """Has Delta refused an order on this product for its 100-order limit since a trade on it last closed, within
+    VENUE_FULL_RETRY_S? Its new signals are then skipped without being sent (25 Nov 2026)."""
+    at = _FULL.get(sym)
+    if at is not None and _now() - at > VENUE_FULL_RETRY_S:
+        _FULL.pop(sym, None)
+        at = None
+    return at is not None
 
 
 async def _products(db, st: dict, extra: set | None = None) -> dict[str, Product]:
@@ -1231,6 +1286,7 @@ async def _record_close(db, t: dict, ex: dict, reason: str, product: Product, ex
                      exit_basis=ex["basis"], fees=round(fees, 6), pnl_usd=pnl, r=round(pnl / _trade_risk(t), 3),
                      close_reason=reason, closed_at=_now(), day_closed=_day(), unrealised_usd=0.0,
                      **({"extra_pnl": extra_pnl} if extra_pnl else {}))
+    _FULL.pop(product.symbol, None)             # a trade on the product closed: room on Delta again (25 Nov)
 
 
 async def _day_pnl(db, mode: str, positions: dict | None) -> float:
@@ -1366,7 +1422,8 @@ async def _leg_order(product: Product, side: str, size: int, kind: str, trigger:
 async def _place_legs(db, tid: str, product: Product, side: int, contracts: int, fill: float, stop: float,
                       target: float | None) -> dict:
     """The trade's own stop (and target) on Delta, each saved on the trade as soon as it is placed. Raises DeltaError;
-    the caller then closes the trade (a leg already placed is on the trade, so it is cancelled with it)."""
+    the caller then closes the trade (a leg already placed is on the trade, so it is cancelled with it). On
+    APP_TARGET_PRODUCTS the target is not an order: it is kept as legs["target_app"] for this server to watch."""
     long_ = side > 0
     if (long_ and stop >= fill) or (not long_ and stop <= fill):
         raise DeltaError(f"legs: the stop {stop} is on the wrong side of the fill {fill}")
@@ -1381,7 +1438,11 @@ async def _place_legs(db, tid: str, product: Product, side: int, contracts: int,
     legs = {"stop": s["stop_price_sent"], "stop_limit": s["limit_price_sent"], "stop_id": s["id"], "target": None,
             "target_id": None}
     await _set_trade(db, tid, legs=legs)
-    if target is not None:
+    if target is not None and product.symbol in APP_TARGET_PRODUCTS:
+        # 25 Nov 2026: this server takes the target (Delta's 100 open orders a product): one order a trade, its stop
+        legs.update(target_app=fmt_tick(target, product.tick))
+        await _set_trade(db, tid, legs=legs)
+    elif target is not None:
         tp = await _leg_order(product, out, contracts, "take_profit_order", target, target, _cid(tid, "t"))
         legs.update(target=tp["stop_price_sent"], target_id=tp["id"])
         await _set_trade(db, tid, legs=legs)
@@ -1450,6 +1511,10 @@ async def _market_once(db, st: dict, t: dict, product: Product, size: int, side:
         o = await D.market(product.id, size, side, client_order_id=cid)
     except DeltaError as exc:
         await _set_trade(db, t["_id"], **{f"orders.{tag}": {"ambiguous": exc.ambiguous, "error": str(exc)[:200]}})
+        if _cap_refusal(exc):                       # Delta's 100 orders full (25 Nov): tried again next pass
+            _FULL[product.symbol] = _now()
+            logger.warning("[premium live %s] %s: %s, its market order waits for room", _d().key, t["acct"], VENUE_FULL)
+            return None
         await _venue_error(db, st, f"{t['acct']}: market order refused ({exc})")
         return None
     await _set_trade(db, t["_id"], **{f"orders.{tag}": o})
@@ -1540,6 +1605,11 @@ async def _settle_entry(db, st: dict, t: dict, product: Product) -> None:
                               float(t["target"]) if t.get("target") else None)
         except DeltaError as exc:
             t = await _tc(db).find_one({"_id": t["_id"]})
+            if _cap_refusal(exc):               # Delta's 100 orders full (25 Nov): closed at once, the desk stays on
+                await _close_own(db, st, t, product, f"closed at once: {VENUE_FULL} on {product.symbol}, no room "
+                                                     "for its stop", {})
+                _FULL[product.symbol] = _now()
+                return
             await _switch_off(db, st, f"{t['acct']}: its stop or target was refused on recovery ({exc})")
             await _close_own(db, st, t, product, f"stop or target refused on recovery: {exc}", {})
         return
@@ -1566,6 +1636,9 @@ async def _manage_own(db, st: dict, t: dict, paper: dict | None, positions: dict
     lost = [k for k, (kind, _o) in state.items() if kind == "cancelled"]
     if lost:
         k = lost[0]
+        if k == "target" and product.symbol in APP_TARGET_PRODUCTS:
+            await _target_to_app(db, t, product)      # 25 Nov: never put back; this server watches it from now
+            return
         if legs.get(f"{k}_replaced"):
             await _close_own(db, st, t, product, f"its {k} was cancelled on Delta again", resting)
             return
@@ -1575,6 +1648,18 @@ async def _manage_own(db, st: dict, t: dict, paper: dict | None, positions: dict
             await _close_own(db, st, t, product, f"its {k} was cancelled on Delta and could not be put back ({exc})",
                              resting)
         return
+    if legs.get("target_id") and product.symbol in APP_TARGET_PRODUCTS \
+            and _CONVERTED.get(_d().key, 0) < CONVERT_PER_PASS:
+        # a trade from before 25 Nov: its resting target is handed to this server, freeing its order on Delta
+        _CONVERTED[_d().key] = _CONVERTED.get(_d().key, 0) + 1
+        kind, _o = await _cancel_leg(product, legs["target_id"])
+        if kind == "filled":                        # it filled (wholly or in part) first: the venue target
+            await _close_own(db, st, t, product, "venue target", resting)
+            return
+        if kind == "cancelled":
+            await _target_to_app(db, t, product)
+            t = await _tc(db).find_one({"_id": t["_id"]}) or t
+        # anything else (not read): tried again next pass, its target still resting on Delta meanwhile
     reason = None
     if paper is None:
         gone = float(t.get("paper_missing_since") or 0)
@@ -1586,6 +1671,8 @@ async def _manage_own(db, st: dict, t: dict, paper: dict | None, positions: dict
         reason = f"paper exit: {paper.get('reason') or 'closed'}"
     elif desk_age > DESK_DEAD_S:
         reason = "the paper desk stopped updating"
+    if reason is None and await _app_target_hit(t, product):
+        reason = APP_TARGET_WHY                     # the target this server watches (25 Nov)
     if reason is not None:
         await _close_own(db, st, t, product, reason, resting)
         return
@@ -1601,6 +1688,42 @@ async def _manage_own(db, st: dict, t: dict, paper: dict | None, positions: dict
     if paper is not None:
         fields["paper_missing_since"] = None
     await _set_trade(db, t["_id"], **fields)
+
+
+async def _target_to_app(db, t: dict, product: Product) -> None:
+    """The trade's target becomes this server's to watch, with no target order on Delta any more (25 Nov 2026)."""
+    legs = dict(t.get("legs") or {})
+    level = legs.get("target") or (fmt_tick(float(t["target"]), product.tick) if t.get("target") else None)
+    legs.update(target=None, target_id=None, target_app=level, target_app_at=_now())
+    await _set_trade(db, t["_id"], legs=legs)
+    t["legs"] = legs
+    logger.info("[premium live %s] %s: its target %s is watched by the app, no longer an order on Delta",
+                _d().key, t.get("acct"), level)
+
+
+async def _target_quote(product: Product) -> dict | None:
+    """One quote a product per TARGET_QUOTE_TTL_S, shared by the desks' target checks; None when Delta gives none."""
+    q = _TQ.get(product.symbol)
+    if q is not None and _now() - float(q["read_at"]) <= TARGET_QUOTE_TTL_S:
+        return q
+    try:
+        q = {**(await D.ticker(product.symbol)), "read_at": _now()}
+    except DeltaError:
+        return None
+    _TQ[product.symbol] = q
+    return q
+
+
+async def _app_target_hit(t: dict, product: Product) -> bool:
+    """Has the price reached the target this server watches for the trade (25 Nov 2026)? A long's when the bid is
+    at or above it, a short's when the ask is at or below it: the prices its market close fills at."""
+    level = (t.get("legs") or {}).get("target_app")
+    if not level:
+        return False
+    q = await _target_quote(product)
+    if q is None:                                   # no quote this pass: the next pass looks again
+        return False
+    return q["bid"] >= float(level) if int(t["side"]) > 0 else q["ask"] <= float(level)
 
 
 async def _expected_net(db) -> dict[str, int]:
@@ -1881,6 +2004,10 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
                                                "entry_fee": round(fee, 6), "opened_at": _now(), "unrealised_usd": -fee})
         return f"shadow entry: {contracts} {pick.product} at {px}"
 
+    if _venue_full(product.symbol):
+        # Delta refused an order here for its 100-order limit and no trade on the product has closed since (25 Nov):
+        # skipped and recorded without sending; the desk stays on
+        return await skip(f"{VENUE_FULL} on {product.symbol}", price=px)
     if cache.get("wallet_down"):                     # already failed this cycle: one venue error a cycle, not one a copy
         return await hold("could not read the wallet")
     w = cache.get("wallet")
@@ -1905,6 +2032,12 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
             await _set_trade(db, tid, reason=f"entry answer lost ({exc}); checking the account")
             await _venue_error(db, st, f"{pick.acct}: entry answer lost ({exc})")
             return f"error: entry answer lost ({exc})"
+        if _cap_refusal(exc):
+            # Delta's 100 open orders on the product (25 Nov): skipped and recorded, not a venue error; the desk stays on
+            _FULL[product.symbol] = _now()
+            await _set_trade(db, tid, status="skipped", reason=f"{VENUE_FULL} on {product.symbol}", adoptable=False)
+            logger.warning("[premium live %s] %s: %s on %s, skipped", _d().key, pick.acct, VENUE_FULL, product.symbol)
+            return f"skipped: {VENUE_FULL}"
         await _set_trade(db, tid, status="error", reason=f"entry refused: {exc}", adoptable=False)
         await _venue_error(db, st, f"{pick.acct}: entry refused ({exc})")
         return f"error: entry refused ({exc})"
@@ -1917,6 +2050,17 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
     try:
         await _place_legs(db, tid, product, side, int(o["filled"]), fill, stop, target)
     except DeltaError as exc:
+        if _cap_refusal(exc):
+            # Delta's 100 open orders on the product were full by the time its stop went in (25 Nov): out at once,
+            # as ever (never unprotected), and the desk stays on
+            t = await _tc(db).find_one({"_id": tid})
+            done = await _close_own(db, st, t, product, f"closed at once: {VENUE_FULL} on {product.symbol}, no room "
+                                                        "for its stop", {})
+            _FULL[product.symbol] = _now()
+            logger.warning("[premium live %s] %s: %s, no room for its stop; closed at once", _d().key, pick.acct,
+                           VENUE_FULL)
+            return f"skipped: {VENUE_FULL}, no room for its stop; " + ("closed at once" if done else
+                                                                      "the close is retried every cycle")
         # never left unprotected: out at once, and the desk stops until someone looks
         await _switch_off(db, st, f"{pick.acct} {pick.product}: its stop or target was refused ({exc}); the trade was closed")
         t = await _tc(db).find_one({"_id": tid})
@@ -1950,6 +2094,7 @@ async def _cycle_one() -> dict:
     async with _LOCKS[_d().key]:
         st = await _state(db)
         await _set_state(db, last_cycle_at=_now())
+        _CONVERTED[_d().key] = 0                    # targets handed to this server this pass (25 Nov)
         out: dict = {"mode": st["mode"], "managed": [], "entered": []}
         # Main Control OFF with a trade still open somewhere: this pass only manages, like mode off (see MAIN CONTROL)
         blocked = _entries_blocked()
@@ -2020,7 +2165,13 @@ async def _cycle_one() -> dict:
                 resting = None
         for t in open_rows:
             if unread(t["_id"]) and t.get("status") == "open":
-                continue                    # unread, not gone: its stop and target rest on Delta until the next pass
+                # unread, not gone: its stop rests on Delta until the next pass, and a target this server watches
+                # (25 Nov) is still watched
+                if t.get("mode") == "live" and positions is not None and resting is not None and _own(t) \
+                        and await _app_target_hit(t, products[t["product"]]):
+                    await _close_own(db, st, t, products[t["product"]], APP_TARGET_WHY, resting.get(t["product"], {}))
+                    out["managed"].append(t["_id"])
+                continue
             age = age_of(t["_id"])
             if t.get("mode") == "live":
                 if positions is not None:
