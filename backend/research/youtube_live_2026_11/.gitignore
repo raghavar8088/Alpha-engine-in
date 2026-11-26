@@ -1,0 +1,6 @@
+raw/
+summary*.json
+recount.json
+__pycache__/
+schedule.json
+survey3_run.log

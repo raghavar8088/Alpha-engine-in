@@ -361,6 +361,19 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Directly below NIFTY 50 Option Scalping, as asked (2026-11-27). Who streams crypto, gold and forex trading
+        // live on YouTube: schedule (IST), audience, brokers, who shows a real account. Static research data; nothing
+        // on it trades. A play button on a screen: a live video stream, not another desk.
+        href: "/youtube-live",
+        label: "YouTube Live Streaming",
+        icon: (
+          <>
+            <rect x="2.5" y="5" width="19" height="14" rx="3.5" />
+            <path d="M10 9.3v5.4l4.6-2.7L10 9.3z" />
+          </>
+        ),
+      },
+      {
         // Commodity Trading's next step, not a rival to it (Commodity Trading itself is pinned
         // to the top): the same patterns, but only the ones that already cleared the gate,
         // in whole MCX lots on Rs 1 lakh per contract. A rocket-on-a-pad mark — staged and
