@@ -4,7 +4,8 @@ DESKS. Each desk has its own picks, products, switch (off / shadow / live), dail
 they share the Delta account, its keys and the owner's PIN, and never trade the same product.
 - gold (Premium Strategies > "Real money · Delta gold"): the five gold picks of 13 Nov, CP-06 (15 Nov), TL-04's gold
   book (16 Nov), and from 18 Nov thirteen more Premium gold books and six Gold Desk H1 templates, on XAUTUSD; the
-  Gold Desk Strategy Factory's top 20 on 19 Nov; 49 more on 22 Nov; three more on 24 Nov (102 in all).
+  Gold Desk Strategy Factory's top 20 on 19 Nov; 49 more on 22 Nov; three more on 24 Nov; 152 more Factory
+  strategies on 27 Nov (254 in all).
   Its records are the original ones (live_delta_state / live_delta_trades).
 - crypto (the "Delta Exchange Live Trading" module, 14 Nov): the bitcoin strategies the owner picked from the Crypto
   tab - TH-05, TL-04 and TH-01 on 14 Nov, TD-02 on 15 Nov, five more on 18 Nov - on BTCUSD, a $20 daily stop
@@ -193,6 +194,18 @@ to 22:09 IST (three refused entries in a row, or a refused stop or target). The 
   cancelled (CONVERT_PER_PASS a pass a desk) and watched by this server from then on; one found filled, wholly or in
   part, closes as the venue target. A target cancelled on Delta by anyone else is handed over too, never put back.
   Bitcoin and ether keep both orders on Delta.
+
+27 NOV 2026: THE OWNER'S FIFTH LIST, THE FACTORY BOARD'S TOP 209. The owner sent the Gold Desk's "Strategy Factory
+· 546" board (ranks 34 to 209, scrolled through), its "Factory Top 1-25" table and the H1 records, and asked for them
+on real money, trading as the others do ("if already present skip, add the remaining"). Asked which ranks (one
+screenful, 97-113, and the board's top 33 were not in the screenshots), the owner chose ranks 1-209. 57 of the 209
+were already picks (ranks have moved since 22 Nov; SF0487, a pick, is now below 209 and stays), and every H1
+template shown was already here, so 152 Factory strategies join, in board order, each at one contract and ON (the
+pick_cfg default). Records at NEW_PICKED_AT_7 (00:15 IST 27 Nov) by the Factory method above, re-proven first on
+four frozen records (SF0181 and SF0243 of 19 Nov, SF0344 and SF0476 of 22 Nov); every one's trade count equals the
+board's. 49 of the 152 held an open tab position at the pick: this follow_all desk copies them on its first pass.
+With 254 strategies on one product, Delta's 100 open orders on XAUTUSD (shared with the Premium Gold book, one stop a
+trade) is the binding limit: a signal past it is skipped as "Delta's 100-order limit full" (25 Nov), never queued.
 """
 
 from __future__ import annotations
@@ -281,6 +294,7 @@ NEW_PICKED_AT_3 = "2026-11-19T21:29:00+05:30"  # the Factory board's top 20 the 
 NEW_PICKED_AT_4 = "2026-11-22T14:30:00+05:30"  # the owner's 22 Nov screenshots (both desks): their records as of this time
 NEW_PICKED_AT_5 = "2026-11-24T00:30:00+05:30"  # the owner's 24 Nov screenshots (both desks): their records as of this time
 NEW_PICKED_AT_6 = "2026-11-24T20:30:00+05:30"  # the Premium Gold book's six (24 Nov evening): their records as of this time
+NEW_PICKED_AT_7 = "2026-11-27T00:15:00+05:30"  # the Factory board's top 209 (27 Nov): the 152 new ones' records as of this time
 CONFIRM = "REAL MONEY"
 D = Delta()
 
@@ -478,6 +492,160 @@ GOLD_PICKS: tuple[Pick, ...] = (
          "never backtested", NEW_PICKED_AT_5),
     Pick("JR-01", "XAUTUSD", "XAUTUSD", "First Candle Rule: 9:30-9:45 range, FVG limit, candle-1 stop, 2R", 5, 0.44, 0.12,
          40, "loses: -0.15R a trade over 341 trades (t -2.2)", NEW_PICKED_AT_5),
+    # the owner's 27 Nov pick: the Gold Desk Factory board's ranks 1-209 not already above (152; records at
+    # NEW_PICKED_AT_7, 00:15 IST), in board order from rank 13 (SF0520) to rank 209 (SF0234)
+    _sf("SF0520", "VWAP Reclaim + Volume + HTF Â· 30m", 36, 16.41, 1.58, 44, NEW_PICKED_AT_7),
+    _sf("SF0352", "EMA Crossover (fast) Â· 5m", 79, 1.42, 0.11, 44, NEW_PICKED_AT_7),
+    _sf("SF0450", "CCI Breakout Â· 30m", 24, 11.89, 1.58, 50, NEW_PICKED_AT_7),
+    _sf("SF0418", "Supertrend Flip Â· 30m", 17, 11.24, 1.61, 53, NEW_PICKED_AT_7),
+    _sf("SF0371", "RSI Trend Regime (40/60) Â· 45m", 20, 12.25, 1.41, 45, NEW_PICKED_AT_7),
+    _sf("SF0427", "Parabolic SAR Flip Â· 45m", 24, 6.11, 0.75, 42, NEW_PICKED_AT_7),
+    _sf("SF0283", "ATR Expansion Thrust Â· 30m", 39, 9.19, 0.90, 44, NEW_PICKED_AT_7),
+    _sf("SF0276", "EMA Ribbon Compression Â· 45m", 29, 9.30, 0.92, 38, NEW_PICKED_AT_7),
+    _sf("SF0111", "Engulfing Candle Â· 4h", 12, 9.11, 1.95, 67, NEW_PICKED_AT_7),
+    _sf("SF0207", "Heikin Ashi Flip Â· 4h", 12, 12.25, 1.92, 58, NEW_PICKED_AT_7),
+    _sf("SF0227", "Keltner Breakout Â· 15m", 98, 13.90, 0.69, 36, NEW_PICKED_AT_7),
+    _sf("SF0284", "ATR Expansion Thrust Â· 45m", 20, 3.53, 0.41, 45, NEW_PICKED_AT_7),
+    _sf("SF0452", "CCI Breakout Â· 1h", 12, 5.19, 0.88, 50, NEW_PICKED_AT_7),
+    _sf("SF0393", "MACD Signal Cross Â· 15m", 48, 8.41, 0.80, 46, NEW_PICKED_AT_7),
+    _sf("SF0330", "Trend Pullback to EMA Â· 30m", 64, 19.75, 1.31, 38, NEW_PICKED_AT_7),
+    _sf("SF0468", "Breakout + Volume + HTF Trend Â· 1h", 15, 8.36, 1.16, 47, NEW_PICKED_AT_7),
+    _sf("SF0292", "HH/HL Structure Shift Â· 45m", 16, 7.48, 0.92, 38, NEW_PICKED_AT_7),
+    _sf("SF0419", "Supertrend Flip Â· 45m", 11, 9.55, 1.41, 55, NEW_PICKED_AT_7),
+    _sf("SF0266", "TTM Squeeze Â· 15m", 37, 5.29, 0.44, 35, NEW_PICKED_AT_7),
+    _sf("SF0354", "EMA Crossover (fast) Â· 30m", 11, 8.97, 1.69, 55, NEW_PICKED_AT_7),
+    _sf("SF0429", "Parabolic SAR Flip Â· 4h", 9, 11.60, 2.23, 67, NEW_PICKED_AT_7),
+    _sf("SF0285", "ATR Expansion Thrust Â· 1h", 29, 2.85, 0.33, 38, NEW_PICKED_AT_7),
+    _sf("SF0428", "Parabolic SAR Flip Â· 1h", 20, 5.05, 0.68, 40, NEW_PICKED_AT_7),
+    _sf("SF0522", "VWAP Reclaim + Volume + HTF Â· 1h", 19, 3.83, 0.55, 42, NEW_PICKED_AT_7),
+    _sf("SF0435", "Stochastic Cross Â· 45m", 21, 1.26, 0.21, 48, NEW_PICKED_AT_7),
+    _sf("SF0417", "Supertrend Flip Â· 15m", 30, 1.64, 0.19, 40, NEW_PICKED_AT_7),
+    _sf("SF0534", "Fib 61.8% + RSI + HTF Trend Â· 30m", 11, 4.25, 0.74, 64, NEW_PICKED_AT_7),
+    _sf("SF0307", "Change of Character Â· 30m", 11, 7.15, 1.14, 45, NEW_PICKED_AT_7),
+    _sf("SF0301", "Break of Structure Â· 1h", 13, 12.36, 1.78, 62, NEW_PICKED_AT_7),
+    _sf("SF0361", "Golden / Death Cross Â· 15m", 15, 4.20, 0.61, 47, NEW_PICKED_AT_7),
+    _sf("SF0188", "Morning / Evening Star Â· 30m", 34, 1.13, 0.12, 35, NEW_PICKED_AT_7),
+    _sf("SF0293", "HH/HL Structure Shift Â· 1h", 7, 17.06, 4.02, 86, NEW_PICKED_AT_7),
+    _sf("SF0308", "Change of Character Â· 45m", 8, 6.96, 1.39, 62, NEW_PICKED_AT_7),
+    _sf("SF0005", "Head & Shoulders Â· 45m", 8, 11.94, 1.97, 62, NEW_PICKED_AT_7),
+    _sf("SF0269", "TTM Squeeze Â· 1h", 8, 7.74, 1.22, 50, NEW_PICKED_AT_7),
+    _sf("SF0300", "Break of Structure Â· 45m", 12, 5.63, 0.91, 50, NEW_PICKED_AT_7),
+    _sf("SF0267", "TTM Squeeze Â· 30m", 19, 4.89, 0.56, 32, NEW_PICKED_AT_7),
+    _sf("SF0002", "Head & Shoulders Â· 5m", 145, -40.78, -1.73, 29, NEW_PICKED_AT_7),
+    _sf("SF0006", "Head & Shoulders Â· 1h", 8, 5.83, 1.06, 50, NEW_PICKED_AT_7),
+    _sf("SF0257", "Bollinger Squeeze Release Â· 5m", 82, -25.36, -1.59, 33, NEW_PICKED_AT_7),
+    _sf("SF0261", "Bollinger Squeeze Release Â· 1h", 6, 13.29, 3.38, 83, NEW_PICKED_AT_7),
+    _sf("SF0496", "S/R Flip Retest + Volume Â· 15m", 86, 3.98, 0.22, 31, NEW_PICKED_AT_7),
+    _sf("SF0206", "Heikin Ashi Flip Â· 1h", 43, 7.16, 0.66, 35, NEW_PICKED_AT_7),
+    _sf("SF0490", "Structure Break + Volume + HTF Â· 45m", 7, 9.32, 1.83, 71, NEW_PICKED_AT_7),
+    _sf("SF0376", "RSI Overbought / Oversold Reversal Â· 5m", 64, -74.89, -2.52, 39, NEW_PICKED_AT_7),
+    _sf("SF0150", "Marubozu Continuation Â· 1h", 12, 3.49, 0.52, 42, NEW_PICKED_AT_7),
+    _sf("SF0260", "Bollinger Squeeze Release Â· 45m", 6, 11.00, 1.94, 67, NEW_PICKED_AT_7),
+    _sf("SF0388", "RSI Divergence Â· 1h", 7, 1.09, 0.19, 43, NEW_PICKED_AT_7),
+    _sf("SF0108", "Engulfing Candle Â· 30m", 83, 9.68, 0.73, 42, NEW_PICKED_AT_7),
+    _sf("SF0183", "Three Soldiers / Crows Â· 4h", 16, 6.84, 1.00, 44, NEW_PICKED_AT_7),
+    _sf("SF0282", "ATR Expansion Thrust Â· 15m", 64, -7.77, -0.62, 39, NEW_PICKED_AT_7),
+    _sf("SF0038", "Descending Triangle Â· 1h", 6, 7.93, 1.75, 67, NEW_PICKED_AT_7),
+    _sf("SF0259", "Bollinger Squeeze Release Â· 30m", 16, 0.99, 0.13, 31, NEW_PICKED_AT_7),
+    _sf("SF0483", "Squeeze + Momentum + Volume Â· 1h", 5, 12.55, 2.81, 80, NEW_PICKED_AT_7),
+    _sf("SF0355", "EMA Crossover (fast) Â· 45m", 9, 3.23, 0.69, 56, NEW_PICKED_AT_7),
+    _sf("SF0508", "Engulfing + VWAP + Volume Â· 4h", 10, 2.68, 0.50, 40, NEW_PICKED_AT_7),
+    _sf("SF0442", "Williams %R Reversal Â· 30m", 14, 1.38, 0.27, 50, NEW_PICKED_AT_7),
+    _sf("SF0491", "Structure Break + Volume + HTF Â· 1h", 7, 8.04, 1.47, 57, NEW_PICKED_AT_7),
+    _sf("SF0444", "Williams %R Reversal Â· 1h", 5, 6.28, 9.34, 100, NEW_PICKED_AT_7),
+    _sf("SF0278", "EMA Ribbon Compression Â· 4h", 5, 6.43, 1.32, 60, NEW_PICKED_AT_7),
+    _sf("SF0481", "Squeeze + Momentum + Volume Â· 30m", 10, 1.92, 0.28, 30, NEW_PICKED_AT_7),
+    _sf("SF0309", "Change of Character Â· 1h", 4, 4.93, 1.54, 75, NEW_PICKED_AT_7),
+    _sf("SF0231", "Keltner Breakout Â· 4h", 12, 7.12, 1.22, 50, NEW_PICKED_AT_7),
+    _sf("SF0482", "Squeeze + Momentum + Volume Â· 45m", 5, 9.51, 1.52, 60, NEW_PICKED_AT_7),
+    _sf("SF0179", "Three Soldiers / Crows Â· 15m", 165, -14.72, -0.71, 35, NEW_PICKED_AT_7),
+    _sf("SF0512", "Pin Bar + Trend + ADX Â· 30m", 5, 5.40, 1.10, 60, NEW_PICKED_AT_7),
+    _sf("SF0214", "Donchian Breakout (fast) Â· 1h", 28, 2.71, 0.30, 36, NEW_PICKED_AT_7),
+    _sf("SF0189", "Morning / Evening Star Â· 45m", 22, 2.05, 0.27, 36, NEW_PICKED_AT_7),
+    _sf("SF0211", "Donchian Breakout (fast) Â· 15m", 121, 0.53, 0.03, 35, NEW_PICKED_AT_7),
+    _sf("SF0489", "Structure Break + Volume + HTF Â· 30m", 9, 2.80, 0.54, 44, NEW_PICKED_AT_7),
+    _sf("SF0523", "VWAP Reclaim + Volume + HTF Â· 4h", 9, 4.75, 0.88, 44, NEW_PICKED_AT_7),
+    _sf("SF0299", "Break of Structure Â· 30m", 16, 3.67, 0.56, 38, NEW_PICKED_AT_7),
+    _sf("SF0124", "Inverted Hammer Â· 30m", 7, 3.19, 0.59, 57, NEW_PICKED_AT_7),
+    _sf("SF0363", "Golden / Death Cross Â· 45m", 4, 4.01, 1.16, 75, NEW_PICKED_AT_7),
+    _sf("SF0037", "Descending Triangle Â· 45m", 3, 6.94, 31.30, 100, NEW_PICKED_AT_7),
+    _sf("SF0410", "ADX / DI Cross Â· 30m", 17, 3.22, 0.47, 41, NEW_PICKED_AT_7),
+    _sf("SF0453", "CCI Breakout Â· 4h", 3, 6.99, 9.87, 100, NEW_PICKED_AT_7),
+    _sf("SF0420", "Supertrend Flip Â· 1h", 6, 2.47, 0.62, 50, NEW_PICKED_AT_7),
+    _sf("SF0372", "RSI Trend Regime (40/60) Â· 1h", 11, 6.57, 1.03, 45, NEW_PICKED_AT_7),
+    _sf("SF0473", "Pullback + EMA + RSI + VWAP Â· 15m", 121, -6.32, -0.30, 31, NEW_PICKED_AT_7),
+    _sf("SF0500", "S/R Flip Retest + Volume Â· 4h", 6, 6.40, 1.14, 50, NEW_PICKED_AT_7),
+    _sf("SF0396", "MACD Signal Cross Â· 1h", 13, 3.40, 0.56, 38, NEW_PICKED_AT_7),
+    _sf("SF0076", "Cup & Handle Â· 30m", 4, 5.23, 0.95, 50, NEW_PICKED_AT_7),
+    _sf("SF0091", "Diamond Â· 15m", 4, 2.54, 0.87, 75, NEW_PICKED_AT_7),
+    _sf("SF0012", "Double Top / Bottom Â· 30m", 79, 2.69, 0.18, 33, NEW_PICKED_AT_7),
+    _sf("SF0323", "Opening Range Breakout Â· 30m", 98, 6.26, 0.41, 40, NEW_PICKED_AT_7),
+    _sf("SF0158", "Inside Bar Breakout Â· 1h", 13, 0.08, 0.01, 31, NEW_PICKED_AT_7),
+    _sf("SF0397", "MACD Signal Cross Â· 4h", 3, 4.07, 1.14, 67, NEW_PICKED_AT_7),
+    _sf("SF0156", "Inside Bar Breakout Â· 30m", 14, 2.14, 0.31, 36, NEW_PICKED_AT_7),
+    _sf("SF0019", "Triple Top / Bottom Â· 15m", 115, -4.90, -0.26, 31, NEW_PICKED_AT_7),
+    _sf("SF0036", "Descending Triangle Â· 30m", 2, 4.52, 19.66, 100, NEW_PICKED_AT_7),
+    _sf("SF0254", "Round Number Break Â· 4h", 5, 3.34, 0.96, 60, NEW_PICKED_AT_7),
+    _sf("SF0535", "Fib 61.8% + RSI + HTF Trend Â· 45m", 6, 0.86, 0.24, 50, NEW_PICKED_AT_7),
+    _sf("SF0215", "Donchian Breakout (fast) Â· 4h", 10, 5.73, 1.06, 50, NEW_PICKED_AT_7),
+    _sf("SF0338", "Previous Week High/Low Break Â· 30m", 12, 0.20, 0.06, 50, NEW_PICKED_AT_7),
+    _sf("SF0015", "Double Top / Bottom Â· 4h", 12, 4.71, 0.78, 42, NEW_PICKED_AT_7),
+    _sf("SF0190", "Morning / Evening Star Â· 1h", 20, 1.87, 0.23, 30, NEW_PICKED_AT_7),
+    _sf("SF0394", "MACD Signal Cross Â· 30m", 22, 9.64, 1.22, 41, NEW_PICKED_AT_7),
+    _sf("SF0163", "Multi Inside Bar Compression Â· 15m", 8, -0.43, -0.08, 25, NEW_PICKED_AT_7),
+    _sf("SF0364", "Golden / Death Cross Â· 1h", 2, 1.79, 1.25, 100, NEW_PICKED_AT_7),
+    _sf("SF0545", "Rectangle + Volume + ATR Â· 4h", 3, 1.10, 0.55, 67, NEW_PICKED_AT_7),
+    _sf("SF0362", "Golden / Death Cross Â· 30m", 7, 5.48, 0.94, 43, NEW_PICKED_AT_7),
+    _sf("SF0149", "Marubozu Continuation Â· 45m", 13, 0.38, 0.06, 38, NEW_PICKED_AT_7),
+    _sf("SF0389", "RSI Divergence Â· 4h", 2, 1.18, 0.33, 50, NEW_PICKED_AT_7),
+    _sf("SF0180", "Three Soldiers / Crows Â· 30m", 77, 3.64, 0.24, 34, NEW_PICKED_AT_7),
+    _sf("SF0506", "Engulfing + VWAP + Volume Â· 45m", 24, 6.98, 0.81, 42, NEW_PICKED_AT_7),
+    _sf("SF0318", "Support / Resistance Flip Â· 4h", 7, 4.68, 0.84, 43, NEW_PICKED_AT_7),
+    _sf("SF0175", "Outside Bar Reversal Â· 4h", 9, -0.79, -0.18, 33, NEW_PICKED_AT_7),
+    _sf("SF0291", "HH/HL Structure Shift Â· 30m", 14, -0.41, -0.06, 29, NEW_PICKED_AT_7),
+    _sf("SF0413", "ADX / DI Cross Â· 4h", 4, 5.20, 1.42, 75, NEW_PICKED_AT_7),
+    _sf("SF0411", "ADX / DI Cross Â· 45m", 12, 1.98, 0.34, 42, NEW_PICKED_AT_7),
+    _sf("SF0191", "Morning / Evening Star Â· 4h", 4, 2.80, 0.71, 50, NEW_PICKED_AT_7),
+    _sf("SF0159", "Inside Bar Breakout Â· 4h", 7, 0.75, 0.14, 29, NEW_PICKED_AT_7),
+    _sf("SF0262", "Bollinger Squeeze Release Â· 4h", 2, 2.01, 0.48, 50, NEW_PICKED_AT_7),
+    _sf("SF0092", "Diamond Â· 30m", 2, 1.87, 0.47, 50, NEW_PICKED_AT_7),
+    _sf("SF0381", "RSI Overbought / Oversold Reversal Â· 4h", 2, -0.16, -0.07, 50, NEW_PICKED_AT_7),
+    _sf("SF0421", "Supertrend Flip Â· 4h", 2, 1.73, 0.48, 50, NEW_PICKED_AT_7),
+    _sf("SF0055", "Rising / Falling Wedge Â· 4h", 2, 2.09, 0.51, 50, NEW_PICKED_AT_7),
+    _sf("SF0165", "Multi Inside Bar Compression Â· 45m", 4, 3.85, 0.84, 50, NEW_PICKED_AT_7),
+    _sf("SF0216", "Donchian Breakout (fast) Â· 1d", 1, 2.98, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0016", "Double Top / Bottom Â· 1d", 1, 2.98, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0232", "Keltner Breakout Â· 1d", 1, 2.98, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0167", "Multi Inside Bar Compression Â· 4h", 1, 3.11, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0492", "Structure Break + Volume + HTF Â· 4h", 1, 1.32, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0302", "Break of Structure Â· 4h", 1, 1.32, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0349", "Rectangle / Trading Range Break Â· 4h", 4, 0.41, 0.16, 50, NEW_PICKED_AT_7),
+    _sf("SF0116", "Hammer / Shooting Star Â· 30m", 79, 7.83, 0.54, 39, NEW_PICKED_AT_7),
+    _sf("SF0501", "S/R Flip Retest + Volume Â· 1d", 1, 2.12, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0319", "Support / Resistance Flip Â· 1d", 1, 1.86, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0192", "Morning / Evening Star Â· 1d", 1, 1.61, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0120", "Hammer / Shooting Star Â· 1d", 1, 1.13, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0461", "Flag + Volume + HTF Trend Â· 4h", 1, 2.88, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0078", "Cup & Handle Â· 1h", 1, 4.49, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0077", "Cup & Handle Â· 45m", 1, 4.05, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0039", "Descending Triangle Â· 4h", 1, 2.31, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0063", "Bull / Bear Flag Â· 4h", 1, 1.91, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0199", "Pin Bar at Extreme Â· 4h", 1, 2.35, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0151", "Marubozu Continuation Â· 4h", 1, 2.06, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0537", "Fib 61.8% + RSI + HTF Trend Â· 4h", 1, 2.37, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0457", "Flag + Volume + HTF Trend Â· 15m", 1, 3.82, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0110", "Engulfing Candle Â· 1h", 42, 3.94, 0.40, 38, NEW_PICKED_AT_7),
+    _sf("SF0059", "Bull / Bear Flag Â· 15m", 1, 2.58, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0067", "Pennant Â· 15m", 1, 2.58, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0093", "Diamond Â· 45m", 1, 2.37, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0164", "Multi Inside Bar Compression Â· 30m", 6, 1.54, 0.30, 33, NEW_PICKED_AT_7),
+    _sf("SF0100", "Broadening Formation Â· 30m", 2, 0.35, 0.13, 50, NEW_PICKED_AT_7),
+    _sf("SF0101", "Broadening Formation Â· 45m", 1, 1.47, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0533", "Fib 61.8% + RSI + HTF Trend Â· 15m", 31, -11.50, -1.25, 32, NEW_PICKED_AT_7),
+    _sf("SF0123", "Inverted Hammer Â· 15m", 1, 0.93, 0.00, 100, NEW_PICKED_AT_7),
+    _sf("SF0130", "Hanging Man Â· 5m", 2, 5.55, 0.93, 50, NEW_PICKED_AT_7),
+    _sf("SF0317", "Support / Resistance Flip Â· 1h", 22, 8.46, 0.83, 32, NEW_PICKED_AT_7),
+    _sf("SF0234", "Bollinger %B Extreme Â· 5m", 1, 1.30, 0.00, 100, NEW_PICKED_AT_7),
 )
 # picked by the owner on 14 Nov 2026 from the Crypto tab; records = their bitcoin paper trades at 09:44 IST
 CRYPTO_PICKS: tuple[Pick, ...] = (
@@ -567,19 +735,20 @@ PREMIUM_GOLD_PICKS: tuple[Pick, ...] = (
     _h1("H1-KLT", "keltner_break", "Keltner Breakout · 4h", 17, 3.98, 0.64, 41, NEW_PICKED_AT_6),
 )
 GOLD_NOTES = (
-    "Real money on 102 unproven gold strategies: five picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, "
+    "Real money on 254 unproven gold strategies: five picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, "
     "on 18 Nov seventeen more Premium gold books and six templates of the Gold Desk's H1 test, on 19 Nov the Gold "
     "Desk Strategy Factory board's top 20, and on 22 Nov ten more Premium gold books, a seventh H1 template and 38 more "
-    "of the Factory board's top 56, and on 24 Nov three more Premium gold books (JR-05, BG-05, JR-01), at the owner's "
+    "of the Factory board's top 56, on 24 Nov three more Premium gold books (JR-05, BG-05, JR-01), and on 27 Nov "
+    "152 more of the Factory board's top 209, at the owner's "
     "chosen size: one contract a trade, the smallest order Delta allows "
     "(or $1 to $5 of risk picked on this page).",
     "Sixteen lose in their own 2-year backtests, five earn too little there to mean anything (t under 2), sixteen were "
-    "never backtested, the seven H1 templates were tested only as a family and the 58 Factory strategies only by the "
+    "never backtested, the seven H1 templates were tested only as a family and the 210 Factory strategies only by the "
     "Factory's own backtest (whose replay reads future 4-hour bars); a few good paper trades picked them.",
     "Every one of them trades on Delta's own live data: the paper desk reads gold from Delta's XAUTUSD one-minute "
     "candles (not from COMEX or Yahoo), the Gold Desk's H1 test and its Strategy Factory tab trade Delta's XAUTUSD, and "
     "the real orders go to Delta's XAUTUSD perpetual.",
-    "EVERY signal becomes a real position (the owner's ask, 19 Nov): an open paper trade of any of the 102 is copied, "
+    "EVERY signal becomes a real position (the owner's ask, 19 Nov): an open paper trade of any of the 254 is copied, "
     "however late this desk sees it and however far the price has moved from the paper entry, including trades already "
     "open when the desk was switched on, with the paper's own stop and target. There is no daily loss stop and no cap on "
     "what one contract may lose: the only rule is the size, one contract.",
@@ -590,12 +759,12 @@ GOLD_NOTES = (
     "A paper trade with no stop at all (PR-12's Supertrend ladder) gets a protective stop on Delta 3% from its fill, so no "
     "real trade is ever without a stop; it otherwise closes when its paper trade does. A stop farther than 7% from the "
     "price is pulled in to 7%: at 10x leverage Delta liquidates a position about 9.5% against it.",
-    "The seven H1 templates' trades are the Gold Desk's own H1 positions (4-hour bars, held up to ten days), and the 58 "
+    "The seven H1 templates' trades are the Gold Desk's own H1 positions (4-hour bars, held up to ten days), and the 210 "
     "Factory strategies' are the positions of the Gold Desk's Strategy Factory tab ($1,111 paper sleeves on closed bars "
     "of 5 minutes to 4 hours); both are copied the same way, and this desk only reads them.",
     "One gold contract is 0.001 XAUT (about $4 of gold), so a trade of one contract loses cents at its stop.",
-    "All 102 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop on "
-    "Delta, and Delta shows their sum as one gold position.",
+    "All 254 can hold a trade at the same time (from 15 Nov), up to Delta's 100 open orders on XAUTUSD (below): "
+    "each trade is its own order with its own stop on Delta, and Delta shows their sum as one gold position.",
     "This desk trades gold (XAUTUSD) only; the bitcoin desk is beside it on the Delta Exchange Live Trading page. Each "
     "has its own switch.",
     "Each trade's stop lives on Delta itself, so it stays protected if this server goes down. Its target is this "
