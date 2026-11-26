@@ -635,7 +635,8 @@ async def main():
     check("the right PIN without the words is refused", not r["ok"] and "REAL MONEY" in r["why"], r["why"])
     M.D.pos[BTC] = {"size": 3, "entry": 69000.0}
     r = await M.set_mode("live", PIN, "real money", desk="crypto")
-    check("a position the desk does not own blocks going live", not r["ok"] and "already holds BTCUSD" in r["why"], r["why"])
+    check("a position the desk does not own blocks going live", not r["ok"] and "BTCUSD: the account holds +3 contracts "
+          "and the desks' trades none: close those 3 on Delta" in r["why"], r["why"])
     M.D.pos.pop(BTC)
     r = await M.set_mode("live", PIN, "REAL MONEY", desk="crypto")
     check("then it goes live, with leverage at 10x on its own products, BTCUSD and ETHUSD (gold keeps Delta's default "
@@ -2684,6 +2685,27 @@ async def main():
           and any("Each trade's stop and target live on Delta itself" in n for n in cn)
           and not any("100-order" in n for n in cn))
     M.APP_TARGET_PRODUCTS = frozenset()
+
+    # ── 42. 26 Nov: the refusal names the numbers and the order that makes them match ─────────────────
+    section("42. 26 Nov: a refused switch-on says what the account holds, what the trades hold, and what order fixes it")
+    db = fresh(mode="off")
+    db.live_crypto_trades.docs.append({"_id": "nj47", "acct": "NJ-47", "mkt": "BTCUSD", "product": "BTCUSD", "mode": "live",
+                                       "side": -1, "contracts": 1, "status": "open", "protect": "own"})
+    r = await M.set_mode("live", PIN, "REAL MONEY", desk="crypto")      # the account flat, the desk short 1
+    check("the account flat under the desk's short: refused, naming the trade and the sell that puts it back",
+          not r["ok"] and "BTCUSD: the account holds none, the desks' open trades -1 (NJ-47 short 1): sell 1 BTCUSD on "
+          "Delta to put them back" in r["why"] and "close" not in r["why"] and st_of(db, "crypto")["mode"] == "off", r["why"])
+    db.live_crypto_trades.docs[-1]["side"] = 1
+    M.D.pos[BTC] = {"size": 14, "entry": 69000.0}                       # 13 bought by hand beside the desk's long 1
+    r = await M.set_mode("live", PIN, "REAL MONEY", desk="crypto")
+    check("13 bought by hand beside the desk's long 1: sell 13, and closing the whole position is ruled out",
+          not r["ok"] and "the account holds +14 contracts, the desks' open trades +1 (NJ-47 long 1): sell 13 BTCUSD on "
+          "Delta to make them match (closing the whole position would close the trades' own contracts too)" in r["why"]
+          and "ETHUSD" not in r["why"], r["why"])
+    M.D.pos[BTC] = {"size": 1, "entry": 69000.0}
+    r = await M.set_mode("live", PIN, "REAL MONEY", desk="crypto")
+    check("once the account matches, it goes live", r["ok"] and st_of(db, "crypto")["mode"] == "live", r)
+    check("no order was sent by any refusal", not M.D.orders, M.D.orders)
 
 
 if __name__ == "__main__":

@@ -2322,6 +2322,32 @@ async def _check_pin(db, st: dict, pin: str | None) -> str | None:
     return None
 
 
+async def _holders(db, sym: str) -> list[str]:
+    """The desks' open live trades on one product, as the page names them ("NJ-47 short 1")."""
+    out = []
+    for d in DESKS.values():
+        async for t in getattr(db, d.trades_coll).find({"mode": "live", "status": {"$in": ["open", "closing"]},
+                                                        "product": sym}, {"acct": 1, "side": 1, "contracts": 1}):
+            out.append(f"{t.get('acct')} {'long' if int(t['side']) > 0 else 'short'} {int(t.get('contracts') or 0)}")
+    return out
+
+
+async def _mismatch_why(db, sym: str, have: int, need: int) -> str:
+    """Why going live is refused on one product, and the order on Delta that makes the account match. 26 Nov 2026: the
+    refusal said "close it on Delta first" whatever the numbers; the account held 14 hand-bought BTCUSD beside the
+    desk's own short of 1, the owner closed the whole position, and the refusal stayed (account 0, trades -1)."""
+    if need == 0:
+        return f"{sym}: the account holds {have:+d} contracts and the desks' trades none: close those {abs(have)} on Delta"
+    diff = need - have
+    names = await _holders(db, sym)
+    told = f" ({', '.join(names[:6])}{', ...' if len(names) > 6 else ''})" if names else ""
+    fix = f"{'buy' if diff > 0 else 'sell'} {abs(diff)} {sym} on Delta"
+    if have == 0:
+        return f"{sym}: the account holds none, the desks' open trades {need:+d}{told}: {fix} to put them back"
+    return (f"{sym}: the account holds {have:+d} contracts, the desks' open trades {need:+d}{told}: {fix} to make them match "
+            f"(closing the whole position would close the trades' own contracts too)")
+
+
 async def _set_mode_one(mode: str, pin: str | None = None, confirm: str | None = None) -> dict:
     db = _db()
     if db is None:
@@ -2358,10 +2384,11 @@ async def _set_mode_one(mode: str, pin: str | None = None, confirm: str | None =
     except DeltaError as exc:
         return {"ok": False, "why": f"Delta refused the check: {exc}"}
     want = await _expected_net(db)
-    foreign = [sym for sym, p in products.items() if int((positions.get(p.id) or {}).get("size") or 0) != want.get(sym, 0)]
-    if foreign:
-        return {"ok": False, "why": f"the account already holds {', '.join(foreign)} that the desks' trades do not "
-                                    "account for: close it on Delta first"}
+    why = [await _mismatch_why(db, sym, int((positions.get(p.id) or {}).get("size") or 0), want.get(sym, 0))
+           for sym, p in products.items() if int((positions.get(p.id) or {}).get("size") or 0) != want.get(sym, 0)]
+    if why:
+        return {"ok": False, "why": "the account's position does not match the desks' trades, so the desk stays off: "
+                                    + "; ".join(why)}
     cached = st.get("products") or {}
     for sym in lev:
         cached.setdefault(sym, {})["leverage"] = lev[sym]
