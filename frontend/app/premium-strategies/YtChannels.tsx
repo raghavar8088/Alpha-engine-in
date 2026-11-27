@@ -23,11 +23,19 @@ const views = (n: number | null) => (n === null ? "" : n >= 1e6 ? `${(n / 1e6).t
 const STATUS_LABEL: Record<string, string> = { coded: "coded", blocked: "no testable rule", duplicate: "repeat", analysed: "read" };
 const STATUS_TONE: Record<string, string> = { coded: "ok", blocked: "warn", duplicate: "", analysed: "" };
 
+// Dates of videos not analysed come from YouTube's channel listing, which says "5 years ago": they can be months off,
+// so only the month is shown, marked "about".
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const approxDate = (d: string | null) => {
+  const m = d ? /^(\d{4})-(\d{2})/.exec(d) : null;
+  return m ? `about ${MONTHS[Number(m[2]) - 1]} ${m[1]}` : null;
+};
+
 function Upload({ u }: { u: YtUpload }) {
   return (
     <li>
       <a href={watch(u.v)} target="_blank" rel="noopener noreferrer">{u.t || u.v}</a>
-      <span className="yc-dim">{[u.d, views(u.w), u.q].filter(Boolean).map(s => ` · ${s}`).join("")}</span>
+      <span className="yc-dim">{[approxDate(u.d), views(u.w), u.q].filter(Boolean).map(s => ` · ${s}`).join("")}</span>
     </li>
   );
 }
@@ -145,6 +153,7 @@ export default function YtChannels() {
           For {num(m.with_uploads_listed)} of these channels the Trading Video Lab also listed every upload ({num(m.uploads)} in all), so the
           videos <b>not</b> analysed are shown too, each with its reason. The studies read the clearest strategy-titled videos first, a few per
           channel, and left out market calls, live streams, Shorts, re-uploads and videos not about trading rules, judged from their titles.
+          Dates of videos not analysed are approximate (YouTube lists them as &quot;5 years ago&quot;), so only the month is shown.
         </p>
         <div className="yc-tiles">
           <div className="yc-tile"><b>{num(m.channels)}</b><span>channels analysed</span></div>
