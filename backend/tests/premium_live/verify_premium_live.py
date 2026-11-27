@@ -40,6 +40,12 @@ product's leverage confirmed in their state.
 100-order limit full") and the desk stays on; gold trades keep only their stop on Delta and the app closes them at
 their target. Sections 1-40 run with APP_TARGET_PRODUCTS empty: they pin the stop-and-target-on-Delta mechanism
 that bitcoin and ether keep (and gold had until then); section 41 runs the server's own setting, gold only.
+
+28 Nov 2026 (section 46): every other gold book of the Premium paper desk, 90, joins the gold desk (all 127 are
+picks), the never-backtested and the not-yet-traded ones too. Pinned: the list against the 127 the paper desk held,
+their records and backtests, the 254 before them unchanged (but the 27 Nov Factory names' mended middle dot), the
+new books' signals copied at one contract on either market key (XAUTUSD, XAUUSD) under the production hybrid, a
+new pick's other books not, the paper desk told all 159 Premium books, the page and its notes.
 """
 
 import asyncio
@@ -724,8 +730,8 @@ async def main():
     # ── 15. the read model ──────────────────────────────────────────────────────────────────────────
     section("15. What the page reads")
     s = await M.status()
-    check("status (gold, the original routes): mode, keys, PIN, limits, its 254 gold picks (13-27 Nov), notes", s["keys"] and s["pin_set"]
-          and s["desk"] == "gold" and len(s["picks"]) == 254 and {p["product"] for p in s["picks"]} == {"XAUTUSD"}
+    check("status (gold, the original routes): mode, keys, PIN, limits, its 344 gold picks (13-28 Nov), notes", s["keys"] and s["pin_set"]
+          and s["desk"] == "gold" and len(s["picks"]) == 344 and {p["product"] for p in s["picks"]} == {"XAUTUSD"}
           and s["limits"]["risk_usd"] == 5 and s["limits"]["daily_stop_usd"] == 20 and s["limits"]["leverage"] == 10
           and len(s["notes"]) >= 5)
     c = await M.status("crypto")
@@ -914,11 +920,12 @@ async def main():
     late.update({(p["acct"], p["mkt"]): "2026-11-19" for p in g["picks"][30:50]})                    # section 34
     late.update({(p["acct"], p["mkt"]): "2026-11-22" for p in c["picks"][15:24] + g["picks"][50:99]})  # section 36
     late.update({(p["acct"], p["mkt"]): "2026-11-24" for p in c["picks"][24:] + g["picks"][99:102]})  # section 39
-    late.update({(p["acct"], p["mkt"]): "2026-11-27" for p in g["picks"][102:]})                     # section 43
+    late.update({(p["acct"], p["mkt"]): "2026-11-27" for p in g["picks"][102:254]})                  # section 43
+    late.update({(p["acct"], p["mkt"]): "2026-11-28" for p in g["picks"][254:]})                     # section 46
     check("the picks: TD-02 joins TH-05, TL-04 and TH-01; CP-06 then TL-04's gold book join the five gold; each new one "
           "carries its own pick time",
           [p["acct"] for p in c["picks"]][:4] == ["TH-05", "TL-04", "TH-01", "TD-02"]
-          and [p["acct"] for p in g["picks"]][5:7] == ["CP-06", "TL-04"] and len(g["picks"]) == 254
+          and [p["acct"] for p in g["picks"]][5:7] == ["CP-06", "TL-04"] and len(g["picks"]) == 344
           and all((p.get("picked_at") or "").startswith(late[(p["acct"], p["mkt"])])
                   for p in c["picks"] + g["picks"] if (p["acct"], p["mkt"]) in late)
           and all(p.get("picked_at") is None for p in c["picks"] + g["picks"] if (p["acct"], p["mkt"]) not in late),
@@ -1184,8 +1191,8 @@ async def main():
     gp, cp = M.DESKS["gold"].picks, M.DESKS["crypto"].picks
     gk, ck = {(p.acct, p.mkt) for p in gp}, {(p.acct, p.mkt) for p in cp}
     check("the gold desk: the 7 before, 13 + 4 Premium gold books, 6 H1 templates and the Factory top 20 (50, then 49 "
-          "more on 22 Nov: section 36, 3 on 24 Nov: section 39, 152 on 27 Nov: section 43); the bitcoin desk: 4 + 5 + 6 (15, then 9, then 8)",
-          len(gp) == len(gk) == 254 and len(cp) == len(ck) == 32
+          "more on 22 Nov: section 36, 3 on 24 Nov: section 39, 152 on 27 Nov: section 43, 90 on 28 Nov: section 46); the bitcoin desk: 4 + 5 + 6 (15, then 9, then 8)",
+          len(gp) == len(gk) == 344 and len(cp) == len(ck) == 32
           and [p.acct for p in gp if p.src == M.GOLD_SF][:20] == ["SF0181", "SF0020", "SF0245", "SF0013", "SF0182", "SF0331",
                                                                   "SF0346", "SF0213", "SF0324", "SF0022", "SF0219", "SF0497",
                                                                   "SF0021", "SF0251", "SF0370", "SF0542", "SF0205", "SF0228",
@@ -1328,7 +1335,7 @@ async def main():
     pr = next(p for p in g["picks"] if p["acct"] == "H1-RIB")
     check("the page lists the H1 template with its source, its own record and its real trades",
           pr["src"] == "gold_h1" and pr["template"] == "ema_ribbon" and pr["trades"] == 12 and pr["live"]["trades"] == 1
-          and pr["backtest"].startswith("pooled only") and len(g["picks"]) == 254, pr)
+          and pr["backtest"].startswith("pooled only") and len(g["picks"]) == 344, pr)
 
     # ── 32. the page's paper view: each strategy's own paper trades beside what the desk did with them ─────
     section("32. The paper view: each strategy's paper record and open trade now, its latest signals and the desk's decision")
@@ -1402,7 +1409,7 @@ async def main():
     advance(31)
     g = await M.status()
     check("the paper side unreadable: the page still gets the desk, its picks without a paper record, no signals",
-          g.get("mode") == "live" and len(g["picks"]) == 254 and all(p["paper"] is None for p in g["picks"])
+          g.get("mode") == "live" and len(g["picks"]) == 344 and all(p["paper"] is None for p in g["picks"])
           and g["signals"] is None and g["paper_view"] is None)
     db.premium_trades = good
     db2 = fresh(mode="off")
@@ -1746,11 +1753,11 @@ async def main():
           and rec("SF0474")[0] == 51 and rec("SF0344")[:2] == (154, -4.11))
     verdict = lambda ps: Counter(p.backtest.split(":")[0].split(" ")[0] for p in ps)   # noqa: E731 - as the page counts
     check("what each one's own backtest said, counted the way the page counts it, is what the desks' notes say "
-          "(from 24 Nov with section 39's picks)",
-          verdict(gp) == {"loses": 16, "earns": 5, "never": 16, "pooled": 7, "factory": 210}
+          "(from 28 Nov with section 46's picks)",
+          verdict(gp) == {"loses": 46, "earns": 8, "never": 73, "pooled": 7, "factory": 210}
           and verdict(cp) == {"loses": 11, "never": 21}
-          and "254 unproven gold strategies" in M.GOLD_NOTES[0] and M.GOLD_NOTES[1].startswith("Sixteen lose")
-          and "five earn" in M.GOLD_NOTES[1] and "sixteen were" in M.GOLD_NOTES[1] and "the 210 Factory" in M.GOLD_NOTES[1]
+          and "344 unproven gold strategies" in M.GOLD_NOTES[0] and M.GOLD_NOTES[1].startswith("Forty-six lose")
+          and "eight earn" in M.GOLD_NOTES[1] and "seventy-three were" in M.GOLD_NOTES[1] and "the 210 Factory" in M.GOLD_NOTES[1]
           and "32 strategies" in M.CRYPTO_NOTES[0] and "eleven lose" in M.CRYPTO_NOTES[1]
           and "twenty-one" in M.CRYPTO_NOTES[1],
           (verdict(gp), verdict(cp)))
@@ -1921,11 +1928,11 @@ async def main():
     check("the paper desk is told the new Premium books (bitcoin, gold, ether), never the H1 or Factory ones",
           doc is not None and {"DT-05|BTCUSD", "TC-04|BTCUSD", "CP-21|XAUUSD", "TF-01|XAUTUSD", "JR-03|XAUTUSD",
                                "DD-04|ETHUSD", "BX-02|ETHUSD"} <= set(doc["books"])
-          and not any(b.startswith(("H1-", "SF")) for b in doc["books"]) and len(doc["books"]) == 69, doc)
+          and not any(b.startswith(("H1-", "SF")) for b in doc["books"]) and len(doc["books"]) == 159, doc)
     g = await M.status()
-    check("the page: 254 gold picks, each new one with its pick time; the notes name 254",
-          len(g["picks"]) == 254 and sum(1 for p in g["picks"] if p["picked_at"] == M.NEW_PICKED_AT_4) == 49
-          and "254" in g["notes"][0], len(g["picks"]))
+    check("the page: 344 gold picks, each new one with its pick time; the notes name 344",
+          len(g["picks"]) == 344 and sum(1 for p in g["picks"] if p["picked_at"] == M.NEW_PICKED_AT_4) == 49
+          and "344" in g["notes"][0], len(g["picks"]))
 
     # ── 37. 23 Nov: each strategy's own lot size and ON/OFF ────────────────────────────────────────────
     section("37. Each strategy's own lots (default one contract) and ON/OFF (default ON), set from the page")
@@ -2169,9 +2176,9 @@ async def main():
               not missing and len(set(asked)) == len(asked) and joined == sorted((p.acct, p.mkt) for p in new)
               and len(kept) == len(asked) - len(new), (missing, joined))
     check("BX-02 is still the only BX book of the bitcoin desk on BTCUSD's side: BX-01's and BX-02's bitcoin books are not "
-          "picks, nor are DD-03's or TD-03's other books",
+          "picks, nor is DD-03's; TD-03's gold book joined the gold desk only on 28 Nov (section 46), not with these",
           all(k not in M.DESKS["crypto"].pick for k in (("BX-01", "BTCUSD"), ("BX-02", "BTCUSD"), ("DD-03", "BTCUSD")))
-          and ("TD-03", "XAUTUSD") not in M.DESKS["gold"].pick)
+          and M.DESKS["gold"].pick[("TD-03", "XAUTUSD")].picked_at == M.NEW_PICKED_AT_8)
     by = {(p.acct, p.mkt): p for p in g24 + c24}
     rec = lambda a, m: (by[(a, m)].trades, by[(a, m)].sum_r, by[(a, m)].t, by[(a, m)].win)   # noqa: E731
     check("records as of 00:30 IST 24 Nov, by the Premium method (re-proven on five frozen records before they were read)",
@@ -2245,7 +2252,7 @@ async def main():
     check("on the page: the 11 with their pick time, each at the desks' default (one contract, ON), each ranked; the "
           "bitcoin desk shows DD-04 twice, one row a book",
           len(new) == 11 and all(p["cfg"]["contracts"] == 1 and p["cfg"]["on"] for p in new)
-          and all(p.get("rank") for p in new) and len(c["picks"]) == 32 and len(g["picks"]) == 254
+          and all(p.get("rank") for p in new) and len(c["picks"]) == 32 and len(g["picks"]) == 344
           and sorted(p["mkt"] for p in c["picks"] if p["acct"] == "DD-04") == ["BTCUSD", "ETHUSD"]
           and len({f"{p['acct']}|{p['mkt']}" for p in c["picks"]}) == 32,
           [(p["acct"], p["mkt"], p["cfg"], bool(p.get("rank"))) for p in new])
@@ -2271,7 +2278,7 @@ async def main():
     check("the gold desk keeps its seven H1 picks untouched; Prior Session High/Low is not in the new book",
           [p.acct for p in M.DESKS["gold"].picks if p.src == M.GOLD_H1] == ["H1-RIB", "H1-RND", "H1-DCF", "H1-PIV",
                                                                              "H1-DCS", "H1-KLT", "H1-PSB"]
-          and "H1-PSB" not in {p.acct for p in pg.picks} and len(M.DESKS["gold"].picks) == 254)
+          and "H1-PSB" not in {p.acct for p in pg.picks} and len(M.DESKS["gold"].picks) == 344)
     ids = {}
     for k in ("gold", "crypto", "premium_gold"):
         with M._use(k):
@@ -2747,13 +2754,13 @@ async def main():
     # ── 43. 27 Nov: the Factory board's top 209 on the gold desk ───────────────────────────────────────
     section("43. 27 Nov: 152 more of the Gold Desk Factory board's top 209 on the gold desk, one contract and ON each")
     g27 = [p for p in M.GOLD_PICKS if p.picked_at == M.NEW_PICKED_AT_7]
-    check("152 new Factory strategies on XAUTUSD after the 102, in board order (rank 13 SF0520 ... rank 209 SF0234); 254 "
-          "in all, 210 of them Factory, no (strategy, market) twice",
-          len(g27) == 152 and tuple(M.GOLD_PICKS[102:]) == tuple(g27) and len(M.GOLD_PICKS) == 254
+    check("152 new Factory strategies on XAUTUSD after the 102, in board order (rank 13 SF0520 ... rank 209 SF0234); 344 "
+          "in all with section 46's 90, 210 of them Factory, no (strategy, market) twice",
+          len(g27) == 152 and tuple(M.GOLD_PICKS[102:254]) == tuple(g27) and len(M.GOLD_PICKS) == 344
           and all(p.src == M.GOLD_SF and p.template == p.acct and p.mkt == p.product == "XAUTUSD"
                   and p.backtest == M._SF_BACKTEST and p.name.startswith("Gold Desk Strategy Factory: ") for p in g27)
           and len({p.acct for p in M.GOLD_PICKS if p.src == M.GOLD_SF}) == 210
-          and len({(p.acct, p.mkt) for p in M.GOLD_PICKS}) == 254
+          and len({(p.acct, p.mkt) for p in M.GOLD_PICKS}) == 344
           and [p.acct for p in g27[:6]] == ["SF0520", "SF0352", "SF0450", "SF0418", "SF0371", "SF0427"]
           and g27[-1].acct == "SF0234" and M.NEW_PICKED_AT_7 == "2026-11-27T00:15:00+05:30",
           [p.acct for p in g27[:8]])
@@ -2793,12 +2800,12 @@ async def main():
           and (M.D.pos.get(GOLD) or {}).get("size", 0) == 0, (a and a.get("status"), b and b.get("status")))
     g = await M.status()
     new = [p for p in g["picks"] if p["picked_at"] == M.NEW_PICKED_AT_7]
-    check("the page: 254 gold picks, the 152 new ones at one contract and ON with a rank; the notes name 254 and the 210 "
+    check("the page: 344 gold picks, the 152 new ones at one contract and ON with a rank; the notes name 344 and the 210 "
           "Factory strategies, and say Delta's 100 open orders cap how many hold a trade at once",
-          len(g["picks"]) == 254 and len(new) == 152
+          len(g["picks"]) == 344 and len(new) == 152
           and all(p["cfg"]["contracts"] == 1 and p["cfg"]["on"] and p.get("rank") for p in new)
-          and "254 unproven gold strategies" in g["notes"][0] and "the 210 Factory" in g["notes"][1]
-          and any("All 254 can hold a trade at the same time" in n and "100 open orders" in n for n in g["notes"]),
+          and "344 unproven gold strategies" in g["notes"][0] and "the 210 Factory" in g["notes"][1]
+          and any("All 344 can hold a trade at the same time" in n and "100 open orders" in n for n in g["notes"]),
           (len(g["picks"]), len(new)))
     check("the bitcoin desk and the Premium Gold book are unchanged (32 and 6)",
           len(M.DESKS["crypto"].picks) == 32 and len(M.DESKS["premium_gold"].picks) == 6)
@@ -3060,6 +3067,112 @@ async def main():
           and any("One safety stop on Delta covers the whole gold position" in n_ for n_ in gn)
           and any("Each trade's stop and target live on Delta itself" in n_ for n_ in M.DESKS["crypto"].notes))
     M.STOP_SLOTS, M.APP_STOP_PRODUCTS, M.APP_TARGET_PRODUCTS = SLOTS0, frozenset(), frozenset()
+
+    # ── 46. 28 Nov: every other Premium gold book on the gold desk ─────────────────────────────────────────
+    section("46. 28 Nov: the other 90 Premium gold books on the gold desk (all 127), one contract and ON each")
+    g28 = [p for p in M.GOLD_PICKS if p.picked_at == M.NEW_PICKED_AT_8]
+    check("90 new Premium gold books after the 254, by study (24 of the 20 channels, 8 Booming Bulls, 1 top-20, 19 "
+          "shortlist, 17 crypto playlist, 16 Gold v2, 3 of the 11 channels, 2 Trade Room); 344 in all, none twice",
+          len(g28) == 90 and tuple(M.GOLD_PICKS[254:]) == tuple(g28) and len(M.GOLD_PICKS) == 344
+          and len({(p.acct, p.mkt) for p in M.GOLD_PICKS}) == 344
+          and all(p.src == M.PREMIUM and p.template is None and p.product == "XAUTUSD" and p.mkt in ("XAUTUSD", "XAUUSD")
+                  for p in g28)
+          and sum(p.mkt == "XAUUSD" for p in g28) == 29 and M.NEW_PICKED_AT_8 == "2026-11-28T00:40:00+05:30"
+          and [p.acct for p in g28[:3]] == ["DE-04", "DR-02", "DT-06"] and g28[-1].acct == "TR-04",
+          [p.acct for p in g28[:5]])
+    ALL127 = {"AF-03|XAUTUSD", "AF-04|XAUTUSD", "BB-07|XAUUSD", "BB-08|XAUUSD", "BB-09|XAUUSD", "BB-10|XAUUSD",
+              "BB-11|XAUUSD", "BB-12|XAUUSD", "BB-13|XAUUSD", "BB-16|XAUUSD", "BB-17|XAUUSD", "BG-01|XAUUSD",
+              "BG-02|XAUUSD", "BG-03|XAUUSD", "BG-05|XAUUSD", "BG-08|XAUUSD", "BO-01|XAUTUSD", "BO-02|XAUTUSD",
+              "BV-01|XAUTUSD", "CA-01|XAUTUSD", "CA-02|XAUTUSD", "CD-02|XAUTUSD", "CP-01|XAUUSD", "CP-02|XAUUSD",
+              "CP-03|XAUUSD", "CP-05|XAUUSD", "CP-06|XAUUSD", "CP-07|XAUUSD", "CP-08|XAUUSD", "CP-09|XAUUSD",
+              "CP-10|XAUUSD", "CP-12|XAUUSD", "CP-13|XAUUSD", "CP-16|XAUUSD", "CP-17|XAUUSD", "CP-18|XAUUSD",
+              "CP-20|XAUUSD", "CP-21|XAUUSD", "CP-22|XAUUSD", "CP-23|XAUUSD", "CP-24|XAUUSD", "CP-25|XAUUSD",
+              "CP-26|XAUUSD", "CP-27|XAUUSD", "CP-28|XAUUSD", "DE-04|XAUTUSD", "DR-01|XAUTUSD", "DR-02|XAUTUSD",
+              "DT-01|XAUTUSD", "DT-02|XAUTUSD", "DT-03|XAUTUSD", "DT-06|XAUTUSD", "DT-07|XAUTUSD", "DT-08|XAUTUSD",
+              "DX-01|XAUTUSD", "FL-02|XAUTUSD", "FZ-01|XAUTUSD", "FZ-02|XAUTUSD", "HF-01|XAUTUSD", "JO-01|XAUTUSD",
+              "JR-01|XAUTUSD", "JR-03|XAUTUSD", "JR-04|XAUTUSD", "JR-05|XAUTUSD", "MA-02|XAUTUSD", "MA-03|XAUTUSD",
+              "MA-04|XAUTUSD", "MH-01|XAUTUSD", "MH-02|XAUTUSD", "MH-03|XAUTUSD", "NK-02|XAUTUSD", "PF-01|XAUTUSD",
+              "PL-06|XAUTUSD", "PR-12|XAUTUSD", "PT-01|XAUTUSD", "PT-02|XAUTUSD", "PT-03|XAUTUSD", "PT-04|XAUTUSD",
+              "RU-01|XAUTUSD", "RU-02|XAUTUSD", "RU-03|XAUTUSD", "RU-04|XAUTUSD", "RU-05|XAUTUSD", "RU-06|XAUTUSD",
+              "RU-07|XAUTUSD", "RU-10|XAUTUSD", "SB-06|XAUUSD", "SK-01|XAUTUSD", "TC-04|XAUTUSD", "TC-05|XAUTUSD",
+              "TC-08|XAUTUSD", "TC-10|XAUTUSD", "TC-11|XAUTUSD", "TC-13|XAUTUSD", "TD-01|XAUTUSD", "TD-02|XAUTUSD",
+              "TD-03|XAUTUSD", "TD-04|XAUTUSD", "TD-05|XAUTUSD", "TF-01|XAUTUSD", "TH-03|XAUUSD", "TK-07|XAUTUSD",
+              "TK-08|XAUTUSD", "TL-01|XAUTUSD", "TL-02|XAUTUSD", "TL-04|XAUTUSD", "TL-06|XAUTUSD", "TO-01|XAUTUSD",
+              "TP-01H|XAUTUSD", "TP-01|XAUTUSD", "TP-02|XAUTUSD", "TP-03|XAUTUSD", "TP-04|XAUTUSD", "TP-05|XAUTUSD",
+              "TQ-02|XAUTUSD", "TQ-05|XAUTUSD", "TR-03|XAUTUSD", "TR-04|XAUTUSD", "TS-04|XAUTUSD", "TT-02|XAUTUSD",
+              "TU-01|XAUTUSD", "TU-02|XAUTUSD", "VS-02|XAUTUSD", "VS-03|XAUTUSD", "YT-11|XAUUSD", "YT-14|XAUUSD",
+              "YT-18|XAUUSD"}
+    check("every gold book of the Premium paper desk is a gold pick now (the 127 it held at the pick: 85 on XAUTUSD, 42 "
+          "on XAUUSD), and no other Premium book",
+          {f"{p.acct}|{p.mkt}" for p in M.GOLD_PICKS if p.src == M.PREMIUM} == ALL127 and len(ALL127) == 127
+          and sum(k.endswith("|XAUUSD") for k in ALL127) == 42)
+    fp = [(p.acct, p.mkt, p.product, p.trades, p.sum_r, p.t, p.win, p.backtest, p.picked_at, p.src, p.template)
+          for p in M.GOLD_PICKS[:254]]
+    check("none of the 254 before them changed (every field but the name), nor the bitcoin desk and the Premium Gold "
+          "book", hashlib.sha256(repr(fp).encode()).hexdigest() == "550106145dbb6bc07c3d8ac30601ac41e0dd7267d2c037814ce66442d1dbd69d"
+          and len(M.DESKS["crypto"].picks) == 32 and len(M.DESKS["premium_gold"].picks) == 6)
+    sf520 = next(p for p in M.GOLD_PICKS if p.acct == "SF0520")
+    check("the 27 Nov Factory names read as on the board: no mis-encoded dot left in any pick name",
+          not any("\u00c2" in p.name for d in M.DESKS.values() for p in d.picks)
+          and sf520.name == "Gold Desk Strategy Factory: VWAP Reclaim + Volume + HTF \u00b7 30m", sf520.name)
+    r28 = {p.acct: (p.trades, p.sum_r, p.t, p.win) for p in g28}
+    check("their records as read at the pick (the method re-proven on five frozen records first); the never-traded "
+          "ones start at zero", r28["BG-02"] == (140, -36.73, -2.12, 35) and r28["TQ-02"] == (57, -37.79, -4.37, 26)
+          and r28["CP-27"] == (11, 0.89, 0.21, 27) and r28["VS-03"] == (1, 1.61, 0.0, 100)
+          and r28["DE-04"] == r28["AF-04"] == r28["TH-03"] == r28["BB-12"] == (0, 0.0, 0.0, 0),
+          {k: r28[k] for k in ("BG-02", "TQ-02", "DE-04")})
+    bt = {p.acct: p.backtest for p in g28}
+    check("their backtests: the 20-channel books' own on XAUUSD, Booming Bulls and top-20 hold-outs of the variant on "
+          "paper, the rest never backtested; the rank reads every one that reports a number",
+          bt["DR-02"] == "loses: -0.26R a trade over 2,798 trades (t -10.3)"
+          and bt["DE-04"].startswith("earns: +0.96R a trade over 57 trades (t 2.0), not significant")
+          and bt["BB-07"] == "loses: -0.16R a trade over 667 hold-out trades (t -3.0; its variant S1, the one on paper)"
+          and bt["BB-10"] == "loses: -0.31R a trade over 655 hold-out trades (t -6.1)"
+          and bt["YT-11"].startswith("loses: -0.23R a trade over 115 hold-out trades")
+          and all(bt[c] == "never backtested" for c in ("AF-03", "CP-03", "TQ-02", "BG-02", "TR-03"))
+          and sum(b.startswith("loses") for b in bt.values()) == 30 and sum(b.startswith("earns") for b in bt.values()) == 3
+          and sum(b == "never backtested" for b in bt.values()) == 57
+          and all((M._bt_edge(b) is not None) == b.startswith(("loses", "earns")) for b in bt.values()))
+
+    # the new books trade as the others do, under the production hybrid (gold's stops and targets as on the box)
+    M.APP_TARGET_PRODUCTS, M.APP_STOP_PRODUCTS = PROD_APP_TARGET, PROD_APP_STOP
+    db = fresh(gold=3885.0)
+    gold_book(db)
+    M._PRIORITY_SENT = None
+    n1 = paper(db, "TR-03", "XAUTUSD", 1, 3885.0, 3878.0, 3899.0, ago=40)      # The Trade Room, market XAUTUSD
+    n2 = paper(db, "CP-03", "XAUUSD", -1, 3885.0, 3892.0, 3871.0, ago=35)      # the crypto playlist, market XAUUSD
+    n3 = paper(db, "AF-04", "XAUTUSD", 1, 3885.0, 3879.0, 3897.0, ago=30)      # Gold v2: no trade before its pick
+    n4 = paper(db, "TD-02", "XAUTUSD", -1, 3885.0, 3891.0, 3873.0, ago=25)     # TD-02's gold book (its bitcoin book
+    #                                                                            is a bitcoin pick since 15 Nov)
+    nb = paper(db, "TR-03", "BTCUSD", 1, 69000.0, 68600.0, 69800.0, ago=20)    # TR-03's bitcoin book: no pick
+    await cyc(db)
+    t1, t2, t3, t4, tb = (trade(db, x) for x in (n1, n2, n3, n4, nb))
+    check("the gold desk copies the new picks' open paper trades at once, one XAUTUSD contract each, on either market "
+          "key, a long and a short each way; the account nets to zero; a new pick's bitcoin book is not copied",
+          all(t and t["status"] == "open" and t["contracts"] == 1 and t["product"] == "XAUTUSD" for t in (t1, t2, t3, t4))
+          and all(any(d["_id"] == t["_id"] for d in db.live_delta_trades.docs) for t in (t1, t2, t3, t4))
+          and (t2["acct"], t2["mkt"], t2["side"]) == ("CP-03", "XAUUSD", -1) and (t1["acct"], t1["side"]) == ("TR-03", 1)
+          and tb is None and (M.D.pos.get(GOLD) or {}).get("size", 0) == 0,
+          [(t or {}).get("status") for t in (t1, t2, t3, t4)])
+    check("each new trade under the hybrid: its stop rests on Delta (room for it), its target is the app's",
+          all((t.get("legs") or {}).get("stop_id") and (t.get("legs") or {}).get("target_app") for t in (t1, t2, t3, t4)),
+          [(t or {}).get("legs") for t in (t1, t2)])
+    doc = next((d for d in db.premium_meta.docs if d["_id"] == "live_priority"), None)
+    check("the paper desk is told all 159 Premium books, the 90 new gold ones among them (never an H1 or Factory one)",
+          doc is not None and len(doc["books"]) == 159 and ALL127 <= set(doc["books"])
+          and {"TD-02|BTCUSD", "TD-02|XAUTUSD", "CP-03|XAUUSD"} <= set(doc["books"])
+          and not any(b.startswith(("H1-", "SF")) for b in doc["books"]), doc and len(doc["books"]))
+    g = await M.status()
+    new = [p for p in g["picks"] if p["picked_at"] == M.NEW_PICKED_AT_8]
+    check("the page: 344 gold picks, the 90 new ones at one contract and ON with a rank; the notes name 344 and the "
+          "28 Nov batch",
+          len(g["picks"]) == 344 and len(new) == 90
+          and all(p["cfg"]["contracts"] == 1 and p["cfg"]["on"] and p.get("rank") for p in new)
+          and "344 unproven gold strategies" in g["notes"][0]
+          and "on 28 Nov the other 90 gold books of the Premium paper desk" in g["notes"][0]
+          and any("All 344 can hold a trade at the same time" in n for n in g["notes"]),
+          (len(g["picks"]), len(new)))
+    M.APP_STOP_PRODUCTS, M.APP_TARGET_PRODUCTS = frozenset(), frozenset()
 
 
 if __name__ == "__main__":
