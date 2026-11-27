@@ -2760,6 +2760,12 @@ def _record(trades: list, prods: dict, now: float, by_day: bool = False) -> dict
         t_stat = round((net / n) / (sd / math.sqrt(n)), 2) if sd > 0 else None
     peak = _peak_margin(closed + held, prods, now)
     ret = 100.0 * net / peak if n and peak > 0 else None
+    # 27 Nov 2026 (the owner's ask, the strategies tables): the capital put into every real trade so far, added up -
+    # each trade's own margin at its fill, closed and open - and what it returned: the closed net P&L plus the open
+    # trades' P&L now. The owner chose this sum over the peak margin above (which Return % keeps) and the position value.
+    invested = sum(_margin(t, prods) for t in closed + held)
+    open_usd = sum(float(t.get("unrealised_usd") or 0.0) for t in held)
+    returns = net + open_usd
     days: dict[str, list] = {}
     for t, x in zip(closed, pnl):
         d = days.setdefault(t.get("day_closed") or _day(float(t.get("closed_at") or now)), [0, 0, 0.0])
@@ -2783,7 +2789,9 @@ def _record(trades: list, prods: dict, now: float, by_day: bool = False) -> dict
         "avg_trade_pct": round(ret / n, 3) if ret is not None else None,
         "best_usd": round(max(pnl), 4) if pnl else None, "worst_usd": round(min(pnl), 4) if pnl else None,
         "max_dd_usd": round(dd, 4), "avg_hold_s": round(sum(holds) / len(holds)) if holds else None,
-        "open_usd": round(sum(float(t.get("unrealised_usd") or 0.0) for t in held), 4),
+        "open_usd": round(open_usd, 4),
+        "invested_usd": round(invested, 4), "returns_usd": round(returns, 4),
+        "invested_return_pct": round(100.0 * returns / invested, 2) if invested > 0 else None,
         "first_at": min((float(t.get("opened_at") or t.get("created_at") or now) for t in closed + held), default=None),
         "last_at": (float(closed[-1].get("closed_at") or 0) or None) if closed else None,
     }

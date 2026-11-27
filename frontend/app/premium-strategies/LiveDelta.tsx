@@ -54,7 +54,10 @@ export type Results = { trades: number; wins: number; open: number; win_pct: num
   won_usd: number; lost_usd: number; pf: number | null; t: number | null; peak_margin_usd: number; return_pct: number | null;
   days: number; avg_day_pct: number | null; avg_day_usd: number | null; avg_trade_usd: number | null;
   avg_trade_pct: number | null; best_usd: number | null; worst_usd: number | null; max_dd_usd: number;
-  avg_hold_s: number | null; open_usd: number; first_at: number | null; last_at: number | null };
+  avg_hold_s: number | null; open_usd: number; first_at: number | null; last_at: number | null;
+  // 27 Nov 2026: every real trade's margin added up (closed and open), the closed net plus the open P&L now, and that
+  // as a % of the margin; absent on an older server
+  invested_usd?: number; returns_usd?: number; invested_return_pct?: number | null };
 export type DeskResults = Results & { green_days: number;
   by_day: { day: string; trades: number; wins: number; pnl_usd: number; return_pct: number | null }[] };
 type Pick = { acct: string; mkt: string; product: string; name: string; trades: number; sum_r: number; t: number; win: number;
@@ -146,6 +149,9 @@ export function lotMoney(s: LiveStatus, product: string, lots: number): LotMoney
 export const inr = (dollars: number | null | undefined, fx: number | null | undefined) =>
   dollars === null || dollars === undefined || !fx ? "—"
     : `₹${(dollars * fx).toLocaleString("en-IN", { maximumFractionDigits: dollars * fx < 1000 ? 2 : 0 })}`;
+/** Signed rupees ("+₹12.34", "−₹1,234") for a profit or loss; "" while no USD/INR rate is known. */
+const inrSigned = (dollars: number, fx: number | null | undefined) =>
+  !fx ? "" : `${dollars > 0 ? "+" : dollars < 0 ? "−" : ""}${inr(Math.abs(dollars), fx)}`;
 /** " (₹…)" after a dollar figure in a sentence; nothing while no USD/INR rate is known. */
 const inrIn = (dollars: number, fx: number | null | undefined) => (fx ? ` (${inr(dollars, fx)})` : "");
 /** Dollars of a position or its margin: always cents (a gold lot is about $3.6, its margin about 36 cents). */
@@ -748,6 +754,9 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   const pfCounts = pm ? pickCounts(picksN) : pCounts;
   const hasRank = s.picks.some((p) => !!p.rank);
   const hasCfg = s.picks.some((p) => p.cfg !== undefined);
+  // 27 Nov 2026: capital invested, returns and the % on it, once the server sends them (an older one: no such columns)
+  const hasInv = s.results?.invested_usd !== undefined || s.picks.some((p) => p.results?.invested_usd !== undefined);
+  const fxNow = s.usd_inr?.rate ?? null;
   // in rank order when the server ranks them (23 Nov); the app-wide sorter can re-sort by any column
   const picksShown = picksN.filter((p) => pf === "all" ? true : pf === "inTrade" ? inTrade(p)
     : pf === "real" ? (p.live?.trades ?? 0) + (p.live?.open ?? 0) > 0 : pf === "off" ? isOff(p) : !inTrade(p))
@@ -957,6 +966,13 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
               {hasRank && <th title="Expected net R a trade (R = what a trade risks at its stop)">Exp. R / trade</th>}
               {hasRank && <th title="How likely the expected R is above zero">Chance &gt; 0</th>}
               {hasPaper && <th className="l">Paper now</th>}
+              {hasInv && (
+                <>
+                  <th title="Every real trade's margin added up so far, closed and open (each trade's contracts × its fill price ÷ the leverage), in dollars and rupees">Capital invested</th>
+                  <th title="What that capital returned so far: the closed trades' net P&L after Delta's fees, plus the open trades' P&L now, in dollars and rupees">Returns</th>
+                  <th title="Returns ÷ Capital invested">Return % on capital</th>
+                </>
+              )}
               <th>Trades</th><th>Win %</th><th>PF</th><th>t‑stat</th><th>Net P&amp;L</th><th>Return %</th><th>Trading days</th>
               <th>Avg % / trading day</th><th>Open now</th>{hasPaper && <th className="l">Paper so far</th>}</tr>
           </thead>
@@ -1031,6 +1047,24 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
                       </td>
                     </>
                   )}
+                  {hasInv && (() => {
+                    const inv = r?.invested_usd ?? 0;
+                    const ret = r?.returns_usd ?? 0;
+                    const has = !!r && inv > 0;
+                    const how = has ? `${plural(n + openN, "real trade")} (${n} closed, ${openN} open) at ${L.leverage}x` : undefined;
+                    return (
+                      <>
+                        <td className="ld-num" title={how}>
+                          {has ? <>{usd(inv)}{fxNow ? <span className="ld-rs" data-r={inr(inv, fxNow)} /> : null}</> : "—"}</td>
+                        <td className={`ld-num ${has ? tone(ret) : ""}`}
+                          title={has ? `closed ${usd(net, true)} + open ${usd(r?.open_usd ?? 0, true)}` : undefined}>
+                          {has ? <>{usd(ret, true)}{fxNow ? <span className="ld-rs" data-r={inrSigned(ret, fxNow)} /> : null}</> : "—"}</td>
+                        <td className={`ld-num ${has ? tone(r?.invested_return_pct) : ""}`}
+                          title={has ? `${usd(ret, true)} on ${usd(inv)}` : undefined}>
+                          {has ? spct(r?.invested_return_pct) : "—"}</td>
+                      </>
+                    );
+                  })()}
                   <td>{n || openN ? n : "—"}</td>
                   <td>{n ? `${(r?.win_pct ?? (100 * wins) / n).toFixed(1)}%` : "—"}</td>
                   <td title={r && n && r.pf === null ? "no losing trade yet" : undefined}>{r && n && r.pf !== null ? num(r.pf) : "—"}</td>
@@ -1065,6 +1099,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
           one time{oneMargin ? ` (one contract at ${L.leverage}x holds about ${usd(oneMargin)} now)` : ""}; avg % /
           trading day = return % ÷ trading days, the IST days on which one of its real trades closed. No t-stat under {MIN_T} trades,
           and no profit factor before a losing trade.
+          {hasInv ? ` Capital invested = every real trade's margin added up so far, closed and open (each trade's contracts × its fill ÷ ${L.leverage}x); Returns = the closed trades' net P&L plus the open trades' P&L now; Return % on capital = Returns ÷ Capital invested.${fxNow ? ` Rupees at ₹${fxNow.toFixed(2)} a dollar, today's rate.` : ""}` : null}
         </p>
         {hasRank && s.rank_method && (
           <p className="ld-foot">{`${s.rank_method} Hover a rank for its parts. Green = 70% or more likely positive, amber 50-70%, grey under 50%. It is an estimate from short records, not a promise.`}</p>
@@ -1429,6 +1464,12 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-lot-m::before { content: attr(data-v); color: var(--text-secondary); font-weight: 700; }
         .ld .ld-lot-m::after { content: attr(data-g); }
         .ld .ld-lot.dirty + .ld-lot-m::before { color: var(--warn); }
+        /* 27 Nov 2026: rupees under a dollar figure (capital invested, returns), drawn from a data attribute so the
+           cell's text stays the dollar figure the app-wide sorter reads */
+        .ld .ld-rs { display: block; font-size: 10.5px; line-height: 1.35; font-weight: 400; color: var(--text-muted);
+                     white-space: nowrap; }
+        .ld .ld-rs::after { content: attr(data-r); }
+        .ld .gain .ld-rs, .ld .loss .ld-rs { color: inherit; opacity: 0.85; }
         /* the Premium Gold book's "Trade size and money" panel (24 Nov 2026) */
         .ld .ld-sz { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
         .ld .ld-sz-head { display: flex; flex-direction: column; gap: 4px; }

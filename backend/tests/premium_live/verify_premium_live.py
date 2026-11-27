@@ -2767,6 +2767,41 @@ async def main():
     check("the bitcoin desk and the Premium Gold book are unchanged (32 and 6)",
           len(M.DESKS["crypto"].picks) == 32 and len(M.DESKS["premium_gold"].picks) == 6)
 
+    # ── 44. 27 Nov: capital invested, returns and the return on it ─────────────────────────────────────
+    section("44. 27 Nov: each strategy's capital invested (every real trade's margin added up), its returns and the % on it")
+    pr44 = {"BTCUSD": {"contract_value": 0.001, "leverage": 10}}
+
+    def row44(acct, status, contracts, fill, opened, closed=None, pnl=None, day=None, mode="live", **kw):
+        return {"_id": f"{acct}|{opened}", "acct": acct, "mkt": "BTCUSD", "product": "BTCUSD", "mode": mode,
+                "status": status, "contracts": contracts, "fill": fill, "opened_at": opened, "created_at": opened,
+                **({"closed_at": closed, "pnl_usd": pnl, "day_closed": day, "fees": 0.1} if status == "closed" else {}), **kw}
+    rows44 = [row44("X", "closed", 4, 60000.0, 1000.0, 2000.0, 6.0, "2026-11-15"),     # $24 of margin
+              row44("Y", "closed", 1, 50000.0, 1500.0, 2500.0, -2.0, "2026-11-15"),    # $5
+              row44("X", "closed", 1, 50000.0, 3000.0, 4000.0, -1.0, "2026-11-16"),    # $5
+              row44("Y", "open", 1, 50000.0, 5000.0, unrealised_usd=0.5),             # $5, open: +$0.50 now
+              row44("X", "skipped", 1, 50000.0, 6000.0),
+              row44("X", "closed", 9, 50000.0, 500.0, 900.0, 99.0, "2026-11-14", mode="shadow")]
+    r44 = M._results(rows44, pr44, 9000.0)
+    k, x, y = r44["desk"], r44["per"]["X|BTCUSD"], r44["per"]["Y|BTCUSD"]
+    check("strategy X: $24 + $5 of margin = $29 invested; returns +$5 (no open trade) = +17.24% of it; Return % on its "
+          "peak margin unchanged (+20.83%)",
+          (x["invested_usd"], x["returns_usd"], x["invested_return_pct"], x["return_pct"]) == (29.0, 5.0, 17.24, 20.83), x)
+    check("strategy Y: $5 closed + $5 open = $10 invested; returns -$2 closed + $0.50 open = -$1.50 = -15%",
+          (y["invested_usd"], y["returns_usd"], y["invested_return_pct"]) == (10.0, -1.5, -15.0), y)
+    check("the desk: $39 invested over its four real trades (skipped and shadow rows left out), +$3.50 returned = +8.97%",
+          (k["invested_usd"], k["returns_usd"], k["invested_return_pct"]) == (39.0, 3.5, 8.97), k)
+    none44 = M._results([], pr44, 9000.0)["desk"]
+    plan44 = M._results([{**row44("P", "closed", 1, None, 1000.0, 2000.0, 0.5, "2026-11-15"), "plan": {"margin_usd": 2.5}}],
+                        {}, 9000.0)["desk"]
+    check("no trade: nothing invested and no % (never a division by zero); no product read yet: the plan's margin counts",
+          (none44["invested_usd"], none44["returns_usd"], none44["invested_return_pct"]) == (0.0, 0.0, None)
+          and (plan44["invested_usd"], plan44["returns_usd"], plan44["invested_return_pct"]) == (2.5, 0.5, 20.0),
+          (none44, plan44))
+    db = fresh()
+    g = await M.status()
+    check("the page gets them on every strategy with a real trade and on the desk (the status carries _results' records)",
+          all(k in (g.get("results") or {}) for k in ("invested_usd", "returns_usd", "invested_return_pct")), g.get("results"))
+
 
 if __name__ == "__main__":
     asyncio.run(main())
