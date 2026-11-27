@@ -285,6 +285,23 @@ class Delta:
             raise DeltaError(f"{kind}: Delta returned no order id", ambiguous=True)
         return {**o, "stop_price_sent": body["stop_price"], "limit_price_sent": body["limit_price"]}
 
+    async def safety_stop(self, product: Product, side: str, size: int, trigger: float,
+                          client_order_id: str | None = None) -> dict:
+        """A reduce-only stop-MARKET order of `size` contracts, triggered on the MARK price: premium_live's safety stop
+        for the desks' whole net position on a product (28 Nov 2026). Reduce-only, so it can only close a position,
+        never open or grow one."""
+        if side not in ("buy", "sell") or size < 1 or trigger <= 0:
+            raise DeltaError(f"refusing a safety stop of {size} contracts, side {side!r}, at {trigger}")
+        body = {"product_id": product.id, "size": int(size), "side": side, "order_type": "market_order",
+                "stop_order_type": "stop_loss_order", "stop_price": fmt_tick(trigger, product.tick),
+                "stop_trigger_method": "mark_price", "reduce_only": True}
+        if client_order_id:
+            body["client_order_id"] = client_order_id[:32]
+        o = _order(await self.request("POST", "/v2/orders", body))
+        if not o["id"]:
+            raise DeltaError("safety stop: Delta returned no order id", ambiguous=True)
+        return {**o, "stop_price_sent": body["stop_price"]}
+
     async def cancel_order(self, product_id: int, order_id: str) -> dict:
         """Cancel one order by id; returns its last state. A filled order cannot be cancelled (DeltaError): read it
         back with order() to learn what happened."""

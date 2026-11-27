@@ -84,7 +84,10 @@ type Plan = { price: number; contracts: number; risk_usd: number; notional_usd: 
 export type LiveTrade = { id: string; acct: string; mkt: string; product: string; name: string; mode: "live" | "shadow"; status: string;
   reason?: string; side: number; contracts?: number; fill?: number; stop: number; target: number | null; mark?: number;
   unrealised_usd?: number; pnl_usd?: number; fees?: number; exit_price?: number; close_reason?: string; created_at: number;
-  opened_at?: number; closed_at?: number; plan?: Plan; legs?: { stop?: string; stop_limit?: string; target?: string };
+  opened_at?: number; closed_at?: number; plan?: Plan;
+  // stop_id: the stop rests on Delta; stop_app: this server watches it (28 Nov 2026, gold); target_app: likewise (25 Nov)
+  legs?: { stop?: string; stop_limit?: string; target?: string; stop_id?: string | null; stop_app?: string | null;
+    target_app?: string | null };
   paper_entry_t?: number | null };
 type Totals = { trades: number; wins: number; pnl_usd: number; fees_usd: number; skipped: number; errors: number };
 export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boolean; pin_required?: boolean; mode: "off" | "shadow" | "live"; since?: number;
@@ -106,7 +109,16 @@ export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boole
     factory_age_s?: number | null } | null; results?: DeskResults | null;
   // the page's money figures (24 Nov 2026): each product's latest price and USD/INR; absent on an older server
   desk_products?: string[]; quotes?: Record<string, { price: number; at: number }>;
-  usd_inr?: { rate: number; asof?: string | null; source?: string } | null };
+  usd_inr?: { rate: number; asof?: string | null; source?: string } | null;
+  // how a gold desk's stops and targets are watched (28 Nov 2026); absent on an older server, null on the bitcoin desk
+  protection?: Protection | null };
+/** A hybrid desk's protection (28 Nov 2026): per product, the stops resting on Delta (the nearest, up to `slots`) and
+ *  the ones this server watches, the one safety stop for the whole net position, and the watcher's last look. */
+export type Protection = { slots: number;
+  products: Record<string, { resting: number; watched: number; quote_age_s: number | null; quote_src?: string | null;
+    safety: { side: string; size: number; level: number; at?: number } | null;
+    safety_fired?: { at: number; price: number; trades: number } | null }>;
+  watcher?: { checked_s_ago: number | null; closed: number; errors: number; last_error: string | null } };
 
 export const usd = (v: number | null | undefined, signed = false) => {
   if (v === null || v === undefined || Number.isNaN(v)) return "—";
@@ -163,6 +175,27 @@ const lotLine = (m: LotMoney | null) => (m ? {
   value: m.fx ? `${dol(m.value)} · ${inr(m.value, m.fx)} of ${m.what}` : `${dol(m.value)} of ${m.what}`,
   margin: m.fx ? `margin ${dol(m.margin)} · ${inr(m.margin, m.fx)}` : `margin ${dol(m.margin)}`,
 } : null);
+/** One line over the open positions of a gold desk (28 Nov 2026): which stops rest on Delta and which this server
+ *  watches, the safety stop, and how fresh the watcher's price is. */
+function ProtectionLine({ p }: { p: Protection }) {
+  const w = p.watcher;
+  return (
+    <div className="ld-note ld-prot" role="note">
+      {Object.entries(p.products).map(([sym, x]) => (
+        <span key={sym}>
+          <b>{sym}</b>
+          {`: ${x.resting} stop${x.resting === 1 ? "" : "s"} resting on Delta (the nearest the price, up to ${p.slots}), ${x.watched} watched by the app`}
+          {x.safety ? ` · safety stop on Delta: ${x.safety.side} ${x.safety.size} at ${px(x.safety.level)} (mark price)`
+            : " · no safety stop (no net position)"}
+          {x.quote_age_s !== null ? ` · live price ${x.quote_src === "stream" ? "stream" : "REST"}, ${x.quote_age_s}s old` : ""}
+          {x.safety_fired ? ` · the safety stop fired ${ago(x.safety_fired.at, Date.now() / 1000)} at ${px(x.safety_fired.price)}: ${x.safety_fired.trades} trades booked there` : ""}
+        </span>
+      ))}
+      {w ? <span>{w.checked_s_ago !== null ? ` · watcher looked ${w.checked_s_ago}s ago` : " · watcher starting"}
+        {w.closed ? `, ${w.closed} closed since the last restart` : ""}</span> : null}
+    </div>
+  );
+}
 const sizeLabel = (r: number | "min" | null) => (r === "min" ? "1 contract a trade" : `${usd(r)} a trade`);
 const px = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : v.toLocaleString("en-US", { maximumFractionDigits: v > 1000 ? 1 : 2 });
@@ -1209,6 +1242,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
           </span>
         ) : null}
       </h4>
+      {s.protection ? <ProtectionLine p={s.protection} /> : null}
       {s.open.length && !openShown.length ? (
         <p className="ld-dim ld-empty">{isSearch(oName) ? `No real position is open now for ${who(oName)}.` : `${oName} has no real position open now.`}</p>
       ) : s.open.length ? (
@@ -1224,7 +1258,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
                 <div><dt>Contracts</dt><dd>{t.contracts ?? "—"}</dd></div>
                 <div><dt>Filled</dt><dd>{px(t.fill)}</dd></div>
                 <div><dt>Mark</dt><dd>{px(t.mark)}</dd></div>
-                <div><dt>Stop on Delta</dt><dd>{t.legs?.stop ?? px(t.stop)}</dd></div>
+                <div><dt>{t.legs && !t.legs.stop_id && t.legs.stop_app ? "Stop, app watches" : "Stop on Delta"}</dt><dd>{t.legs?.stop ?? px(t.stop)}</dd></div>
                 <div><dt>Target</dt><dd>{t.legs?.target ?? (t.target ? px(t.target) : "paper exit")}</dd></div>
                 <div><dt>Since</dt><dd>{ist(t.opened_at ?? t.created_at)}</dd></div>
               </dl>
@@ -1469,6 +1503,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-rs { display: block; font-size: 10.5px; line-height: 1.35; font-weight: 400; color: var(--text-muted);
                      white-space: nowrap; }
         .ld .ld-rs::after { content: attr(data-r); }
+        .ld .ld-prot { margin: 6px 0 10px; font-size: 12.5px; line-height: 1.5; }
         .ld .gain .ld-rs, .ld .loss .ld-rs { color: inherit; opacity: 0.85; }
         /* the Premium Gold book's "Trade size and money" panel (24 Nov 2026) */
         .ld .ld-sz { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }

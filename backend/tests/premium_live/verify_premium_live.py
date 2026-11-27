@@ -62,6 +62,7 @@ from app.services import premium_live as M  # noqa: E402
 from app.services.delta_rest import Delta, DeltaError  # noqa: E402
 
 PROD_APP_TARGET = M.APP_TARGET_PRODUCTS     # as the server reads it (25 Nov 2026): gold only; section 41
+PROD_APP_STOP = M.APP_STOP_PRODUCTS         # as the server reads it (28 Nov 2026): gold only; section 45
 
 UTC = timezone.utc
 T0 = datetime(2026, 11, 16, 9, 0, tzinfo=UTC).timestamp()      # a Monday, 14:30 IST
@@ -107,6 +108,7 @@ class FakeDelta(Delta):
         self.stops = {}               # order id -> a trade's own leg (a standalone stop order), as Delta reports it
         self.book = {}                # order id -> every order placed, as Delta reports it (by id or client id)
         self.stop_orders = []         # the bodies of the legs placed
+        self.safety_orders = []       # the bodies of the safety stops placed (28 Nov 2026)
 
     # quotes
     def bid(self, sym):
@@ -154,6 +156,20 @@ class FakeDelta(Delta):
         pid = SPECS[sym]["id"]
         for oid, o in sorted(self.stops.items(), key=lambda kv: int(kv[0])):
             if o["product_id"] != pid or o["state"] != "pending":
+                continue
+            if o.get("reduce_only"):                      # the desks' safety stop (28 Nov): stop-market on the mark
+                sell = o["side"] == "sell"
+                if not (px <= float(o["stop_price"]) if sell else px >= float(o["stop_price"])):
+                    continue
+                p = self.pos.get(pid, {"size": 0})
+                can = min(int(o["size"]), max(0, p["size"]) if sell else max(0, -p["size"]))
+                if can < 1:                               # nothing it may reduce: Delta drops a reduce-only order
+                    o.update(state="cancelled")
+                    continue
+                fill = self.bid(sym) if sell else self.ask(sym)
+                _, comm = self._fill(pid, o["side"], can, fill, True, "safety", order_id=oid)
+                o.update(state="closed", unfilled_size=int(o["size"]) - can, average_fill_price=f"{fill}",
+                         paid_commission=f"{comm}")
                 continue
             trig, lim, sell = float(o["stop_price"]), float(o["limit_price"]), o["side"] == "sell"
             loss = o["stop_order_type"] == "stop_loss_order"
@@ -237,6 +253,21 @@ class FakeDelta(Delta):
             if o is None or o["state"] != "pending":
                 raise DeltaError("DELETE /v2/orders: HTTP 400 {\"code\": \"open_order_not_found\"}")
             o["state"] = "cancelled"
+            return dict(o)
+        if method == "POST" and base == "/v2/orders" and body.get("stop_order_type") and body.get("reduce_only"):
+            self._fail("safety")                          # the desks' safety stop (28 Nov 2026)
+            assert body["order_type"] == "market_order" and body["stop_trigger_method"] == "mark_price"
+            assert body["stop_order_type"] == "stop_loss_order" and "limit_price" not in body
+            pid, tick = body["product_id"], float(SPECS[BY_ID[body["product_id"]]]["tick"])
+            assert abs(round(float(body["stop_price"]) / tick) * tick - float(body["stop_price"])) < 1e-9
+            self.oid += 1
+            o = {"id": self.oid, "product_id": pid, "side": body["side"], "size": body["size"],
+                 "unfilled_size": body["size"], "state": "pending", "stop_order_type": "stop_loss_order",
+                 "stop_price": body["stop_price"], "reduce_only": True, "client_order_id": body.get("client_order_id"),
+                 "average_fill_price": None, "paid_commission": "0"}
+            self.stops[str(self.oid)] = o
+            self.book[str(self.oid)] = o
+            self.safety_orders.append(dict(body))
             return dict(o)
         if method == "POST" and base == "/v2/orders" and body.get("stop_order_type"):
             self._fail("stop_order")
@@ -331,6 +362,10 @@ def fresh(mode="live", btc=69000.0, gold=3885.0, follow=True):
     M._FULL.clear()                         # Delta's 100-order limit seen full (25 Nov; memory only)
     M._TQ.clear()                           # the target check's quotes (memory only)
     M._CONVERTED.clear()
+    M._LIVEQ.clear()                        # the watcher's quotes and memory (28 Nov): never across scenarios
+    M._GAP_SEEN.clear()
+    M._WATCH_ROWS.update(at=0.0, rows=[])
+    M._WATCH.update(at=0.0, closed=0, errors=0, last_error=None, rest_at=0.0, stream={})
     M.D = FakeDelta()
     M.D.mid.update(BTCUSD=btc, XAUTUSD=gold)
     if mode != "off":
@@ -389,6 +424,7 @@ async def _fake_fx():                      # the page's USD/INR (24 Nov 2026): n
 async def main():
     M._read_fx = _fake_fx
     M.APP_TARGET_PRODUCTS = frozenset()   # sections 1-40: both orders on Delta (bitcoin and ether still); 41: gold
+    M.APP_STOP_PRODUCTS = frozenset()     # sections 1-44: every stop rests on Delta; 45: the hybrid (gold)
     BTC, GOLD = 27, 131253
     M.REQUIRE_PIN = True          # sections 1-23 test the PIN when the server requires one; 24 the owner's choice: none
     # ── 1. a live bitcoin entry, sized by risk, with the stop on the venue ─────────────────────────
@@ -2801,6 +2837,229 @@ async def main():
     g = await M.status()
     check("the page gets them on every strategy with a real trade and on the desk (the status carries _results' records)",
           all(k in (g.get("results") or {}) for k in ("invested_usd", "returns_usd", "invested_return_pct")), g.get("results"))
+
+
+    # ── 45. 28 Nov: hybrid stops, the watcher and the safety stop (gold) ───────────────────────────────────────────
+    section("45. 28 Nov: gold keeps only the stops nearest the price on Delta; the app watches the rest and every "
+            "target on the live quote; one safety stop covers the whole position")
+    check("as the server reads it: the hybrid is gold's only (bitcoin and ether keep every stop and target on Delta), "
+          "80 resting stops", PROD_APP_STOP == frozenset({"XAUTUSD"}) and M.STOP_SLOTS == 80, (PROD_APP_STOP, M.STOP_SLOTS))
+    M.APP_TARGET_PRODUCTS, M.APP_STOP_PRODUCTS = PROD_APP_TARGET, PROD_APP_STOP
+    SLOTS0, G = M.STOP_SLOTS, "XAUTUSD"
+    near = lambda x, y: x is not None and abs(float(x) - y) < 1e-6   # noqa: E731
+
+    def stops_resting(db_):
+        return {t["acct"]: bool((t.get("legs") or {}).get("stop_id")) for t in db_.live_delta_trades.docs
+                if t["status"] == "open" and t["product"] == G}
+
+    def safety_open():
+        return [o for o in M.D.stops.values() if o.get("reduce_only") and o["state"] == "pending"]
+
+    def gold_stop_orders():
+        return [o for o in M.D.stop_orders if o["product_id"] == GOLD and o["stop_order_type"] == "stop_loss_order"]
+
+    # 45a: three slots, four gold trades: the fourth (the nearest its stop) is watched at entry, then the rotation puts it
+    # on Delta in place of the farthest; one safety stop for the net +2; bitcoin unchanged
+    M.STOP_SLOTS = 3
+    db = fresh(gold=3885.0)
+    gold_book(db)
+    a = paper(db, "DR-01", G, 1, 3885.0, 3880.0, 3895.0, ago=40)
+    b = paper(db, "TL-04", G, 1, 3885.0, 3870.0, 3910.0, ago=35)
+    c = paper(db, "RU-02", G, -1, 3885.0, 3893.0, 3870.0, ago=30)
+    d4 = paper(db, "PT-04", G, 1, 3885.0, 3882.0, 3900.0, ago=25)
+    bt = paper(db, "TL-04", "BTCUSD", -1, 69000.0, 69400.0, 68400.0, ago=20)
+    await cyc(db)
+    ta, tb, tc_, td = (trade(db, x) for x in (a, b, c, d4))
+    check("45a: four gold trades open at one contract; the first three took the three slots, the fourth was watched at "
+          "entry (no order), then the rotation put it on Delta in place of the farthest (TL-04's, 15 away), now watched",
+          all(t and t["status"] == "open" and t["contracts"] == 1 for t in (ta, tb, tc_, td))
+          and stops_resting(db) == {"DR-01": True, "TL-04": False, "RU-02": True, "PT-04": True}
+          and tb["legs"]["stop_app"] == "3870.00" and tb["legs"]["stop_id"] is None
+          and own_leg(td, "stop")["stop_price"] == "3882.00" and td["legs"]["stop_n"] == 1
+          and own_leg(td, "stop")["client_order_id"].endswith("r1") and len(gold_stop_orders()) == 4
+          and resting_on(G) - len(safety_open()) == 3, (stops_resting(db), tb and tb.get("legs"), td and td.get("legs")))
+    sf = safety_open()
+    check("45a: one safety stop: reduce-only, a stop-market on the mark, sell 2 (the net long), half a percent beyond "
+          "the lowest long stop (3870 x 0.995)", len(sf) == 1 and sf[0]["side"] == "sell" and sf[0]["size"] == 2
+          and sf[0]["stop_price"] == "3850.65" and M.D.safety_orders[-1]["stop_trigger_method"] == "mark_price", sf)
+    tb2 = trade(db, bt)
+    check("45a: bitcoin unchanged: its trade's stop AND target rest on Delta; no safety stop on bitcoin",
+          tb2 and tb2["status"] == "open" and own_leg(tb2, "stop") and own_leg(tb2, "target")
+          and not any(o["product_id"] == BTC for o in M.D.stops.values() if o.get("reduce_only")), tb2 and tb2.get("legs"))
+    # 45b: a second cycle with nothing changed
+    n_stop, n_cxl = len(M.D.stop_orders), sum(1 for o in M.D.stops.values() if o["state"] == "cancelled")
+    advance(20)
+    await cyc(db)
+    check("45b: nothing moves when nothing changed: no stop put on or taken off, the safety stop left where it is",
+          len(M.D.stop_orders) == n_stop and sum(1 for o in M.D.stops.values() if o["state"] == "cancelled") == n_cxl
+          and len(M.D.safety_orders) == 1, (len(M.D.stop_orders), n_stop))
+    # 45c: a fifth trade
+    e5 = paper(db, "RU-03", G, 1, 3885.0, 3875.0, 3905.0, ago=5)
+    advance(20)
+    await cyc(db)
+    te, sf = trade(db, e5), safety_open()
+    check("45c: a fifth trade is watched (slots full, and its stop not nearer than 3/4 of the farthest resting one's); "
+          "the safety stop follows the net: the sell 2 taken off, a sell 3 put on",
+          te and te["status"] == "open" and te["legs"]["stop_app"] == "3875.00" and te["legs"]["stop_id"] is None
+          and len(sf) == 1 and sf[0]["size"] == 3 and len(M.D.safety_orders) == 2, (te and te.get("legs"), sf))
+    # 45d: the price falls to 3874.90: Delta fills the two resting long stops it passes; the watcher closes the watched
+    # stop it reaches (RU-03's 3875) at once; the pass books the venue stops; the rotation puts TL-04's stop on Delta
+    M.D.set_price(G, 3874.9)
+    M._quote_in(G, 3874.885, 3874.915, "stream")
+    n = await M._watch_once()
+    te = trade(db, e5)
+    check("45d: the watcher closes the watched stop it reaches, at the market, the moment it sees it",
+          n == 1 and te["status"] == "closed" and te["close_reason"] == M.APP_STOP_WHY and near(te["exit_price"], 3874.885),
+          (n, te.get("close_reason"), te.get("exit_price")))
+    await cyc(db)
+    ta, tb, tc_, td = (trade(db, x) for x in (a, b, c, d4))
+    check("45d: the pass books the two resting stops Delta filled; the account matches the trades (TL-04 +1, RU-02 -1); "
+          "the rotation puts TL-04's stop back on Delta; the safety stop comes off (no net position)",
+          ta["close_reason"] == "venue stop" and td["close_reason"] == "venue stop" and GOLD not in M.D.pos
+          and stops_resting(db) == {"TL-04": True, "RU-02": True} and tb["legs"]["stop_n"] == 1
+          and own_leg(tb, "stop")["stop_price"] == "3870.00" and not safety_open()
+          and st_of(db, "gold")["mode"] == "live", (ta.get("close_reason"), td.get("close_reason"), stops_resting(db)))
+    # 45e: a spike to RU-02's target and straight back, between two looks
+    M._quote_in(G, 3869.95, 3869.98, "stream")
+    M._quote_in(G, 3874.0, 3874.03, "stream")
+    M.D.mid[G] = 3874.015
+    stop_c = own_leg(tc_, "stop")
+    n = await M._watch_once()
+    tc_ = trade(db, c)
+    check("45e: a spike through a watched target that came straight back is still taken (the extremes since the last "
+          "look): closed at the market at the then ask, its resting stop taken off first",
+          n == 1 and tc_["status"] == "closed" and tc_["close_reason"] == M.APP_TARGET_WHY
+          and near(tc_["exit_price"], 3874.03) and stop_c["state"] == "cancelled", (n, tc_.get("close_reason")))
+    # 45f: the price jumps past TL-04's resting stop's limit (3867) and Delta does not fill it
+    M.D.mid[G] = 3860.0
+    M._quote_in(G, 3859.985, 3860.015, "stream")
+    n1 = await M._watch_once()
+    advance(2.5)
+    M._quote_in(G, 3859.985, 3860.015, "stream")
+    stop_b = own_leg(trade(db, b), "stop")
+    n2 = await M._watch_once()
+    tb = trade(db, b)
+    check("45f: a resting stop the price jumped past (its limit unfillable) is closed by the app after 2 seconds: its "
+          "stop taken off first, then the market; the account is flat",
+          n1 == 0 and n2 == 1 and tb["close_reason"] == M.GAP_STOP_WHY and near(tb["exit_price"], 3859.985)
+          and stop_b["state"] == "cancelled" and GOLD not in M.D.pos, (n1, n2, tb.get("close_reason")))
+
+    # 45g: a trade the watcher closes while a desk pass is under way, between two of the pass's trades
+    M.STOP_SLOTS = 3
+    db2 = fresh(gold=3885.0)
+    gold_book(db2)
+    x = paper(db2, "DR-01", G, 1, 3885.0, 3880.0, 3895.0, ago=40)
+    y = paper(db2, "TL-04", G, 1, 3885.0, 3870.0, 3910.0, ago=35)
+    await cyc(db2)
+    ty = trade(db2, y)
+    y_stop = ty["legs"]["stop_id"]
+    real_manage, fired = M._manage_live, {"n": 0}
+
+    async def manage_after_close(*a_, **k_):
+        if not fired["n"]:                  # as if the watcher closed Y here: its stop off, the trade booked
+            fired["n"] = 1
+            M.D.stops[str(y_stop)]["state"] = "cancelled"
+            trade(db2, y).update(status="closed", close_reason=M.APP_TARGET_WHY, closed_at=CLOCK[0])
+        return await real_manage(*a_, **k_)
+    M._manage_live = manage_after_close
+    n_stop = len(M.D.stop_orders)
+    advance(20)
+    await cyc(db2)
+    M._manage_live = real_manage
+    ty = trade(db2, y)
+    check("45g: a trade closed while a pass was under way is left alone by that pass (re-read under the product's "
+          "lock): no stop put back on it, its legs untouched",
+          fired["n"] == 1 and ty["status"] == "closed" and ty["legs"]["stop_id"] == y_stop
+          and not ty["legs"].get("stop_app") and len(M.D.stop_orders) == n_stop, (ty.get("legs"), len(M.D.stop_orders)))
+
+    # 45h: the safety stop fires while this server is away; the watcher comes back and must not trade a position that
+    # is gone
+    M.STOP_SLOTS = 0
+    db3 = fresh(gold=3885.0)
+    gold_book(db3)
+    a3 = paper(db3, "DR-01", G, 1, 3885.0, 3880.0, 3895.0, ago=40)
+    b3 = paper(db3, "TL-04", G, 1, 3885.0, 3870.0, 3910.0, ago=35)
+    c3 = paper(db3, "RU-02", G, -1, 3885.0, 3893.0, 3870.0, ago=30)
+    await cyc(db3)
+    sf = safety_open()
+    check("45h: no slot: all three stops watched, none on Delta; the safety stop sells the net 1 at 3850.65",
+          not gold_stop_orders() and all(trade(db3, x_)["legs"]["stop_app"] for x_ in (a3, b3, c3))
+          and len(sf) == 1 and sf[0]["size"] == 1 and sf[0]["stop_price"] == "3850.65", sf)
+    n_mkt = len(M.D.orders)
+    M.D.set_price(G, 3840.0)                       # away: Delta's safety stop closes the position
+    M._quote_in(G, 3839.985, 3840.015, "stream")    # back: every stop and RU-02's target look reached
+    n = await M._watch_once()
+    rs = [trade(db3, x_) for x_ in (a3, b3, c3)]
+    st3 = st_of(db3, "gold")
+    check("45h: back, the watcher sees the safety stop filled before closing anything: all three trades booked closed "
+          "at its fill, NO market order sent, the account flat",
+          n == 0 and all(r["status"] == "closed" and r["close_reason"] == M.SAFETY_WHY and near(r["exit_price"], 3839.985)
+                         for r in rs) and len(M.D.orders) == n_mkt and GOLD not in M.D.pos
+          and (st3.get("safety") or {}).get(G) == {} and st3["safety_fired"]["trades"] == 3,
+          ([(r["status"], r.get("close_reason")) for r in rs], len(M.D.orders) - n_mkt))
+    advance(20)
+    await cyc(db3)
+    check("45h: the next cycle finds the account matching the trades: the desk stays live, nothing switched off",
+          st_of(db3, "gold")["mode"] == "live" and not st_of(db3, "gold").get("switched_off")
+          and not st_of(db3, "gold").get("mismatch_checks"), st_of(db3, "gold").get("switched_off"))
+
+    # 45i: the REST ticker when the stream is silent
+    M.STOP_SLOTS = 3
+    db4 = fresh(gold=3885.0)
+    gold_book(db4)
+    x4 = paper(db4, "DR-01", G, 1, 3885.0, 3880.0, 3895.0, ago=40)
+    await cyc(db4)
+    tick = lambda: sum(1 for c_ in M.D.calls if c_ == ("GET", "/v2/tickers/XAUTUSD"))   # noqa: E731
+    M._LIVEQ.clear()
+    k0 = tick()
+    await M._watch_once()
+    k1, src1 = tick(), M._LIVEQ[G]["src"]
+    M._quote_in(G, 3884.985, 3885.015, "stream")
+    await M._watch_once()
+    k2 = tick()
+    advance(5)
+    await M._watch_once()
+    check("45i: no stream: the watcher reads the REST ticker; a live stream: it does not; the stream silent over 4 "
+          "seconds: the REST ticker again", k1 == k0 + 1 and src1 == "rest" and k2 == k1 and tick() == k2 + 1,
+          (k0, k1, k2, tick(), src1))
+    # 45j: a stop cancelled on Delta by someone else
+    t4 = trade(db4, x4)
+    old = t4["legs"]["stop_id"]
+    M.D.stops[str(old)]["state"] = "cancelled"
+    advance(20)
+    await cyc(db4)
+    t4 = trade(db4, x4)
+    check("45j: a resting stop cancelled on Delta by someone else is watched at once, and the rotation puts it back on "
+          "Delta (a free slot): a new order of its own", t4["status"] == "open" and t4["legs"]["stop_id"] != old
+          and t4["legs"]["stop_app"] is None and own_leg(t4, "stop")["client_order_id"].endswith("r1")
+          and own_leg(t4, "stop")["state"] == "pending", t4.get("legs"))
+    # 45k: Delta refuses a new trade's stop for its 100 open orders
+    orig = M.D.request
+    cap_at(100, only="stop")
+    z = paper(db4, "RU-03", G, 1, 3885.0, 3875.0, 3905.0, ago=5)
+    advance(20)
+    await cyc(db4)
+    M.D.request = orig
+    tz = trade(db4, z)
+    check("45k: a stop Delta refuses for its 100 open orders leaves the trade open with its stop watched (before 28 Nov "
+          "it was closed at once); new signals wait for room as before",
+          tz and tz["status"] == "open" and tz["legs"]["stop_id"] is None and tz["legs"]["stop_app"] == "3875.00"
+          and M._venue_full(G), tz and tz.get("legs"))
+    M._FULL.clear()
+    g = await M.status()
+    pr = (g.get("protection") or {}).get("products", {}).get(G) or {}
+    c4 = await M.status("crypto")
+    check("45l: the page reads how gold is protected: slots, stops resting and watched, the safety stop and the "
+          "watcher; the bitcoin desk has no such block",
+          g["protection"]["slots"] == 3 and pr.get("resting") == 1 and pr.get("watched") == 1
+          and "safety" in pr and "watcher" in g["protection"] and c4.get("protection") is None, g.get("protection"))
+    gn = M.DESKS["gold"].notes
+    check("45m: the gold desk's notes say which stops rest on Delta, that the app watches the rest and every target on "
+          "the live price, and what the safety stop does; the bitcoin desk's notes are unchanged",
+          any("80 stops nearest the price" in n_ and "rest on Delta itself" in n_ for n_ in gn)
+          and any("One safety stop on Delta covers the whole gold position" in n_ for n_ in gn)
+          and any("Each trade's stop and target live on Delta itself" in n_ for n_ in M.DESKS["crypto"].notes))
+    M.STOP_SLOTS, M.APP_STOP_PRODUCTS, M.APP_TARGET_PRODUCTS = SLOTS0, frozenset(), frozenset()
 
 
 if __name__ == "__main__":

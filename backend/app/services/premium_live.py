@@ -206,6 +206,29 @@ four frozen records (SF0181 and SF0243 of 19 Nov, SF0344 and SF0476 of 22 Nov); 
 board's. 49 of the 152 held an open tab position at the pick: this follow_all desk copies them on its first pass.
 With 254 strategies on one product, Delta's 100 open orders on XAUTUSD (shared with the Premium Gold book, one stop a
 trade) is the binding limit: a signal past it is skipped as "Delta's 100-order limit full" (25 Nov), never queued.
+
+28 NOV 2026: HYBRID STOPS, THE WATCHER AND THE SAFETY STOP. The owner wants up to 500 gold strategies holding trades at
+once, past Delta's 100 open orders a product, and asked that a target touched only for a moment is still taken (27 Nov
+11:00 IST: a $12 spike inside one minute was missed between two 23-second passes, and ten Factory trades closed half an
+hour later at the paper exit, about $20 an ounce below their targets). After a look at Delta's API (no documented
+open-order cap; 20,000 rate units per 5 minutes; its "deadman switch" only CANCELS orders; one bracket per position;
+the public l1_orderbook stream, measured at about one best bid / ask a second for XAUTUSD) the owner chose a hybrid, on
+APP_STOP_PRODUCTS (XAUTUSD; bitcoin and ether unchanged):
+- only the STOP_SLOTS (80) stops nearest the price rest on Delta, all desks on the product together; every other stop is
+  watched by this server (legs.stop_app), like every target there. A new trade's stop rests on Delta while there is room
+  (and is watched when Delta refuses it for the 100 orders, never closed for that); each cycle the rotation puts the
+  watched stops that come near onto Delta and takes far ones off (ROTATE_HYST, at most ROTATE_PER_CYCLE each way);
+- the watcher (watch(), beside loop()) keeps Delta's l1_orderbook stream and every WATCH_POLL_S looks at every open
+  trade: a watched target or stop reached - judged on the highest / lowest bid and ask since its last look, so a spike
+  counts - or the price GAP_HOLD_S past a resting stop's limit (a stop-limit Delta would not fill) closes the trade at
+  the market at once. When the stream is silent it reads the REST ticker; the desk passes check the same every pass;
+- one SAFETY STOP on Delta for the desks' whole net position on the product: a reduce-only stop-market on the mark
+  price, SAFETY_BUFFER beyond the farthest stop on the losing side, so it never fires while this server runs but a big
+  move cannot run to liquidation while it is away. A fill books every open trade on the product closed at its price
+  (their own resting stops taken off first: they are not reduce-only); this is checked first in every cycle and before
+  the watcher closes anything, since the position would be gone;
+- every change to a live trade on such a product, or to its orders, holds the product's lock (_plock): the desk passes
+  (a trade at a time, re-read under it), entries, the watcher, the rotation and the safety stop never act at once.
 """
 
 from __future__ import annotations
@@ -215,6 +238,7 @@ import contextlib
 import contextvars
 import hashlib
 import hmac
+import json
 import logging
 import math
 import os
@@ -264,6 +288,23 @@ VENUE_FULL_RETRY_S = 120       # after that refusal a product's new signals are 
 #                                closes, or this long has passed
 CONVERT_PER_PASS = 10          # open trades whose resting target is handed to this server, at most this many a pass
 TARGET_QUOTE_TTL_S = 5         # the target check's quote: one read a product per pass, shared by the desks
+# Hybrid stops (28 Nov 2026, see 28 NOV 2026 above): on these products a trade's stop rests on Delta only while it is
+# among the STOP_SLOTS nearest the price (all desks on the product together); the others are this server's to watch
+APP_STOP_PRODUCTS = frozenset(x.strip().upper() for x in os.getenv("PREMIUM_LIVE_APP_STOP", "XAUTUSD").split(",")
+                              if x.strip())
+STOP_SLOTS = int(os.getenv("PREMIUM_LIVE_STOP_SLOTS", "80"))   # resting trade stops a product, under Delta's 100 orders
+ROTATE_PER_CYCLE = 10          # resting stops moved (taken off or put on Delta) a cycle, at most, each way
+ROTATE_HYST = 0.75             # a watched stop takes a resting one's place only when nearer than this share of its distance
+APP_STOP_WHY = "stop reached, closed by the app"
+GAP_STOP_WHY = "the price jumped past its stop's limit, closed by the app"
+GAP_HOLD_S = 2.0               # the price past a resting stop's limit this long: closed by the app at the market
+SAFETY_WHY = "Delta's safety stop for the whole position"
+SAFETY_BUFFER = 0.005          # the safety stop sits this share beyond the farthest stop on the losing side ...
+SAFETY_MOVE = 0.0025           # ... and is moved only when that level changes by more than this share (or the size or side)
+WATCH_POLL_S = 1.0             # the watcher checks every open trade's stop and target this often
+WATCH_TRADES_TTL_S = 2.0       # ... reading the open trades from the database at most this often
+STREAM_STALE_S = 4.0           # Delta's live quote stream silent this long: the watcher reads the REST ticker instead
+WS_URL = os.getenv("DELTA_WS_URL", "wss://socket.india.delta.exchange").strip()
 # Each strategy's own size (23 Nov 2026): the contracts a new trade takes in contract sizing, 1 (the default, the size
 # every trade had before) up to its product's cap here - about $700-1,000 of notional at late-November prices.
 LOTS_DEFAULT = 1
@@ -756,23 +797,28 @@ GOLD_NOTES = (
     "target (5 ticks and a tenth of its risk, so a fill cannot land past a level), while its source is silent, while "
     "Delta gives no quote, or while the wallet has too little free margin; it is never given up for being late. A paper "
     "trade that closes before it is copied is not copied, and the switches (this desk's and Main Control) still apply.",
-    "A paper trade with no stop at all (PR-12's Supertrend ladder) gets a protective stop on Delta 3% from its fill, so no "
+    "A paper trade with no stop at all (PR-12's Supertrend ladder) gets a protective stop 3% from its fill, so no "
     "real trade is ever without a stop; it otherwise closes when its paper trade does. A stop farther than 7% from the "
     "price is pulled in to 7%: at 10x leverage Delta liquidates a position about 9.5% against it.",
     "The seven H1 templates' trades are the Gold Desk's own H1 positions (4-hour bars, held up to ten days), and the 210 "
     "Factory strategies' are the positions of the Gold Desk's Strategy Factory tab ($1,111 paper sleeves on closed bars "
     "of 5 minutes to 4 hours); both are copied the same way, and this desk only reads them.",
     "One gold contract is 0.001 XAUT (about $4 of gold), so a trade of one contract loses cents at its stop.",
-    "All 254 can hold a trade at the same time (from 15 Nov), up to Delta's 100 open orders on XAUTUSD (below): "
-    "each trade is its own order with its own stop on Delta, and Delta shows their sum as one gold position.",
+    "All 254 can hold a trade at the same time (from 15 Nov), each its own trade, and Delta shows their sum as one gold "
+    "position. From 28 Nov Delta's 100 open orders on XAUTUSD no longer cap how many: only the 80 stops nearest the "
+    "price rest on Delta (below).",
     "This desk trades gold (XAUTUSD) only; the bitcoin desk is beside it on the Delta Exchange Live Trading page. Each "
     "has its own switch.",
-    "Each trade's stop lives on Delta itself, so it stays protected if this server goes down. Its target is this "
-    "server's (from 25 Nov): once the price reaches it the trade is closed at the market at the next check (every 20 "
-    "seconds), so each trade holds one open order on Delta, not two.",
-    "Delta allows an account 100 open orders on XAUTUSD, shared with the Premium Gold book. When they are full, a new "
-    "signal is skipped and recorded as \"Delta's 100-order limit full\"; live trading stays on, and new signals go "
-    "through again as trades close.",
+    "Stops and targets (from 28 Nov): the 80 stops nearest the price, of this desk and the Premium Gold book together, "
+    "rest on Delta itself, so they hold even if this server goes down; every other stop, and every target, is watched "
+    "by this server on Delta's live gold price (about once a second), and the trade is closed at the market the moment "
+    "its stop or target is reached. As the price moves, the stops it nears are put on Delta and far ones taken off.",
+    "One safety stop on Delta covers the whole gold position: reduce-only, on the mark price, just beyond the "
+    "farthest stop on the losing side, so it never fires while this server runs; if this server is away, a big move "
+    "cannot run to liquidation. If it ever fires, every open trade is booked closed at its price.",
+    "Delta allows an account 100 open orders on XAUTUSD, shared with the Premium Gold book; the resting stops are kept "
+    "to 80 so entries find room. Should they still be full, a new signal is skipped and recorded as \"Delta's "
+    "100-order limit full\"; live trading stays on, and new signals go through again as trades close.",
     "Leverage is set to 10x on XAUTUSD before going live; positions are capped at $2,500 of notional.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
 )
@@ -820,16 +866,17 @@ PREMIUM_GOLD_NOTES = (
     "at $3,600 an ounce, and at 10x it holds a tenth of that as margin; the page shows any lots in dollars and rupees. "
     "Every trade is capped at $2,500 of notional and at the product's most lots a trade.",
     "EVERY signal becomes a real position, as on the gold desk: an open H1 position of the six is copied however late "
-    "this book sees it, with that position's own stop on Delta (a stop more than 7% away is pulled in to 7%) and its "
-    "target closed by this server at the market, as on the gold desk. "
+    "this book sees it, with that position's own stop (a stop more than 7% away is pulled in to 7%) and its target, "
+    "both handled as on the gold desk. "
     "A copy waits while the price is not inside its stop and target with room, while the Gold Desk is silent, while Delta "
     "gives no quote, or while the wallet has too little free margin. No daily loss stop.",
     "This book starts OFF: its own switch, on this tab, turns it on (one confirmation). The gold desk's switch does not "
     "move it, nor this one the gold desk.",
     "Delta shows all of the account's XAUTUSD trades, both books', as one position; each book checks the account against "
-    "the sum of both, and each trade closes only its own contracts. Each trade's stop lives on Delta itself; its "
-    "target is this server's (25 Nov). The two books share Delta's 100 open orders on XAUTUSD: when they are full, a "
-    "new signal is skipped and recorded as \"Delta's 100-order limit full\", and the book stays on.",
+    "the sum of both, and each trade closes only its own contracts. From 28 Nov the two books share 80 stops resting "
+    "on Delta (the nearest the price); this server watches the others and every target, and one safety stop on Delta "
+    "covers the whole gold position. Should Delta's 100 open orders on XAUTUSD still be full, a new signal is skipped "
+    "and recorded as \"Delta's 100-order limit full\", and the book stays on.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
 )
 
@@ -1602,10 +1649,23 @@ async def _place_legs(db, tid: str, product: Product, side: int, contracts: int,
         raise DeltaError("legs: the stop is under two ticks from the fill")
     out = "sell" if long_ else "buy"
     slip = max(abs(fill - stop) * 0.20, 2 * product.tick)     # the stop's limit sits past its trigger (see delta_rest)
-    s = await _leg_order(product, out, contracts, "stop_loss_order", stop, stop - slip if long_ else stop + slip,
-                         _cid(tid, "s"))
-    legs = {"stop": s["stop_price_sent"], "stop_limit": s["limit_price_sent"], "stop_id": s["id"], "target": None,
-            "target_id": None}
+    limit = stop - slip if long_ else stop + slip
+    legs = {"stop": fmt_tick(stop, product.tick), "stop_limit": fmt_tick(limit, product.tick), "stop_id": None,
+            "target": None, "target_id": None}
+    if product.symbol in APP_STOP_PRODUCTS and await _resting_stops(db, product.symbol) >= STOP_SLOTS:
+        # 28 Nov 2026: the product's resting stops are all taken by trades nearer theirs: this one is watched by this
+        # server (the rotation puts it on Delta once it is among the nearest)
+        legs.update(stop_app=legs["stop"], stop_app_at=_now())
+    else:
+        try:
+            s = await _leg_order(product, out, contracts, "stop_loss_order", stop, limit, _cid(tid, "s"))
+        except DeltaError as exc:
+            if not (product.symbol in APP_STOP_PRODUCTS and _cap_refusal(exc)):
+                raise
+            _FULL[product.symbol] = _now()          # Delta's 100 orders full after all: watched, never unprotected
+            legs.update(stop_app=legs["stop"], stop_app_at=_now())
+        else:
+            legs.update(stop=s["stop_price_sent"], stop_limit=s["limit_price_sent"], stop_id=s["id"])
     await _set_trade(db, tid, legs=legs)
     if target is not None and product.symbol in APP_TARGET_PRODUCTS:
         # 25 Nov 2026: this server takes the target (Delta's 100 open orders a product): one order a trade, its stop
@@ -1808,6 +1868,11 @@ async def _manage_own(db, st: dict, t: dict, paper: dict | None, positions: dict
         if k == "target" and product.symbol in APP_TARGET_PRODUCTS:
             await _target_to_app(db, t, product)      # 25 Nov: never put back; this server watches it from now
             return
+        if k == "stop" and product.symbol in APP_STOP_PRODUCTS:
+            await _stop_to_app(db, t, product)        # 28 Nov: watched from now; the rotation may put it back on Delta
+            logger.info("[premium live %s] %s: its stop was cancelled on Delta; watched by the app", _d().key,
+                        t.get("acct"))
+            return
         if legs.get(f"{k}_replaced"):
             await _close_own(db, st, t, product, f"its {k} was cancelled on Delta again", resting)
             return
@@ -1840,8 +1905,8 @@ async def _manage_own(db, st: dict, t: dict, paper: dict | None, positions: dict
         reason = f"paper exit: {paper.get('reason') or 'closed'}"
     elif desk_age > DESK_DEAD_S:
         reason = "the paper desk stopped updating"
-    if reason is None and await _app_target_hit(t, product):
-        reason = APP_TARGET_WHY                     # the target this server watches (25 Nov)
+    if reason is None:                              # a target (25 Nov) or a stop (28 Nov) this server watches
+        reason = await _app_exit(t, product)
     if reason is not None:
         await _close_own(db, st, t, product, reason, resting)
         return
@@ -1883,16 +1948,472 @@ async def _target_quote(product: Product) -> dict | None:
     return q
 
 
-async def _app_target_hit(t: dict, product: Product) -> bool:
-    """Has the price reached the target this server watches for the trade (25 Nov 2026)? A long's when the bid is
-    at or above it, a short's when the ask is at or below it: the prices its market close fills at."""
-    level = (t.get("legs") or {}).get("target_app")
-    if not level:
-        return False
-    q = await _target_quote(product)
+# -- hybrid stops and the watcher (28 Nov 2026) ---------------------------------------------------------------------
+# On APP_STOP_PRODUCTS (gold) only the STOP_SLOTS stops nearest the price rest on Delta (legs.stop_id); the rest are
+# this server's to watch (legs.stop_app), like every target there (legs.target_app). The watcher (watch()) reads Delta's
+# live best bid / ask (the l1_orderbook stream, about once a second; the REST ticker when the stream is silent) and
+# closes a trade at the market the moment its watched stop or target is reached, or when the price has jumped past a
+# resting stop's limit (a stop-limit Delta would not fill). Each cycle the rotation keeps the resting stops on the
+# trades nearest to being stopped, and one reduce-only stop on Delta covers the desks' whole net position beyond the
+# farthest stop on its losing side (the safety stop), in case this server is away. Every change to a live trade on such
+# a product, or to its orders, holds the product's lock (_plock); a trade is re-read under it before anything acts.
+
+_PLOCKS: dict[str, asyncio.Lock] = {}
+_LIVEQ: dict[str, dict] = {}       # product -> the latest best bid / ask, and the extremes since the watcher last looked
+_GAP_SEEN: dict[str, float] = {}   # trade id -> when the price was first seen past its resting stop's limit
+_WATCH: dict = {"at": 0.0, "closed": 0, "errors": 0, "last_error": None, "rest_at": 0.0, "stream": {}}
+_WATCH_ROWS: dict = {"at": 0.0, "rows": []}
+_STREAM_TASKS: dict[str, asyncio.Task] = {}
+
+
+def _plock(sym: str) -> asyncio.Lock:
+    """The product's lock: the desks' passes (a trade at a time), entries, the watcher, the rotation and the safety
+    stop all hold it while they change a live trade on the product or its orders, so two never act on one trade."""
+    lk = _PLOCKS.get(sym)
+    if lk is None:
+        lk = _PLOCKS[sym] = asyncio.Lock()
+    return lk
+
+
+def _watched() -> frozenset:
+    """The products whose trades this server closes at a watched stop or target."""
+    return APP_STOP_PRODUCTS | APP_TARGET_PRODUCTS
+
+
+def _quote_in(sym: str, bid: float, ask: float, src: str) -> None:
+    """A best bid / ask for a product (the stream's, or a REST read): kept as the latest, with the extremes since the
+    watcher last looked, so a touch between two of its checks is not lost."""
+    q = _LIVEQ.get(sym)
+    if q is None or q.get("used"):
+        q = {"lo_bid": bid, "hi_bid": bid, "lo_ask": ask, "hi_ask": ask}
+    else:
+        q = {**q, "lo_bid": min(q["lo_bid"], bid), "hi_bid": max(q["hi_bid"], bid),
+             "lo_ask": min(q["lo_ask"], ask), "hi_ask": max(q["hi_ask"], ask)}
+    q.update(bid=bid, ask=ask, at=_now(), src=src, used=False)
+    _LIVEQ[sym] = q
+
+
+async def _quote_now(product: Product) -> dict | None:
+    """The freshest best bid / ask: the stream's while it is live, else the REST ticker (one read a product per
+    TARGET_QUOTE_TTL_S, shared). None when Delta gives none."""
+    q = _LIVEQ.get(product.symbol)
+    if q is not None and _now() - float(q.get("at") or 0) <= STREAM_STALE_S:
+        return q
+    t = await _target_quote(product)
+    if t is None:
+        return None
+    return {"bid": t["bid"], "ask": t["ask"], "lo_bid": t["bid"], "hi_bid": t["bid"], "lo_ask": t["ask"],
+            "hi_ask": t["ask"], "at": float(t["read_at"]), "src": "rest"}
+
+
+def _exit_due(t: dict, q: dict, extremes: bool = True) -> str | None:
+    """Why this server must close a live trade now, or None: its watched target reached (a long's bid at or above it,
+    a short's ask at or below - the prices its market close fills at), its watched stop reached (a long's bid at or
+    below it, a short's ask at or above), or the price past its RESTING stop's limit for GAP_HOLD_S on a hybrid
+    product (a stop-limit Delta would not fill). `extremes`: judge by the highest / lowest bid and ask since the
+    watcher last looked, so a spike between two checks counts."""
+    legs = t.get("legs") or {}
+    long_ = int(t["side"]) > 0
+    hb, lb = (q["hi_bid"], q["lo_bid"]) if extremes else (q["bid"], q["bid"])
+    ha, la = (q["hi_ask"], q["lo_ask"]) if extremes else (q["ask"], q["ask"])
+    tgt = legs.get("target_app")
+    if tgt and ((long_ and hb >= float(tgt)) or (not long_ and la <= float(tgt))):
+        return APP_TARGET_WHY
+    sa = legs.get("stop_app")
+    if sa and not legs.get("stop_id") and ((long_ and lb <= float(sa)) or (not long_ and ha >= float(sa))):
+        return APP_STOP_WHY
+    lim = legs.get("stop_limit")
+    if legs.get("stop_id") and lim and t.get("product") in APP_STOP_PRODUCTS:
+        if (long_ and q["bid"] < float(lim)) or (not long_ and q["ask"] > float(lim)):
+            first = _GAP_SEEN.setdefault(t["_id"], _now())
+            if _now() - first >= GAP_HOLD_S:
+                return GAP_STOP_WHY
+        else:
+            _GAP_SEEN.pop(t["_id"], None)
+    return None
+
+
+async def _app_exit(t: dict, product: Product) -> str | None:
+    """The desk pass's own check of a trade's watched stop and target (the watcher's, every pass, in case it is not
+    running): the latest quote, not the extremes (those are the watcher's)."""
+    legs = t.get("legs") or {}
+    if not (legs.get("target_app") or legs.get("stop_app")
+            or (legs.get("stop_id") and legs.get("stop_limit") and product.symbol in APP_STOP_PRODUCTS)):
+        return None
+    q = await _quote_now(product)
     if q is None:                                   # no quote this pass: the next pass looks again
-        return False
-    return q["bid"] >= float(level) if int(t["side"]) > 0 else q["ask"] <= float(level)
+        return None
+    return _exit_due(t, q, extremes=False)
+
+
+async def _stream(sym: str) -> None:
+    """Delta's public best bid / ask stream for one product (l1_orderbook, about one message a second) into _LIVEQ.
+    Reconnects for ever, pausing longer each time; without the websockets package it stops (the REST ticker serves)."""
+    try:
+        import websockets
+    except Exception:  # noqa: BLE001
+        logger.warning("[premium live] no websockets package: the watcher reads Delta's REST ticker instead")
+        return
+    pause, warned = 2.0, 0.0
+    while True:
+        try:
+            async with websockets.connect(WS_URL, open_timeout=15, ping_interval=20, ping_timeout=20, close_timeout=5,
+                                          max_size=2 ** 20) as ws:
+                await ws.send(json.dumps({"type": "subscribe", "payload": {
+                    "channels": [{"name": "l1_orderbook", "symbols": [sym]}]}}))
+                _WATCH["stream"][sym] = {"connected_at": _now(), "error": None}
+                pause = 2.0
+                async for raw in ws:
+                    try:
+                        m = json.loads(raw)
+                        if m.get("symbol") != sym or "best_bid" not in m:
+                            continue
+                        bid, ask = float(m["best_bid"]), float(m["best_ask"])
+                    except (TypeError, ValueError, KeyError, AttributeError):
+                        continue
+                    if bid > 0 and ask >= bid:
+                        _quote_in(sym, bid, ask, "stream")
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:  # noqa: BLE001 - the stream must outlive any one failure; the REST ticker serves
+            _WATCH["stream"][sym] = {"error": str(exc)[:160], "at": _now()}
+            if _now() - warned > 300:
+                logger.warning("[premium live] %s quote stream down (%s): the watcher reads the REST ticker", sym, exc)
+                warned = _now()
+        await asyncio.sleep(pause)
+        pause = min(pause * 2, 60.0)
+
+
+async def _watch_rows(db) -> list:
+    """Every desk's open live trades on the watched products, as (desk, trade), read at most every WATCH_TRADES_TTL_S."""
+    if _now() - float(_WATCH_ROWS["at"]) < WATCH_TRADES_TTL_S:
+        return _WATCH_ROWS["rows"]
+    rows = []
+    for d in DESKS.values():
+        prods = [p for p in d.products if p in _watched()]
+        if prods:
+            async for t in getattr(db, d.trades_coll).find({"mode": "live", "status": "open", "product": {"$in": prods}}):
+                if _own(t):
+                    rows.append((d.key, t))
+    _WATCH_ROWS.update(at=_now(), rows=rows)
+    return rows
+
+
+async def _watch_close(db, desk: str, tid: str, sym: str, q: dict) -> bool:
+    """Close one trade the watcher found due: under the product's lock, re-read first (a pass may have closed it, or
+    the rotation changed its legs), then judged again on the same quote."""
+    async with _plock(sym):
+        with _use(desk):
+            t = await _tc(db).find_one({"_id": tid})
+            if t is None or t.get("status") != "open" or t.get("mode") != "live" or not _own(t):
+                return False
+            why = _exit_due(t, q)
+            if why is None:
+                return False
+            st = await _state(db)
+            try:
+                product = (await _products(db, st, {sym}))[sym]
+            except (DeltaError, KeyError) as exc:
+                _WATCH.update(errors=_WATCH["errors"] + 1, last_error=f"{sym}: product spec unavailable ({exc})"[:200])
+                return False
+            done = await _close_own(db, st, t, product, why, {})
+            logger.info("[premium live %s] %s %s: %s (bid %s, ask %s)%s", desk, t.get("acct"), sym, why, q["bid"],
+                        q["ask"], "" if done else "; the close is retried every cycle")
+            return done
+
+
+async def _watch_once() -> int:
+    """One look by the watcher: every open live trade on the watched products against the latest quote (the stream's,
+    or the REST ticker when the stream is silent); each one due is closed at the market at once. Before closing
+    anything on a product it makes sure the safety stop has not fired there (the position would be gone). Returns how
+    many it closed."""
+    db = _db()
+    if db is None or not _watched():
+        return 0
+    rows = await _watch_rows(db)
+    _WATCH["at"] = _now()
+    closed = 0
+    for sym in sorted({t["product"] for _k, t in rows}):
+        q = _LIVEQ.get(sym)
+        if q is None or _now() - float(q.get("at") or 0) > STREAM_STALE_S:
+            try:
+                tk = await D.ticker(sym)
+            except DeltaError as exc:
+                _WATCH.update(errors=_WATCH["errors"] + 1, last_error=f"{sym}: no quote ({exc})"[:200])
+                continue
+            _quote_in(sym, tk["bid"], tk["ask"], "rest")
+            _WATCH["rest_at"] = _now()
+            q = _LIVEQ[sym]
+        snap = dict(q)
+        q["used"] = True                            # the next quote starts new extremes
+        due = [(k, t["_id"]) for k, t in rows if t["product"] == sym and _exit_due(t, snap) is not None]
+        if not due:
+            continue
+        if sym in APP_STOP_PRODUCTS and await _safety(db, sym, maintain=False) == "fired":
+            continue                                # booked at the safety stop's fill: nothing left to close
+        for k, tid in due:
+            if await _watch_close(db, k, tid, sym, snap):
+                closed += 1
+    if closed:
+        _WATCH_ROWS["at"] = 0.0                     # read the trades again next time
+        _WATCH["closed"] += closed
+    return closed
+
+
+async def watch() -> None:
+    """The watcher (28 Nov 2026), started beside loop(): Delta's live quote stream for every watched product, and every
+    WATCH_POLL_S a look at every open trade's watched stop and target. It only ever closes trades, so it runs whatever
+    the desks' switches and Main Control say (a desk that is off still has its open trades managed to their close)."""
+    await asyncio.sleep(10)
+    for sym in sorted(_watched()):
+        if sym not in _STREAM_TASKS:
+            _STREAM_TASKS[sym] = asyncio.create_task(_stream(sym))
+    warned = 0.0
+    while True:
+        try:
+            await _watch_once()
+        except Exception as exc:  # noqa: BLE001 - the watcher must outlive any one bad look
+            _WATCH.update(errors=_WATCH["errors"] + 1, last_error=str(exc)[:200])
+            if _now() - warned > 60:
+                logger.warning("[premium live] the watcher's look failed", exc_info=True)
+                warned = _now()
+        await asyncio.sleep(WATCH_POLL_S)
+
+
+def _level(t: dict) -> float | None:
+    """A trade's stop as it stands: on Delta, or watched."""
+    legs = t.get("legs") or {}
+    v = legs.get("stop") or legs.get("stop_app")
+    try:
+        return float(v) if v else None
+    except (TypeError, ValueError):
+        return None
+
+
+async def _hybrid_rows(db, sym: str, statuses=("open",)) -> list:
+    """Every desk's live trades on the product with their own legs, as (desk, trade)."""
+    rows = []
+    for d in DESKS.values():
+        if sym in d.products:
+            async for t in getattr(db, d.trades_coll).find({"mode": "live", "product": sym,
+                                                            "status": {"$in": list(statuses)}}):
+                if _own(t):
+                    rows.append((d.key, t))
+    return rows
+
+
+async def _resting_stops(db, sym: str) -> int:
+    """The product's trade stops resting on Delta now, all desks together (entering, open or closing)."""
+    return sum(1 for _k, t in await _hybrid_rows(db, sym, OPEN_STATUSES) if (t.get("legs") or {}).get("stop_id"))
+
+
+def _owner(sym: str) -> str:
+    """The desk whose state keeps the product's safety stop: the first desk trading it."""
+    return next(d.key for d in DESKS.values() if sym in d.products)
+
+
+async def _hybrid_product(db, sym: str) -> Product | None:
+    with _use(_owner(sym)):
+        st = await _state(db)
+        try:
+            return (await _products(db, st, {sym}))[sym]
+        except (DeltaError, KeyError):
+            return None
+
+
+async def _stop_to_app(db, t: dict, product: Product) -> None:
+    """A stop taken off Delta (by the rotation, or cancelled there by someone else): watched by this server from now."""
+    legs = dict(t.get("legs") or {})
+    legs.update(stop_id=None, stop_app=legs.get("stop"), stop_app_at=_now())
+    await _set_trade(db, t["_id"], legs=legs)
+    t["legs"] = legs
+    _WATCH_ROWS["at"] = 0.0                         # the watcher reads the trades again at its next look
+
+
+async def _stop_on(db, desk: str, t: dict, product: Product, q: dict) -> bool:
+    """Put a watched stop on Delta (the rotation). Never when the price is already at it: the watcher closes that
+    trade."""
+    with _use(desk):
+        legs = dict(t.get("legs") or {})
+        lvl = _level(t)
+        n, long_ = int(t.get("contracts") or 0), int(t["side"]) > 0
+        if lvl is None or n < 1 or (long_ and q["bid"] <= lvl) or (not long_ and q["ask"] >= lvl):
+            return False
+        lim = legs.get("stop_limit")
+        slip = max(abs(float(t.get("fill") or lvl) - lvl) * 0.20, 2 * product.tick)
+        limit = float(lim) if lim else (lvl - slip if long_ else lvl + slip)
+        k = int(legs.get("stop_n") or 0) + 1
+        try:
+            o = await _leg_order(product, "sell" if long_ else "buy", n, "stop_loss_order", lvl, limit,
+                                 _cid(t["_id"], f"r{k}"))
+        except DeltaError as exc:
+            if _cap_refusal(exc):
+                _FULL[product.symbol] = _now()
+            logger.warning("[premium live %s] %s: its stop could not be put on Delta (%s); still watched", desk,
+                           t.get("acct"), exc)
+            return False
+        legs.update(stop=o["stop_price_sent"], stop_limit=o["limit_price_sent"], stop_id=o["id"], stop_app=None,
+                    stop_n=k)
+        await _set_trade(db, t["_id"], legs=legs)
+        _WATCH_ROWS["at"] = 0.0                     # the watcher reads the trades again at its next look
+        return True
+
+
+async def _stop_off(db, desk: str, t: dict, product: Product) -> bool:
+    """Take a resting stop off Delta (the rotation). False when it filled (the desk's pass closes the trade as a
+    venue stop) or could not be read (tried again next cycle)."""
+    with _use(desk):
+        kind, _o = await _cancel_leg(product, (t.get("legs") or {})["stop_id"])
+        if kind != "cancelled":
+            return False
+        await _stop_to_app(db, t, product)
+        return True
+
+
+async def _rotate(db, sym: str) -> dict:
+    """Keep the product's resting stops on the trades nearest to being stopped (28 Nov 2026): free slots (of
+    STOP_SLOTS) take the nearest watched stops; then a watched stop nearer than ROTATE_HYST of the farthest resting
+    stop's distance swaps with it, that one taken off Delta first. At most ROTATE_PER_CYCLE each way a cycle; a stop the
+    price has already reached is never moved (the watcher, or Delta, closes that trade)."""
+    out = {"on": 0, "off": 0}
+    async with _plock(sym):
+        rows = await _hybrid_rows(db, sym)
+        if not rows:
+            return out
+        product = await _hybrid_product(db, sym)
+        q = await _quote_now(product) if product is not None else None
+        if q is None:
+            return out
+        mid = (q["bid"] + q["ask"]) / 2
+
+        def dist(t):                                # how far the price is from the trade's stop, a share of the price
+            lvl = _level(t)
+            return None if lvl is None else (mid - lvl) / mid * (1 if int(t["side"]) > 0 else -1)
+        rest = sorted([(dist(t), k, t) for k, t in rows if (t.get("legs") or {}).get("stop_id") and dist(t) is not None
+                       and dist(t) > 0], key=lambda x: -x[0])                       # farthest first
+        held = sorted([(dist(t), k, t) for k, t in rows if not (t.get("legs") or {}).get("stop_id")
+                       and (t.get("legs") or {}).get("stop_app") and dist(t) is not None and dist(t) > 0],
+                      key=lambda x: x[0])                                           # nearest first
+        free = STOP_SLOTS - await _resting_stops(db, sym)
+        while held and free > 0 and out["on"] < ROTATE_PER_CYCLE:
+            _d_, k, t = held.pop(0)
+            if await _stop_on(db, k, t, product, q):
+                out["on"] += 1
+                free -= 1
+            elif _venue_full(sym):
+                return out
+        while held and rest and out["on"] < ROTATE_PER_CYCLE and out["off"] < ROTATE_PER_CYCLE:
+            dh, kh, th = held[0]
+            dr, kr, tr = rest[0]
+            if not dh < dr * ROTATE_HYST:
+                break
+            rest.pop(0)
+            if not await _stop_off(db, kr, tr, product):
+                continue                            # filled or unread: this one stays; the next farthest is tried
+            out["off"] += 1
+            held.pop(0)
+            if await _stop_on(db, kh, th, product, q):
+                out["on"] += 1
+            else:
+                break
+    if out["on"] or out["off"]:
+        logger.info("[premium live] %s: %d stops put on Delta, %d taken off (the nearest %d rest there)", sym,
+                    out["on"], out["off"], STOP_SLOTS)
+    return out
+
+
+async def _safety_fired(db, sym: str, product: Product, cur: dict, o: dict) -> str:
+    """The safety stop filled: Delta closed the desks' position at once, so this server was away or too slow. Every
+    desk's trade still open on the product is booked closed at that fill, with no order sent; each one's own resting
+    stop is taken off first (it is not reduce-only, and would open a position nobody holds)."""
+    fill = float(o.get("avg_price") or 0.0) or float(cur.get("level") or 0.0)
+    rows = await _hybrid_rows(db, sym, ("open", "closing"))
+    held = sum(int(t.get("contracts") or 0) for _k, t in rows) or 1
+    fee = float(o.get("commission") or 0.0)
+    for k, t in rows:
+        with _use(k):
+            for leg in ("stop", "target"):
+                oid = (t.get("legs") or {}).get(f"{leg}_id")
+                if oid:
+                    await _cancel_leg(product, oid)
+            await _record_close(db, t, {"price": fill, "fee": fee * int(t.get("contracts") or 0) / held,
+                                        "basis": "safety stop"}, SAFETY_WHY, product)
+    with _use(_owner(sym)):
+        st = await _state(db)
+        await _set_state(db, safety={**(st.get("safety") or {}), sym: {}},
+                         safety_fired={"product": sym, "at": _now(), "price": fill, "trades": len(rows)})
+    _WATCH_ROWS["at"] = 0.0
+    logger.warning("[premium live] %s: the safety stop filled at %s; %d trades booked closed there", sym, fill, len(rows))
+    return "fired"
+
+
+async def _safety(db, sym: str, maintain: bool = True) -> str:
+    """The safety stop (28 Nov 2026): ONE reduce-only stop-market on Delta for the whole net position the desks'
+    trades hold on the product, triggered on the mark price, SAFETY_BUFFER beyond the farthest stop on the position's
+    losing side - so while this server runs it never fires (each trade is closed at its own stop first), and if this
+    server is away a big move cannot run to liquidation. Reduce-only: it can only close a position, never open one.
+    First: did it fire? (then every trade is booked at its fill: "fired"). Then, with `maintain`, it is put where the
+    trades now say, moved only when its side or size changes or its level moves more than SAFETY_MOVE. Returns
+    "fired", "ok" or "error"."""
+    async with _plock(sym):
+        product = await _hybrid_product(db, sym)
+        if product is None:
+            return "error"
+        with _use(_owner(sym)):
+            st = await _state(db)
+            cur = dict((st.get("safety") or {}).get(sym) or {})
+            if cur.get("id"):
+                kind, o = await _leg(product, cur["id"], {})
+                if kind == "filled":
+                    return await _safety_fired(db, sym, product, cur, o)
+                if kind == "unknown":
+                    return "error"
+                if kind == "cancelled":             # taken off on Delta by someone else, or Delta's own doing
+                    cur = {}
+            if not maintain:
+                return "ok"
+            rows = await _hybrid_rows(db, sym, ("open", "closing"))
+            net = sum(int(t["side"]) * int(t.get("contracts") or 0) for _k, t in rows)
+            want = None
+            if net:
+                q = await _quote_now(product)
+                if q is None:
+                    return "error"
+                mid = (q["bid"] + q["ask"]) / 2
+                lose = [lv for _k, t in rows if int(t["side"]) * net > 0 and (lv := _level(t)) is not None]
+                if net > 0:
+                    lvl = min(min(lose, default=mid) * (1 - SAFETY_BUFFER), mid * (1 - SAFETY_BUFFER))
+                else:
+                    lvl = max(max(lose, default=mid) * (1 + SAFETY_BUFFER), mid * (1 + SAFETY_BUFFER))
+                want = {"side": "sell" if net > 0 else "buy", "size": abs(net), "level": float(fmt_tick(lvl, product.tick))}
+            if cur.get("id") and want and cur.get("side") == want["side"] and int(cur.get("size") or 0) == want["size"] \
+                    and abs(float(cur.get("level") or 0) - want["level"]) <= want["level"] * SAFETY_MOVE:
+                return "ok"                         # where it should be
+            if cur.get("id"):
+                kind, o = await _cancel_leg(product, cur["id"])
+                if kind == "filled":
+                    return await _safety_fired(db, sym, product, cur, o)
+                if kind != "cancelled":
+                    return "error"
+            safety = dict(st.get("safety") or {})
+            if want is None:
+                if (st.get("safety") or {}).get(sym):
+                    await _set_state(db, safety={**safety, sym: {}})
+                return "ok"
+            k = int((st.get("safety_n") or {}).get(sym) or 0) + 1
+            try:
+                o = await D.safety_stop(product, want["side"], want["size"], want["level"],
+                                        client_order_id=_cid(f"safety|{sym}", f"z{k}"))
+            except DeltaError as exc:
+                if _cap_refusal(exc):
+                    _FULL[sym] = _now()
+                await _set_state(db, safety={**safety, sym: {}}, safety_n={**(st.get("safety_n") or {}), sym: k})
+                logger.warning("[premium live] %s: the safety stop could not be placed (%s)", sym, exc)
+                return "error"
+            await _set_state(db, safety={**safety, sym: {"id": o["id"], **want, "level": float(o["stop_price_sent"]),
+                                                         "at": _now()}},
+                             safety_n={**(st.get("safety_n") or {}), sym: k})
+            return "ok"
 
 
 async def _expected_net(db) -> dict[str, int]:
@@ -2332,22 +2853,27 @@ async def _cycle_one() -> dict:
             except DeltaError as exc:
                 await _venue_error(db, st, f"resting orders unavailable ({exc})")
                 resting = None
-        for t in open_rows:
-            if unread(t["_id"]) and t.get("status") == "open":
-                # unread, not gone: its stop rests on Delta until the next pass, and a target this server watches
-                # (25 Nov) is still watched
-                if t.get("mode") == "live" and positions is not None and resting is not None and _own(t) \
-                        and await _app_target_hit(t, products[t["product"]]):
-                    await _close_own(db, st, t, products[t["product"]], APP_TARGET_WHY, resting.get(t["product"], {}))
-                    out["managed"].append(t["_id"])
-                continue
-            age = age_of(t["_id"])
-            if t.get("mode") == "live":
-                if positions is not None:
-                    await _manage_live(db, st, t, paper.get(t["_id"]), positions, products, age, resting)
-            else:
-                await _manage_shadow(db, t, paper.get(t["_id"]), age, products)
-            out["managed"].append(t["_id"])
+        for t0 in open_rows:
+            async with _plock(t0["product"]):           # 28 Nov: the watcher may have closed it since the pass read it
+                t = await _tc(db).find_one({"_id": t0["_id"]})
+                if t is None or t.get("status") not in OPEN_STATUSES:
+                    continue
+                if unread(t["_id"]) and t.get("status") == "open":
+                    # unread, not gone: a stop resting on Delta stays there, and a stop or target this server watches
+                    # (25 and 28 Nov) is still watched
+                    if t.get("mode") == "live" and positions is not None and resting is not None and _own(t):
+                        why = await _app_exit(t, products[t["product"]])
+                        if why:
+                            await _close_own(db, st, t, products[t["product"]], why, resting.get(t["product"], {}))
+                            out["managed"].append(t["_id"])
+                    continue
+                age = age_of(t["_id"])
+                if t.get("mode") == "live":
+                    if positions is not None:
+                        await _manage_live(db, st, t, paper.get(t["_id"]), positions, products, age, resting)
+                else:
+                    await _manage_shadow(db, t, paper.get(t["_id"]), age, products)
+                out["managed"].append(t["_id"])
         if st["mode"] == "off" or blocked or (st["mode"] == "live" and positions is None):
             return out
         decided = {t["_id"] async for t in _tc(db).find({"_id": {"$in": list(paper)}}, {"_id": 1})}
@@ -2388,7 +2914,8 @@ async def _cycle_one() -> dict:
                 if follow:                      # its leverage is not confirmed yet: wait, undecided (the page says why)
                     waits[tid] = {"why": f"{pk.product}'s leverage is not yet confirmed at {LEVERAGE}x", "at": _now()}
                 continue
-            res = await _enter(db, st, pk, p, products, busy, day_pnl, age_of(tid, p.get("src")), cache)
+            async with _plock(pk.product):             # 28 Nov: its fill and stop go in without the watcher between
+                res = await _enter(db, st, pk, p, products, busy, day_pnl, age_of(tid, p.get("src")), cache)
             if res.startswith("waiting:"):
                 out["waiting"] = out.get("waiting", 0) + 1     # counted, not listed: the loop logs only real decisions
             else:
@@ -2424,6 +2951,14 @@ async def cycle(desk: str | None = None) -> dict:
         with _use(desk):
             return await _cycle_one()
     out = {}
+    db = _db()
+    hybrid = sorted(p for p in APP_STOP_PRODUCTS if db is not None and any(p in d.products for d in DESKS.values()))
+    for sym in hybrid:
+        # 28 Nov: a safety stop that filled is booked before any desk acts on the product (its position is gone)
+        try:
+            await _safety(db, sym, maintain=False)
+        except Exception:  # noqa: BLE001 - the desks still run; their books check sees any mismatch
+            logger.warning("[premium live] %s: the safety stop could not be checked", sym, exc_info=True)
     for key in DESKS:
         try:
             with _use(key):
@@ -2431,6 +2966,13 @@ async def cycle(desk: str | None = None) -> dict:
         except Exception as exc:  # noqa: BLE001 - one desk's failure must not stop the other
             logger.warning("[premium live %s] cycle failed", key, exc_info=True)
             out[key] = {"error": f"cycle failed: {exc}"}
+    for sym in hybrid:
+        # 28 Nov: the resting stops onto the trades nearest to being stopped, then the safety stop where they now say
+        try:
+            await _rotate(db, sym)
+            await _safety(db, sym)
+        except Exception:  # noqa: BLE001 - the watcher still watches every stop; next cycle tries again
+            logger.warning("[premium live] %s: the rotation or the safety stop failed", sym, exc_info=True)
     await _publish_priority()
     return out
 
@@ -3073,7 +3615,35 @@ async def _status_one() -> dict:
         "paper_view": None if view is None else {k: view[k] for k in ("at", "paper_age_s", "gold_desk_age_s", "factory_age_s")
                                                           if k in view},
         "quotes": await _prices(db, _d().products), "usd_inr": await _usd_inr(),   # the page's lot conversions (24 Nov)
+        "protection": await _protection(db),
     }
+
+
+async def _protection(db) -> dict | None:
+    """How this desk's stops and targets are watched (28 Nov 2026), for the page: per hybrid product, the stops resting
+    on Delta and the ones watched here (all desks on the product together), the safety stop, and the watcher."""
+    try:
+        prods = [p for p in _d().products if p in APP_STOP_PRODUCTS]
+        if not prods:
+            return None
+        out = {"slots": STOP_SLOTS, "products": {}}
+        for sym in prods:
+            rows = await _hybrid_rows(db, sym, OPEN_STATUSES)
+            resting = sum(1 for _k, t in rows if (t.get("legs") or {}).get("stop_id"))
+            with _use(_owner(sym)):
+                ost = await _state(db)
+            q = _LIVEQ.get(sym) or {}
+            out["products"][sym] = {
+                "resting": resting, "watched": sum(1 for _k, t in rows if (t.get("legs") or {}).get("stop_app")
+                                                   and not (t.get("legs") or {}).get("stop_id")),
+                "safety": (ost.get("safety") or {}).get(sym) or None, "safety_fired": ost.get("safety_fired"),
+                "quote_age_s": round(_now() - float(q["at"]), 1) if q.get("at") else None, "quote_src": q.get("src")}
+        out["watcher"] = {"checked_s_ago": round(_now() - float(_WATCH["at"]), 1) if _WATCH["at"] else None,
+                          "closed": _WATCH["closed"], "errors": _WATCH["errors"], "last_error": _WATCH["last_error"]}
+        return out
+    except Exception:  # noqa: BLE001 - an extra for the page: never let it break what it reads
+        logger.exception("premium live %s: protection not read", _d().key)
+        return None
 
 
 async def status(desk: str = "gold") -> dict:

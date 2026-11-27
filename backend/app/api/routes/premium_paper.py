@@ -136,6 +136,9 @@ async def _start_premium_live() -> None:
         import asyncio
         from app.services import premium_live
         _live_tasks.add(asyncio.create_task(premium_live.loop()))
+        # 28 Nov 2026: the watcher - Delta's live gold quotes, and each trade closed the moment its watched stop or
+        # target is reached
+        _live_tasks.add(asyncio.create_task(premium_live.watch()))
     except Exception:  # noqa: BLE001
         logger.exception("premium live desk not started")
 
