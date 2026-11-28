@@ -1084,6 +1084,22 @@ CRYPTO_PICKS: tuple[Pick, ...] = (
     Pick("BX-01", "ETHUSD", "ETHUSD", "First green Heikin Ashi candle with MFI (14) at 20 or below, out on the first red "
          "one after MFI 80 (long only)", 5, 3.97, 0.83, 60, "never backtested", NEW_PICKED_AT_5),
 )
+# 28 Nov 2026: the owner's seven BTC books in a separate second tab, following
+# premium_gold. The original crypto picks, settings and ledger remain unchanged.
+_CRYPTO_PREVIOUS_PICKS = CRYPTO_PICKS
+_BTC_SELECTION = ("DT-05", "TH-05", "TL-03", "DT-02", "TH-01", "PV-04", "TD-02")
+_BTC_AVAILABLE = {p.acct: p for p in _CRYPTO_PREVIOUS_PICKS if p.product == "BTCUSD"}
+_BTC_AVAILABLE["PV-04"] = Pick(
+    "PV-04", "BTCUSD", "BTCUSD",
+    "No-bias SMC scalp: daily levels, two 1-hour candles, 15-minute sweep and break",
+    0, 0.0, 0.0, 0,
+    "loses: -0.157R a trade over 386 trades (t -3.32); frozen paper R snapshot not captured; see current paper record",
+    "2026-11-28T19:32:00+05:30",
+)
+PREMIUM_BTC_PICKS = tuple(_BTC_AVAILABLE[acct] for acct in _BTC_SELECTION)
+# The original BTC/ETH desk keeps every existing pick and its stored settings.
+CRYPTO_PICKS = _CRYPTO_PREVIOUS_PICKS
+
 # 24 Nov 2026 (evening), the owner's ask: the Gold Desk H1 test's six best paper records as a SEPARATE real-money book,
 # "Premium Gold Strategies", beside the gold desk (which keeps its own copies of them). In the order of the Gold Desk's
 # "Strategy records" ranking; records = their closed H1 positions at NEW_PICKED_AT_6 (20:30 IST), in R.
@@ -1238,6 +1254,14 @@ DESKS: dict[str, Desk] = {
     "premium_gold": Desk("premium_gold", "Premium Gold Strategies", PREMIUM_GOLD_PICKS, "live_pgold_state",
                          "live_pgold_trades", RISK_USD, DAILY_STOP_USD, NEW_PICKED_AT_6, PREMIUM_GOLD_NOTES,
                          GOLD_MAX_LAG_S, follow_all=True, cid_salt="pgold|"),
+    "premium_btc": Desk("premium_btc", "Premium 7 Strategies", PREMIUM_BTC_PICKS,
+                        "live_pbtc_state", "live_pbtc_trades", CRYPTO_RISK_USD,
+                        CRYPTO_DAILY_STOP_USD, "2026-11-28T19:38:00+05:30",
+                        ("Separate BTC book: DT-05, TH-05, TL-03, DT-02, TH-01, PV-04 and TD-02. "
+                         "Starts OFF, with independent lots, switches, notes, trades and results. "
+                         "PV-04 frozen paper R snapshot was not captured; see its current paper record. "
+                         "Shared signals can create a separate copy in each enabled book.",),
+                        CRYPTO_MAX_LAG_S, follow_all=True, cid_salt="pbtc|"),
 }
 if set(DESKS["gold"].products) & set(DESKS["crypto"].products):
     raise RuntimeError("two desks may never trade the same product")

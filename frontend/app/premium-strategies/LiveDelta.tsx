@@ -360,11 +360,13 @@ function SizePanel({ s, onPick, busy }: { s: LiveStatus; onPick?: (p: Pick, chan
   busy: boolean }) {
   const [want, setWant] = useState<Record<string, string>>({});
   const product = s.desk_products?.[0] ?? s.picks[0]?.product ?? "XAUTUSD";
+  const asset = product === "BTCUSD" ? "bitcoin" : "gold";
+  const priceUnit = product === "BTCUSD" ? "BTC" : "ounce";
   const one = lotMoney(s, product, 1);
   const max = s.limits.lots_max?.[product] ?? 1;
   const cap = s.limits.max_notional_usd;
   const fx = s.usd_inr?.rate ?? null;
-  // dollars of gold a trade -> whole lots: the nearest, at least 1, at most the product's lots and the notional cap
+  // dollars of ${asset} a trade -> whole lots: the nearest, at least 1, at most the product's lots and the notional cap
   const lotsFor = (d: number) => {
     if (!one || !(d > 0)) return null;
     const byCap = cap ? Math.max(1, Math.floor(cap / one.value)) : max;
@@ -388,8 +390,8 @@ function SizePanel({ s, onPick, busy }: { s: LiveStatus; onPick?: (p: Pick, chan
         <b>Trade size, and what it is in money</b>
         <span>
           {one
-            ? `One lot is ${one.cv} ${one.unit} of ${one.what}. At ${dol(one.price)} an ounce, one lot is ${dol(one.value)} of gold${inrIn(one.value, fx)}; at ${one.lev}x leverage it holds ${dol(one.margin)}${inrIn(one.margin, fx)} of margin in the wallet.`
-            : "The gold price is not read yet: the money figures show once it is."}
+            ? `One lot is ${one.cv} ${one.unit} of ${one.what}. At ${dol(one.price)} a ${priceUnit}, one lot is ${dol(one.value)} of ${asset}${inrIn(one.value, fx)}; at ${one.lev}x leverage it holds ${dol(one.margin)}${inrIn(one.margin, fx)} of margin in the wallet.`
+            : `The ${asset} price is not read yet: the money figures show once it is.`}
           {fx ? ` Rupees at ₹${fx.toFixed(2)} a dollar, from ${s.usd_inr?.source ?? "USD/INR"}.` : " No USD/INR rate yet: rupees show once it is read."}
         </span>
       </div>
@@ -398,7 +400,7 @@ function SizePanel({ s, onPick, busy }: { s: LiveStatus; onPick?: (p: Pick, chan
           <h5>Lots in money</h5>
           <div className="ld-sz-x">
             <table className="ld-sz-table">
-              <thead><tr><th>Lots</th><th>Gold</th><th>Value</th><th>{`Margin at ${one?.lev ?? s.limits.leverage}x`}</th></tr></thead>
+              <thead><tr><th>Lots</th><th>{product === "BTCUSD" ? "Bitcoin" : "Gold"}</th><th>Value</th><th>{`Margin at ${one?.lev ?? s.limits.leverage}x`}</th></tr></thead>
               <tbody>
                 {ladder.map((n) => {
                   const m = lotMoney(s, product, n);
@@ -412,7 +414,7 @@ function SizePanel({ s, onPick, busy }: { s: LiveStatus; onPick?: (p: Pick, chan
               </tbody>
             </table>
           </div>
-          <p className="ld-sz-note">{`A trade takes 1 to ${max} lots and at most ${dol(cap)} of gold. Value is the gold the trade holds; margin is what the wallet sets aside for it. A trade that hits its stop loses its lots × ${one ? one.cv : 0.001} × the stop's distance in dollars, plus fees (a stop $30 away: about 3 cents a lot).`}</p>
+          <p className="ld-sz-note">{`A trade takes 1 to ${max} lots and at most ${dol(cap)} of ${asset}. Value is the ${asset} the trade holds; margin is what the wallet sets aside for it. A trade that hits its stop loses its lots × ${one ? one.cv : 0.001} × the stop's distance in dollars, plus fees (a stop $30 away: about 3 cents a lot).`}</p>
         </div>
         <div className="ld-sz-block">
           <h5>Each strategy&apos;s size</h5>
@@ -431,13 +433,13 @@ function SizePanel({ s, onPick, busy }: { s: LiveStatus; onPick?: (p: Pick, chan
                       <td className="l">
                         <span className="ld-sz-in">
                           <span aria-hidden="true">$</span>
-                          <input type="number" min={0} step="any" inputMode="decimal" aria-label={`${p.acct}: dollars of gold a trade`}
+                          <input type="number" min={0} step="any" inputMode="decimal" aria-label={`${p.acct}: dollars of ${asset} a trade`}
                             placeholder={one ? (n * one.value).toFixed(2) : ""} value={want[key] ?? ""} disabled={!onPick || busy}
                             onChange={(e) => setWant((w) => ({ ...w, [key]: e.target.value }))} />
                           <button type="button" className="ld-lot-save" disabled={!onPick || busy || !k || k === n}
                             onClick={() => { if (k) onPick?.(p, { contracts: k }); }}>{k ? `Use ${k} lot${k === 1 ? "" : "s"}` : "Use"}</button>
                         </span>
-                        {km ? <div className="ld-sub">{`= ${k} lot${k === 1 ? "" : "s"}: ${dol(km.value)} of gold${inrIn(km.value, fx)}, ${dol(km.margin)} of margin${inrIn(km.margin, fx)}`}</div> : null}
+                        {km ? <div className="ld-sub">{`= ${k} lot${k === 1 ? "" : "s"}: ${dol(km.value)} of ${asset}${inrIn(km.value, fx)}, ${dol(km.margin)} of margin${inrIn(km.margin, fx)}`}</div> : null}
                       </td>
                       <td>{now(lotLine(m))}</td>
                     </tr>
@@ -447,7 +449,7 @@ function SizePanel({ s, onPick, busy }: { s: LiveStatus; onPick?: (p: Pick, chan
               <tfoot>
                 <tr>
                   <td className="l"><b>{`All ${rows.length}, if all are in a trade at once`}</b></td><td>{tot.lots}</td><td />
-                  <td>{one ? now({ value: `${pair(tot.value)} of gold`, margin: `margin ${pair(tot.margin)}` }) : "—"}</td>
+                  <td>{one ? now({ value: `${pair(tot.value)} of ${asset}`, margin: `margin ${pair(tot.margin)}` }) : "—"}</td>
                 </tr>
               </tfoot>
             </table>
@@ -972,7 +974,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         </section>
       )}
 
-      {s.desk === "premium_gold" && <SizePanel s={s} onPick={canPick ? onPick : undefined} busy={!!busy || !!pickBusy} />}
+      {(s.desk === "premium_gold" || s.desk === "premium_btc") && <SizePanel s={s} onPick={canPick ? onPick : undefined} busy={!!busy || !!pickBusy} />}
 
       <h4 className="ld-h ld-h-row">
         <span>{`The ${s.picks.length} strategies, real-money results`}</span>
@@ -1628,7 +1630,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   );
 }
 
-export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "crypto" | "premium_gold"; intro?: ReactNode }) {
+export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "crypto" | "premium_gold" | "premium_btc"; intro?: ReactNode }) {
   // the gold desk keeps the original routes (they work on every server build); other desks use /live/desk/{desk}
   const base = desk === "gold" ? "/api/premium-paper/live" : `/api/premium-paper/live/desk/${desk}`;
   const [s, setS] = useState<LiveStatus | null>(null);

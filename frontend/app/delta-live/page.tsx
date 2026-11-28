@@ -27,7 +27,7 @@ import { apiFetch } from "../../lib/api";
 import LiveDelta, { MODE, ago, usd, tone, spct, type LiveStatus } from "../premium-strategies/LiveDelta";
 
 type DeskKey = "crypto" | "gold";
-type BookKey = DeskKey | "premium_gold";          // premium_gold: the gold desk's second tab (24 Nov)
+type BookKey = DeskKey | "premium_gold" | "premium_btc";
 type GoldTab = "all" | "premium";
 const DESKS: { key: DeskKey; label: string; product: string; path: string; intro: string }[] = [
   { key: "crypto", label: "Bitcoin desk", product: "BTCUSD · ETHUSD", path: "/api/premium-paper/live/desk/crypto",
@@ -40,12 +40,15 @@ const DESKS: { key: DeskKey; label: string; product: string; path: string; intro
 const PG = { key: "premium_gold" as const, label: "Premium Gold Strategies", product: "XAUTUSD",
   path: "/api/premium-paper/live/desk/premium_gold",
   intro: "The six Gold Desk H1 templates you picked on 24 Nov: EMA Ribbon Compression, Pivot R1/S1 Break, Donchian Breakout (fast), Round Number Break, Donchian Breakout (slow) and Keltner Breakout, all on 4-hour XAUTUSD bars from Delta's own data. This is a separate real-money book: the gold desk trades these six too, at its own lots, and each of their signals opens a second position here, at the lots set on this tab, beside the gold desk's copy. Their records were frozen at 24 Nov 20:30 IST (7 to 23 closed trades each, t-stats 0.5 to 1.0): none is proven to make money. The book starts OFF, and its own Live trading switch turns it on." };
-const BOOKS: { key: BookKey; label: string; product: string; path: string; intro: string }[] = [...DESKS, PG];
+const PB = { key: "premium_btc" as const, label: "Premium 7 Strategies", product: "BTCUSD",
+  path: "/api/premium-paper/live/desk/premium_btc",
+  intro: "DT-05, TH-05, TL-03, DT-02, TH-01, PV-04 and TD-02 in a separate BTC book. It has its own lots, switches, notes, trades and results. It starts OFF. When both books are enabled, a shared signal can open a separate copy in each book, using the same Delta wallet." };
+const BOOKS: { key: BookKey; label: string; product: string; path: string; intro: string }[] = [...DESKS, PG, PB];
 const POLL_MS = 15000;
 
 function useDesks() {
-  const [st, setSt] = useState<Record<BookKey, LiveStatus | null>>({ crypto: null, gold: null, premium_gold: null });
-  const [err, setErr] = useState<Record<BookKey, string | null>>({ crypto: null, gold: null, premium_gold: null });
+  const [st, setSt] = useState<Record<BookKey, LiveStatus | null>>({ crypto: null, gold: null, premium_gold: null, premium_btc: null });
+  const [err, setErr] = useState<Record<BookKey, string | null>>({ crypto: null, gold: null, premium_gold: null, premium_btc: null });
   const [now, setNow] = useState(() => Date.now() / 1000);
   const load = useCallback(async () => {
     await Promise.all(BOOKS.map(async (d) => {
@@ -78,18 +81,19 @@ export default function DeltaLiveTradingPage() {
       if (q === "gold" || q === "crypto") setDesk(q);
       // ?desk=gold&book=premium, or ?desk=premium_gold, opens the gold desk's Premium Gold Strategies tab
       if (q === "premium_gold" || (q === "gold" && sp.get("book") === "premium")) { setDesk("gold"); setTab("premium"); }
+      if (q === "premium_btc" || ((q === "crypto" || !q) && sp.get("book") === "premium")) { setDesk("crypto"); setTab("premium"); }
     } catch { /* no URL */ }
   }, []);
   const toUrl = (k: DeskKey, t: GoldTab) => {
     try {
       const u = new URL(window.location.href);
       if (k === "crypto") u.searchParams.delete("desk"); else u.searchParams.set("desk", k);
-      if (k === "gold" && t === "premium") u.searchParams.set("book", "premium"); else u.searchParams.delete("book");
+      if (t === "premium") u.searchParams.set("book", "premium"); else u.searchParams.delete("book");
       window.history.replaceState(null, "", u.toString());
     } catch { /* no URL */ }
   };
-  const choose = (k: DeskKey) => { setDesk(k); toUrl(k, tab); };
-  const chooseTab = (t: GoldTab) => { setTab(t); toUrl("gold", t); };
+  const choose = (k: DeskKey) => { setDesk(k); setTab("all"); toUrl(k, "all"); };
+  const chooseTab = (t: GoldTab) => { setTab(t); toUrl(desk, t); };
 
   // every real-money book on the account: the two desks and, from 24 Nov, the Premium Gold book (once the server has it)
   const both = BOOKS.map((d) => st[d.key]).filter((x): x is LiveStatus => !!x);
@@ -100,7 +104,7 @@ export default function DeltaLiveTradingPage() {
   const wins = both.reduce((a, s) => a + s.totals.live.wins, 0);
   const open = both.reduce((a, s) => a + s.open.length, 0);
   const openPnl = both.reduce((a, s) => a + s.open.reduce((b, t) => b + (t.unrealised_usd ?? 0), 0), 0);
-  const view: BookKey = desk === "gold" && tab === "premium" ? "premium_gold" : desk;   // the book shown in full
+  const view: BookKey = tab === "premium" ? (desk === "gold" ? "premium_gold" : "premium_btc") : desk;
   const cur = BOOKS.find((d) => d.key === view)!;
   const pg = st.premium_gold;
   const pgState = pg ? (pg.mode === "live" ? "LIVE" : pg.mode === "shadow" ? "SHADOW" : "OFF") : null;
@@ -186,12 +190,31 @@ export default function DeltaLiveTradingPage() {
                   <span>{`Premium Gold Strategies · ${pg ? `${pg.picks.length} strategies · ${pgState} · ${pg.open.length} open` : pgWhy}`}</span>
                 </span>
               )}
+              {d.key === "crypto" && (
+                <span className="dlx-desk-book">
+                  <span className="dlx-desk-book-k">Second tab</span>
+                  <span>{`${PB.label} · ${st.premium_btc ? `${st.premium_btc.picks.length} strategies · ${st.premium_btc.mode.toUpperCase()} · ${st.premium_btc.open.length} open` : err.premium_btc ? "could not be read" : "loading"}`}</span>
+                </span>
+              )}
             </button>
           );
         })}
       </div>
 
       <div id="dlx-panel" role="tabpanel" aria-labelledby={`dlx-tab-${desk}`}>
+        {desk === "crypto" && (
+          <div className="dlx-books" role="tablist" aria-label="Bitcoin desk tabs">
+            <button type="button" role="tab" id="dlx-btc-all" aria-selected={tab === "all"} aria-controls="dlx-book-panel"
+              className={`dlx-book${tab === "all" ? " on" : ""}`} onClick={() => chooseTab("all")}>
+              Bitcoin desk strategies <span className="dlx-book-n">{st.crypto?.picks.length ?? "."}</span>
+            </button>
+            <button type="button" role="tab" id="dlx-btc-premium" aria-selected={tab === "premium"} aria-controls="dlx-book-panel"
+              className={`dlx-book${tab === "premium" ? " on" : ""}`} onClick={() => chooseTab("premium")}>
+              {PB.label} <span className="dlx-book-n">{st.premium_btc?.picks.length ?? "."}</span>
+              {st.premium_btc && <span className={`dlx-pill ${(MODE[st.premium_btc.mode] ?? MODE.off).cls}`}>{st.premium_btc.mode.toUpperCase()}</span>}
+            </button>
+          </div>
+        )}
         {desk === "gold" && (
           <div className="dlx-books" role="tablist" aria-label="Gold desk tabs">
             <button type="button" role="tab" id="dlx-book-all" aria-selected={tab === "all"} aria-controls="dlx-book-panel"
@@ -205,8 +228,8 @@ export default function DeltaLiveTradingPage() {
             </button>
           </div>
         )}
-        <div id="dlx-book-panel" role={desk === "gold" ? "tabpanel" : undefined}
-          aria-labelledby={desk === "gold" ? `dlx-book-${tab}` : undefined}>
+        <div id="dlx-book-panel" role="tabpanel"
+          aria-labelledby={desk === "gold" ? `dlx-book-${tab}` : `dlx-btc-${tab}`}>
           <LiveDelta key={view} desk={view} intro={<>{cur.intro}</>} />
         </div>
       </div>

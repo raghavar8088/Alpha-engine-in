@@ -352,7 +352,8 @@ def fresh(mode="live", btc=69000.0, gold=3885.0, follow=True):
     M.DESKS.update(_REAL_DESKS if follow else {k: replace(v, follow_all=False) for k, v in _REAL_DESKS.items()})
     db = SimpleNamespace(premium_trades=Coll("pt"), premium_meta=Coll("pm"), live_delta_trades=Coll("lt"),
                          live_delta_state=Coll("ls"), live_crypto_trades=Coll("ct"), live_crypto_state=Coll("cs"),
-                         live_pgold_state=Coll("gs2"), live_pgold_trades=Coll("gt2"))   # the Premium Gold book (24 Nov)
+                         live_pgold_state=Coll("gs2"), live_pgold_trades=Coll("gt2"),   # the Premium Gold book (24 Nov)
+                         live_pbtc_state=Coll("bs3"), live_pbtc_trades=Coll("bt3"))     # the Premium 7 book (28 Nov)
     db.premium_meta.docs.append({"_id": "status", "segments_at": datetime.fromtimestamp(CLOCK[0], UTC).isoformat()})
     M._db = lambda: db
     # the Gold Desk (the gold desk's second source, 18 Nov): empty and running, unless section 31 says otherwise
@@ -385,7 +386,8 @@ def fresh(mode="live", btc=69000.0, gold=3885.0, follow=True):
 
 
 def st_of(db, desk):
-    coll = {"crypto": db.live_crypto_state, "premium_gold": db.live_pgold_state}.get(desk, db.live_delta_state)
+    coll = {"crypto": db.live_crypto_state, "premium_gold": db.live_pgold_state,
+            "premium_btc": db.live_pbtc_state}.get(desk, db.live_delta_state)
     return coll.docs[0] if coll.docs else {}
 
 
@@ -1128,8 +1130,8 @@ async def main():
           await M.open_count() == 0 and await SW.state(M.MODULE) == SW.ACTIVE)
     heartbeat(db)
     r = await SW.gated(M.MODULE, M.cycle)
-    check("ON: the gated loop runs every desk as before (the Premium Gold book too, from 24 Nov)",
-          set(r) == {"gold", "crypto", "premium_gold"}, r)
+    check("ON: the gated loop runs every desk as before (the Premium Gold book too, from 24 Nov, and the Premium 7 "
+          "book from 28 Nov)", set(r) == {"gold", "crypto", "premium_gold", "premium_btc"}, r)
     held = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
     heartbeat(db)
     await SW.gated(M.MODULE, M.cycle)
@@ -1928,7 +1930,7 @@ async def main():
     check("the paper desk is told the new Premium books (bitcoin, gold, ether), never the H1 or Factory ones",
           doc is not None and {"DT-05|BTCUSD", "TC-04|BTCUSD", "CP-21|XAUUSD", "TF-01|XAUTUSD", "JR-03|XAUTUSD",
                                "DD-04|ETHUSD", "BX-02|ETHUSD"} <= set(doc["books"])
-          and not any(b.startswith(("H1-", "SF")) for b in doc["books"]) and len(doc["books"]) == 159, doc)
+          and not any(b.startswith(("H1-", "SF")) for b in doc["books"]) and len(doc["books"]) == 160, doc)
     g = await M.status()
     check("the page: 344 gold picks, each new one with its pick time; the notes name 344",
           len(g["picks"]) == 344 and sum(1 for p in g["picks"] if p["picked_at"] == M.NEW_PICKED_AT_4) == 49
@@ -2263,13 +2265,13 @@ async def main():
             "real position at the book's own lots")
     pg = M.DESKS["premium_gold"]
     check("the book: six H1 templates in the Gold Desk's ranking order on XAUTUSD, every signal copied, its own "
-          "collections, an order-id salt (the gold and bitcoin desks have none), three desks in all",
+          "collections, an order-id salt (the gold and bitcoin desks have none), four desks in all (28 Nov: Premium 7)",
           [p.template for p in pg.picks] == ["ema_ribbon", "pivot_break", "donchian_fast", "round_number_break",
                                              "donchian_slow", "keltner_break"]
           and all(p.src == M.GOLD_H1 and p.product == "XAUTUSD" and p.picked_at == M.NEW_PICKED_AT_6 for p in pg.picks)
           and pg.products == ["XAUTUSD"] and pg.follow_all and (pg.state_coll, pg.trades_coll) == ("live_pgold_state",
                                                                                                    "live_pgold_trades")
-          and pg.cid_salt != "" and M.DESKS["gold"].cid_salt == M.DESKS["crypto"].cid_salt == "" and len(M.DESKS) == 3,
+          and pg.cid_salt != "" and M.DESKS["gold"].cid_salt == M.DESKS["crypto"].cid_salt == "" and len(M.DESKS) == 4,
           [p.template for p in pg.picks])
     rec40 = {p.acct: (p.trades, p.sum_r, p.t, p.win) for p in pg.picks}
     check("records at 20:30 IST 24 Nov by the H1 method (re-proven on three frozen H1 records before they were read)",
@@ -3158,8 +3160,9 @@ async def main():
           all((t.get("legs") or {}).get("stop_id") and (t.get("legs") or {}).get("target_app") for t in (t1, t2, t3, t4)),
           [(t or {}).get("legs") for t in (t1, t2)])
     doc = next((d for d in db.premium_meta.docs if d["_id"] == "live_priority"), None)
-    check("the paper desk is told all 159 Premium books, the 90 new gold ones among them (never an H1 or Factory one)",
-          doc is not None and len(doc["books"]) == 159 and ALL127 <= set(doc["books"])
+    check("the paper desk is told all 160 Premium books, the 90 new gold ones and the Premium 7 book's PV-04 among them "
+          "(never an H1 or Factory one)",
+          doc is not None and len(doc["books"]) == 160 and ALL127 <= set(doc["books"]) and "PV-04|BTCUSD" in doc["books"]
           and {"TD-02|BTCUSD", "TD-02|XAUTUSD", "CP-03|XAUUSD"} <= set(doc["books"])
           and not any(b.startswith(("H1-", "SF")) for b in doc["books"]), doc and len(doc["books"]))
     g = await M.status()
@@ -3173,6 +3176,52 @@ async def main():
           and any("All 344 can hold a trade at the same time" in n for n in g["notes"]),
           (len(g["picks"]), len(new)))
     M.APP_STOP_PRODUCTS, M.APP_TARGET_PRODUCTS = frozenset(), frozenset()
+
+
+    # ── 47. 28 Nov: the bitcoin desk's second tab, "Premium 7 Strategies" ───────────────────────────────────────────
+    section("47. 28 Nov: the Premium 7 book - seven bitcoin strategies in a book of their own beside the bitcoin desk; "
+            "it starts OFF")
+    pb, cdk = M.DESKS["premium_btc"], M.DESKS["crypto"]
+    check("47: seven BTCUSD books in the owner's order (DT-05, TH-05, TL-03, DT-02, TH-01, PV-04, TD-02), every signal "
+          "copied, its own collections and order-id salt; six are the bitcoin desk's own picks, PV-04 is new to real money",
+          [p.acct for p in pb.picks] == ["DT-05", "TH-05", "TL-03", "DT-02", "TH-01", "PV-04", "TD-02"]
+          and all(p.product == p.mkt == "BTCUSD" and p.src == M.PREMIUM for p in pb.picks)
+          and pb.products == ["BTCUSD"] and pb.follow_all
+          and (pb.state_coll, pb.trades_coll) == ("live_pbtc_state", "live_pbtc_trades") and pb.cid_salt == "pbtc|"
+          and all(p in cdk.picks for p in pb.picks if p.acct != "PV-04") and not any(p.acct == "PV-04" for p in cdk.picks),
+          [p.acct for p in pb.picks])
+    check("47: the bitcoin desk is unchanged: its 32 picks on BTCUSD and ETHUSD, its own collections, no order-id salt",
+          len(cdk.picks) == 32 and cdk.products == ["BTCUSD", "ETHUSD"] and cdk.cid_salt == ""
+          and (cdk.state_coll, cdk.trades_coll) == ("live_crypto_state", "live_crypto_trades"), len(cdk.picks))
+    db = fresh()
+    s7 = await M.status("premium_btc")
+    check("47: it starts OFF (a book with no state yet is off), seven strategies on its page, nothing open",
+          s7["mode"] == "off" and len(s7["picks"]) == 7 and not s7["open"] and s7["desk"] == "premium_btc",
+          (s7.get("mode"), len(s7.get("picks") or [])))
+    sig = paper(db, "DT-05", "BTCUSD", 1, 69000.0, 68650.0, 69700.0, ago=20)
+    await cyc(db)
+    check("47: a DT-05 signal with the bitcoin desk live and the Premium 7 book off: one real trade, the bitcoin desk's; "
+          "nothing in the new book",
+          (trade(db, sig) or {}).get("status") == "open" and any(d["_id"] == sig for d in db.live_crypto_trades.docs)
+          and not db.live_pbtc_trades.docs and st_of(db, "premium_btc")["mode"] == "off", (trade(db, sig) or {}).get("status"))
+    db.live_pbtc_state.docs[0].update(mode="live", products={s: {"leverage": 10} for s in SPECS})
+    sig2 = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68650.0, 69700.0, ago=10)
+    advance(20)
+    await cyc(db)
+    t_c = next((d for d in db.live_crypto_trades.docs if d["_id"] == sig2), None)
+    t_p = next((d for d in db.live_pbtc_trades.docs if d["_id"] == sig2), None)
+    with M._use("crypto"):
+        cid_c = M._cid(sig2)
+    with M._use("premium_btc"):
+        cid_p = M._cid(sig2)
+    held = sum(int(d["side"]) * int(d.get("contracts") or 0) for d in db.live_crypto_trades.docs + db.live_pbtc_trades.docs
+               if d.get("mode") == "live" and d.get("status") in ("open", "closing"))
+    check("47: once switched on, a shared signal opens a separate trade in each book, with different order ids (the "
+          "salt), and the account holds the sum of both books (its books check passes)",
+          t_c is not None and t_p is not None and t_c["status"] == t_p["status"] == "open" and cid_c != cid_p
+          and t_p["contracts"] == 1 and M.D.pos[BTC]["size"] == held
+          and st_of(db, "crypto")["mode"] == "live" and st_of(db, "premium_btc")["mode"] == "live",
+          (t_c and t_c.get("status"), t_p and t_p.get("status"), held, M.D.pos.get(BTC)))
 
 
 if __name__ == "__main__":
