@@ -1234,6 +1234,7 @@ class Desk:
     max_lag_s: int = MAX_LAG_S      # a paper entry seen later than this after its entry time is skipped
     follow_all: bool = False        # True: every open paper trade is copied, however late or far (lag/drift unused)
     cid_salt: str = ""              # hashed into its client order ids: a desk copying another's paper trades needs one
+    history_from: str | None = None  # a second book: the desk whose real trades of its strategies its page shows (28 Nov)
 
     @property
     def pick(self) -> dict:
@@ -1261,7 +1262,7 @@ DESKS: dict[str, Desk] = {
                          "Starts OFF, with independent lots, switches, notes, trades and results. "
                          "PV-04 frozen paper R snapshot was not captured; see its current paper record. "
                          "Shared signals can create a separate copy in each enabled book.",),
-                        CRYPTO_MAX_LAG_S, follow_all=True, cid_salt="pbtc|"),
+                        CRYPTO_MAX_LAG_S, follow_all=True, cid_salt="pbtc|", history_from="crypto"),
 }
 if set(DESKS["gold"].products) & set(DESKS["crypto"].products):
     raise RuntimeError("two desks may never trade the same product")
@@ -3923,13 +3924,19 @@ async def _status_one() -> dict:
         except Exception:                              # an extra for the page: never let it break what it reads
             logger.exception("premium live %s: rank not computed", _d().key)
     empty = {"trades": 0, "wins": 0, "sum_r": 0.0, "open": [], "last_t": None}
+    try:
+        hist = await _history(db)
+    except Exception:                                  # an extra for the page: never let it break what it reads
+        logger.exception("premium live %s: history not read", _d().key)
+        hist = None
     picks = []
     for p in _d().picks:
         picks.append({**asdict(p), "live": per.get(f"live|{p.acct}|{p.mkt}"), "shadow": per.get(f"shadow|{p.acct}|{p.mkt}"),
                       "paper": None if view is None else view["per"].get(f"{p.acct}|{p.mkt}", empty),
                       "results": None if res is None else res["per"].get(f"{p.acct}|{p.mkt}"),
                       "cfg": {**_cfg(st, p), "max": _lots_max(p.product)},
-                      "rank": None if rank is None else rank.get(_pkey(p))})
+                      "rank": None if rank is None else rank.get(_pkey(p)),
+                      "history": None if hist is None else hist["per"].get(f"{p.acct}|{p.mkt}")})
     today = {m: await _day_pnl(db, m, None) for m in ("live", "shadow")}
     totals = {}
     for m in ("live", "shadow"):
@@ -3963,7 +3970,33 @@ async def _status_one() -> dict:
                                                           if k in view},
         "quotes": await _prices(db, _d().products), "usd_inr": await _usd_inr(),   # the page's lot conversions (24 Nov)
         "protection": await _protection(db),
+        "history": None if hist is None else {k: hist[k] for k in ("desk", "title", "results", "trades")},
     }
+
+
+HISTORY_TRADES_N = 400          # a second book's history list: its strategies' latest real trades on the other desk
+
+
+async def _history(db) -> dict | None:
+    """28 Nov 2026 (the owner's ask, the Premium 7 tab): a second book whose strategies already traded real money on
+    another desk (Desk.history_from) shows their record there - each strategy's results, and their real trades there,
+    closed and open, newest first. Read only, and apart from this book's own trades, results and P&L, which stay its
+    own; nothing that trades (the account check, the entries) reads it."""
+    src = _d().history_from
+    if not src or src not in DESKS or src == _d().key:
+        return None
+    keys = {(p.acct, p.mkt) for p in _d().picks}
+    sd = DESKS[src]
+    rows = [t async for t in getattr(db, sd.trades_coll).find(
+        {"mode": "live", "acct": {"$in": sorted({a for a, _m in keys})},
+         "status": {"$in": ["closed", "open", "closing", "entering"]}})]
+    rows = [t for t in rows if (t.get("acct"), t.get("mkt")) in keys]
+    with _use(src):
+        prods = (await _state(db)).get("products") or {}
+    res = _results(rows, prods, _now())
+    rows.sort(key=lambda t: -float(t.get("created_at") or 0))
+    return {"desk": src, "title": sd.title, "per": res["per"], "results": res["desk"],
+            "trades": [_clean(t) for t in rows[:HISTORY_TRADES_N]]}
 
 
 async def _protection(db) -> dict | None:

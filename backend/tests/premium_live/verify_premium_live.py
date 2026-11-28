@@ -3224,6 +3224,46 @@ async def main():
           (t_c and t_c.get("status"), t_p and t_p.get("status"), held, M.D.pos.get(BTC)))
 
 
+    # ── 48. 28 Nov: the Premium 7 tab shows its strategies' history on the bitcoin desk ─────────────────────────────
+    section("48. 28 Nov: the Premium 7 book shows its strategies' real trades on the bitcoin desk, apart from its own")
+    db = fresh()
+
+    def row48(acct, status, side, n, fill, opened, closed=None, pnl=None, mkt="BTCUSD", mode="live"):
+        return {"_id": f"{acct}|{mkt}|h{opened}", "acct": acct, "mkt": mkt, "product": mkt, "mode": mode, "status": status,
+                "side": side, "contracts": n, "fill": fill, "opened_at": opened, "created_at": opened,
+                **({"closed_at": closed, "pnl_usd": pnl, "day_closed": "2026-11-27", "fees": 0.05, "exit_price": fill + 10}
+                   if status == "closed" else {"unrealised_usd": 0.4})}
+    db.live_crypto_trades.docs += [
+        row48("DT-05", "closed", 1, 1, 60000.0, CLOCK[0] - 9000, CLOCK[0] - 8000, 1.5),
+        row48("DT-05", "closed", -1, 1, 60100.0, CLOCK[0] - 7000, CLOCK[0] - 6000, -0.5),
+        row48("TH-05", "open", -1, 1, 60200.0, CLOCK[0] - 5000),
+        row48("RU-03", "closed", 1, 1, 60000.0, CLOCK[0] - 4000, CLOCK[0] - 3000, 2.0),      # not one of the seven
+        row48("BX-02", "closed", -1, 1, 1690.0, CLOCK[0] - 4000, CLOCK[0] - 3000, 0.3, mkt="ETHUSD"),   # not one of the seven
+        row48("TH-01", "closed", 1, 1, 60000.0, CLOCK[0] - 2000, CLOCK[0] - 1000, 9.0, mode="shadow"),  # shadow: not real
+        {**row48("TD-02", "closed", 1, 1, 60000.0, CLOCK[0] - 3500), "status": "skipped"}]           # a skip: not a trade
+    s7 = await M.status("premium_btc")
+    h = s7.get("history") or {}
+    per = {p["acct"]: p.get("history") for p in s7["picks"]}
+    check("48: the history lists the bitcoin desk's real trades of the seven only (DT-05 twice, TH-05 open), newest first; "
+          "never another strategy's, a shadow trade or a skip",
+          h.get("desk") == "crypto" and [t["acct"] for t in h.get("trades") or []] == ["TH-05", "DT-05", "DT-05"]
+          and h["trades"][0]["status"] == "open" and all("id" in t for t in h["trades"]), [t["acct"] for t in h.get("trades") or []])
+    check("48: each strategy's record there: DT-05 2 trades, 1 won, net +$1.00; TH-05 one open; PV-04 none",
+          per["DT-05"] and (per["DT-05"]["trades"], per["DT-05"]["wins"], per["DT-05"]["net_usd"]) == (2, 1, 1.0)
+          and per["TH-05"] and (per["TH-05"]["trades"], per["TH-05"]["open"]) == (0, 1) and per["PV-04"] is None
+          and h["results"]["trades"] == 2 and h["results"]["open"] == 1, {k: v and (v["trades"], v["net_usd"]) for k, v in per.items()})
+    check("48: the book's own record stays its own: no trades, no results, nothing open",
+          s7["results"]["trades"] == 0 and not s7["open"] and all(p.get("results") is None for p in s7["picks"])
+          and s7["totals"]["live"]["trades"] == 0, s7.get("results"))
+    want = await M._expected_net(db)
+    check("48: what the account must hold is unchanged: TH-05's open short counted once, on the bitcoin desk",
+          want.get("BTCUSD") == -1, want)
+    c48, g48 = await M.status("crypto"), await M.status("premium_gold")
+    check("48: only a book with a desk to draw from shows a history: the bitcoin desk and the Premium Gold book do not",
+          c48.get("history") is None and g48.get("history") is None and M.DESKS["premium_btc"].history_from == "crypto",
+          (c48.get("history"), g48.get("history")))
+
+
 if __name__ == "__main__":
     asyncio.run(main())
     finish()

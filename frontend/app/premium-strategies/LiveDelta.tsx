@@ -67,7 +67,8 @@ type Pick = { acct: string; mkt: string; product: string; name: string; trades: 
   paper?: PaperRec | null;                  // undefined on an older server, null when the paper side cannot be read
   results?: Results | null;                 // null until it has a real trade (21 Nov)
   cfg?: PickCfg | null;                     // its own lots and switch (23 Nov); undefined on an older server
-  rank?: Rank | null };                     // the server's rank (23 Nov); null when the paper side cannot be read
+  rank?: Rank | null;                       // the server's rank (23 Nov); null when the paper side cannot be read
+  history?: Results | null };              // its real-money record on the desk this book was drawn from (28 Nov)
 /** A strategy's own size and switch (23 Nov): the contracts a new real trade takes, 1..max, and whether it trades. */
 export type PickCfg = { contracts: number; on: boolean; max: number; at?: number | null };
 /** The server's rank (23 Nov): pos 1 = best by edge_r, the expected net R a trade, and its parts. */
@@ -111,7 +112,9 @@ export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boole
   desk_products?: string[]; quotes?: Record<string, { price: number; at: number }>;
   usd_inr?: { rate: number; asof?: string | null; source?: string } | null;
   // how a gold desk's stops and targets are watched (28 Nov 2026); absent on an older server, null on the bitcoin desk
-  protection?: Protection | null };
+  protection?: Protection | null;
+  // a second book's strategies' real trades on the desk they came from (28 Nov 2026: the Premium 7 tab), read only
+  history?: { desk: string; title: string; results: DeskResults | null; trades: LiveTrade[] } | null };
 /** A hybrid desk's protection (28 Nov 2026): per product, the stops resting on Delta (the nearest, up to `slots`) and
  *  the ones this server watches, the one safety stop for the whole net position, and the watcher's last look. */
 export type Protection = { slots: number;
@@ -750,6 +753,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   const [pName, setPName] = useState("");
   const [sName, setSName] = useState("");
   const [oName, setOName] = useState("");
+  const [hName, setHName] = useState("");
   // each strategy's description for the filters' lists: its pick's, else a trade's own (a strategy no longer picked)
   const descs = useMemo(() => {
     const m = new Map<string, string>();
@@ -807,6 +811,13 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   const openShown = om ? s.open.filter((t) => om(t.acct)) : s.open;
   const openShownPnl = openShown.reduce((a, t) => a + (t.unrealised_usd ?? 0), 0);
   const dOpts = optsOf(s.recent);
+  // 28 Nov 2026: a second book (the Premium 7 tab) shows its strategies' real trades on the desk they came from
+  const hist = s.history ?? null;
+  const histLabel = hist ? (hist.desk === "crypto" ? "bitcoin desk" : hist.desk === "gold" ? "gold desk" : hist.title) : "";
+  const hOpts = hist ? optsOf(hist.trades) : [];
+  const hm = matcher(hName, hayOf);
+  const histShown = hist ? (hm ? hist.trades.filter((t) => hm(t.acct)) : hist.trades) : [];
+  const HR = hist?.results ?? null;
   const pv = s.paper_view;
   return (
     <div className="ld">
@@ -1001,6 +1012,13 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
               {hasRank && <th title="Expected net R a trade (R = what a trade risks at its stop)">Exp. R / trade</th>}
               {hasRank && <th title="How likely the expected R is above zero">Chance &gt; 0</th>}
               {hasPaper && <th className="l">Paper now</th>}
+              {hist && (
+                <>
+                  <th title={`Every real trade of the strategy on the ${histLabel}, closed (its open ones in the tooltip): its history there, not this book's own`}>{`Trades on the ${histLabel}`}</th>
+                  <th title={`Share of its closed real trades on the ${histLabel} that made money`}>Won there</th>
+                  <th title={`Net P&L of its closed real trades on the ${histLabel}, after Delta's fees, in dollars and rupees`}>Net P&amp;L there</th>
+                </>
+              )}
               {hasInv && (
                 <>
                   <th title="Every real trade's margin added up so far, closed and open (each trade's contracts × its fill price ÷ the leverage), in dollars and rupees">Capital invested</th>
@@ -1082,6 +1100,18 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
                       </td>
                     </>
                   )}
+                  {hist && (() => {
+                    const h = p.history ?? null;
+                    const hn = h?.trades ?? 0;
+                    return (
+                      <>
+                        <td title={h?.open ? `${plural(h.open, "real trade")} open there now` : undefined}>{hn || (h?.open ? 0 : "—")}</td>
+                        <td>{hn && h ? `${(h.win_pct ?? 0).toFixed(1)}%` : "—"}</td>
+                        <td className={`ld-num ${hn && h ? tone(h.net_usd) : ""}`}>
+                          {hn && h ? <>{usd(h.net_usd, true)}{fxNow ? <span className="ld-rs" data-r={inrSigned(h.net_usd, fxNow)} /> : null}</> : "—"}</td>
+                      </>
+                    );
+                  })()}
                   {hasInv && (() => {
                     const inv = r?.invested_usd ?? 0;
                     const ret = r?.returns_usd ?? 0;
@@ -1269,6 +1299,51 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
           ))}
         </div>
       ) : <p className="ld-dim ld-empty">Nothing open. A position opens when one of these strategies enters on the paper desk.</p>}
+
+      {hist && (
+        <>
+          <h4 className="ld-h ld-h-row">
+            <span>{`Trade history of these strategies on the ${histLabel} (${hist.trades.length})`}</span>
+            {(hOpts.length > 1 || hName) && (
+              <span className="ld-filters" role="group" aria-label="Filter the history">
+                <StratFilter label="Filter the history by strategy" value={hName} onChange={setHName} opts={hOpts} descOf={descOf} hayOf={hayOf} />
+              </span>
+            )}
+          </h4>
+          <p className="ld-foot">
+            {`Their real trades on the ${histLabel}, before and beside this book: read only, and not this book's own (its own trades, results and P&L are above). `}
+            {HR && HR.trades ? `${plural(HR.trades, "closed trade")}, ${(HR.win_pct ?? 0).toFixed(1)}% won, net ${usd(HR.net_usd, true)}${fxNow ? ` (${inrSigned(HR.net_usd, fxNow)})` : ""}${HR.open ? `, ${HR.open} open now` : ""}.` : "None of them has a closed real trade there yet."}
+          </p>
+          {histShown.length ? (
+            <div className="ld-card ld-scroll ld-log">
+              <table className="ld-table ld-hist">
+                <thead>
+                  <tr><th className="l">Opened (IST)</th><th className="l">Strategy</th><th>Side</th><th className="l">How it ended</th>
+                    <th>Contracts</th><th>In → out</th><th>Fees</th><th>P&amp;L</th><th className="l">Closed (IST)</th></tr>
+                </thead>
+                <tbody>
+                  {histShown.map((t) => {
+                    const st = STATE[t.status] ?? { label: t.status, cls: "skipped" };
+                    return (
+                      <tr key={t.id}>
+                        <td className="l">{ist(t.opened_at ?? t.created_at)}</td>
+                        <td className="l"><b>{t.acct}</b> <span className="ld-chip">{t.product}</span></td>
+                        <td><span className={`ld-side ${t.side > 0 ? "long" : "short"}`}>{t.side > 0 ? "Long" : "Short"}</span></td>
+                        <td className="l ld-why"><span className={`ld-badge ${st.cls}`}>{st.label}</span>{t.status === "closed" && t.close_reason ? <div className="ld-sub">{t.close_reason}</div> : null}</td>
+                        <td>{t.contracts ?? "—"}</td>
+                        <td>{t.fill ? `${px(t.fill)} → ${t.exit_price ? px(t.exit_price) : "…"}` : "—"}</td>
+                        <td>{t.fees != null ? usd(t.fees) : "—"}</td>
+                        <td className={`ld-num ${tone(t.status === "closed" ? t.pnl_usd : t.unrealised_usd)}`}>{t.status === "closed" ? usd(t.pnl_usd, true) : t.unrealised_usd != null ? <span className="ld-sub">{usd(t.unrealised_usd, true)} open</span> : "—"}</td>
+                        <td className="l">{t.closed_at ? ist(t.closed_at) : "—"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : <p className="ld-dim ld-empty">{hName ? `${who(hName)} has no real trade on the ${histLabel}.` : `None of these strategies has a real trade on the ${histLabel} yet.`}</p>}
+        </>
+      )}
 
       <h4 className="ld-h ld-h-row">
         <span>Real-money decisions, newest first</span>
